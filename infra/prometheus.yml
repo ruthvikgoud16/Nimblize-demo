@@ -1,0 +1,20 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  # Scrape the Nimblize API's Prometheus metrics endpoint
+  - job_name: "nimblize_api"
+    static_configs:
+      - targets: ["api:9090"]
+    metrics_path: "/"
+
+  # Scrape Prometheus itself
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+
+alerting:
+  alertmanagers: []
+
+rule_files: []
