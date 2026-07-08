@@ -8,9 +8,9 @@ pydantic==2.8.2
 pydantic-settings==2.4.0
 
 # ─── LangChain / LangGraph ───────────────────────────────────────────
-langchain==0.3.0
-langchain-openai==0.2.0
-langchain-text-splitters==0.3.0
+langchain>=0.2.0,<0.4.0
+langchain-openai>=0.1.0,<0.3.0
+langchain-text-splitters>=0.2.0,<0.4.0
 langgraph==0.2.20
 
 # ─── LLM APIs ────────────────────────────────────────────────────────
@@ -19,7 +19,7 @@ anthropic==0.34.0      # Claude (Agent 2 optional)
 instructor==1.4.3      # Pydantic-enforced structured outputs
 
 # ─── RAG & Evaluation ────────────────────────────────────────────────
-ragas==0.1.21          # RAGAS evaluation framework
+ragas>=0.1.21,<0.3.0          # RAGAS evaluation framework
 datasets==3.0.0
 
 # ─── Vector & Embeddings ─────────────────────────────────────────────
