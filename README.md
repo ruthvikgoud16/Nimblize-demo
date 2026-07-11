@@ -218,7 +218,7 @@ The script exercises these four core flows:
 *   **Roadmap PDF Path:** `Nimblize_Future_Implementation_Roadmap.pdf`
 *   **Roadmap Markdown Path:** `docs/Nimblize_Future_Implementation_Roadmap.md`
 *   **Total Page Count:** **29 pages** (exceeds the 19 pages minimum requirement, maintaining all 29 original sections of the deep report with maximized diagram styling).
-*   **Git Commit Hash:** `293a50b10bc66b40863bbd4db5e184b839775afd`
+*   **Git Commit Hash:** `9647d282d0c99a9a091058f02c5f8b13d2f54be6`
 *   **Included Diagrams:**
     1.  **High-Level Future Architecture Diagram** (Section 4.2: Full-width flowchart)
     2.  **Multi-Agent Workflow Diagram** (Section 8.2: Sequence diagram)
