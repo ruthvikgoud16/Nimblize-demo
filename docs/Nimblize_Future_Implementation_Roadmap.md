@@ -24,7 +24,7 @@ This blueprint details the proposed future scaling and architecture evolution ro
 We propose transitioning from proprietary OpenAI APIs to self-hosted open-source model inference clusters, expanding Postgres pgvector to distributed CockroachDB clusters, and integrating Kafka for event-driven orchestration. By doing so, Nimblize can achieve absolute data privacy, eliminate token-based API expenses, and scale to thousands of concurrent pipeline runs without encountering upstream rate limits.
 
 ```mermaid
-graph LR
+graph TD
     subgraph B2B SEO Intelligence
         A[Competitor Scraping] --> B[Decoupled Extraction Agent 1]
         B --> C[Algorithmic Quality Evaluation]
@@ -204,8 +204,8 @@ The production system deploys eight Docker containers orchestrated by Docker Com
 * **Grafana:** Dashboard visualization.
 
 ```mermaid
-graph LR
-    Orchestrator --> Agent1[Agent 1: Extraction Specialist]
+graph TD
+    Orchestrator[Orchestrator] --> Agent1[Agent 1: Extraction Specialist]
     Agent1 --> Validator{Pydantic Schema Check}
     Validator -->|Pass| Agent2[Agent 2: Strategy Generator]
     Validator -->|Fail| Agent1
@@ -354,7 +354,7 @@ graph TD
 The search query is embedded and matched against child vectors. The system locates the relevant child nodes, fetches the corresponding parent chunks, and feeds the parents to the LLM context window.
 
 ```mermaid
-graph LR
+graph TD
     Query[User Query] --> Embed[Query Embedding]
     Embed --> Search[HNSW Similarity Search]
     Search --> ChildMatch[Match Child Chunks]
@@ -430,7 +430,7 @@ Compiled state graph using a TypedDict state object (`PipelineState`). Node func
 Transition paths coordinate PII filtering, extraction, retries, strategy generation, RAGAS evaluations, and conditional routes for database persistence or reviews.
 
 ```mermaid
-graph LR
+graph TD
     Input[Extracted Payload] --> ScoreCheck{Verify RAGAS Score}
     ScoreCheck -->|Score >= 0.85| Production[(PostgreSQL DB)]
     ScoreCheck -->|Score < 0.85| SlackAlert[Slack HITL Alert]
@@ -506,7 +506,7 @@ To protect client confidentiality and prevent malicious users from spamming the 
 Collects traces and metrics using OpenTelemetry, aggregating data into Prometheus and visualizing it in Grafana.
 
 ```mermaid
-graph LR
+graph TD
     Pipeline[Failed Pipeline] --> Queue[Redis Queue]
     Queue --> NotifWorker[Notification Worker]
     NotifWorker --> Slack[Slack Webhook Channel]
@@ -522,7 +522,7 @@ graph LR
 Tracks latency (TTFT, RTT), RAGAS evaluations, cache ratios, and exception rates.
 
 ```mermaid
-graph LR
+graph TD
     Producer[LangGraph Node] -->|LPUSH| Queue[(Redis List)]
     Queue -->|BRPOP| Consumer[Notification Worker]
     Consumer -->|Dispatch| Services[Slack / Email / PagerDuty]
@@ -612,7 +612,7 @@ To maintain financial sustainability. Without optimization, LLM token costs woul
 * `backend/telemetry/`: OTel and Prometheus config.
 
 ```mermaid
-graph LR
+graph TD
     API[FastAPI Gateway] -->|OTLP gRPC| Collector[OTel Collector]
     Collector --> Prometheus[Prometheus DB]
     Prometheus --> Grafana[Grafana Dashboards]
@@ -660,7 +660,7 @@ Comprehensive validation matrix covers units, integrations, and load profiles.
 | **T-012** | Security | 15 requests on free tier (limit: 10) | HTTP 429 on request 11 | HTTP 429 on request 11 | **PASS** |
 
 ```mermaid
-graph LR
+graph TD
     GitPush[Git Push main] --> Staging[Automated Staging Tests]
     Staging --> DockerBuild[Docker Image Build]
     DockerBuild --> ProductionDeploy[Compose Stack Deploy]
@@ -734,7 +734,7 @@ To inspect how the system handles different inputs, verifying that bad data is s
 *   **CORS wildcards:** Removed wildcards when credentials are true, using explicit ALLOWED_ORIGINS lists.
 
 ```mermaid
-graph LR
+graph TD
     Production[Production Logs] --> Filters[Score >= 0.95 Filter]
     Filters --> Dataset[Fine-Tuning Dataset]
     Dataset --> Training[Llama-3 Fine-Tuning]
@@ -770,15 +770,13 @@ Documenting challenges creates a knowledge base, helping future engineers avoid 
 *   **Model Selection:** Tiered routing saves substantial token expenses.
 
 ```mermaid
-gantt
-    title One-Year Proposed Scaling Roadmap
-    dateFormat  YYYY-MM-DD
-    section Infra
-    Kubernetes Migration   :a1, 2026-07-12, 120d
-    section AI Layer
-    Llama-3 Fine-Tuning    :a2, after a1, 90d
-    section Optimization
-    Redis Search & Hybrid  :a3, after a2, 90d
+graph TD
+    M1[Milestone 1: Q1 - Infrastructure Migration] -->|120 Days| M2[Milestone 2: Q2 - Llama-3 Fine-Tuning]
+    M2 -->|90 Days| M3[Milestone 3: Q3 - Redis Search & Hybrid Tuning]
+    
+    style M1 fill:#f0f4ff,stroke:#4a6cf7,stroke-width:2px
+    style M2 fill:#e6fffa,stroke:#10b981,stroke-width:2px
+    style M3 fill:#fffbeb,stroke:#f59e0b,stroke-width:2px
 ```
 **Figure 17.1: Proposed One-Year Roadmap.** *This Gantt chart outlines key milestones for the proposed infrastructure migration and model training.*
 
@@ -809,15 +807,13 @@ To institutionalize knowledge, ensuring the engineering department builds on pas
 *   **Kafka Event Streaming:** Replace the synchronous scraper with Kafka topics for event-driven message distribution.
 
 ```mermaid
-gantt
-    title Three-Year Proposed Enterprise Roadmap
-    dateFormat  YYYY-MM-DD
-    section Phase 1
-    Hybrid Search & K8s deployment :active, 2026-07-12, 180d
-    section Phase 2
-    On-Prem Private AI Clusters    :2027-01-08, 365d
-    section Phase 3
-    Full Autonomous SEO Engines     :2028-01-08, 365d
+graph TD
+    P1[Phase 1: Year 1 - Hybrid Search & K8s Deployment] -->|180 Days| P2[Phase 2: Year 2 - On-Prem Private AI Clusters]
+    P2 -->|365 Days| P3[Phase 3: Year 3 - Full Autonomous SEO Engines]
+    
+    style P1 fill:#f0f4ff,stroke:#4a6cf7,stroke-width:2px
+    style P2 fill:#e6fffa,stroke:#10b981,stroke-width:2px
+    style P3 fill:#fffbeb,stroke:#f59e0b,stroke-width:2px
 ```
 **Figure 18.1: Proposed Three-Year Enterprise Roadmap.** *This Gantt chart shows the long-term vision from Kubernetes migration to fully autonomous agent deployments.*
 
