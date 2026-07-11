@@ -8,6 +8,10 @@
 
 ---
 
+📄 **[Nimblize Future Implementation & Production Roadmap (PDF)](Nimblize_Future_Implementation_Roadmap.pdf)** — Architecture recommendations, scaling strategies, and proposed enhancements beyond Phase 4.
+
+---
+
 ## 1. Project Overview
 
 Nimblize is a high-performance competitor intelligence and product recommendation platform. This repository contains the Phase 4 production-ready implementation, providing:
