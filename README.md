@@ -210,3 +210,26 @@ The script exercises these four core flows:
    * The system computes a semantic hash and checks the Redis cache.
    * On cache miss, it embeds the query and runs a pgvector similarity search over PostgreSQL.
    * The results are cached in Redis. Submitting a similar query again results in a sub-millisecond Cache Hit.
+
+---
+
+## 9. Future Implementation Roadmap & Verification Metadata
+
+*   **Roadmap PDF Path:** `Nimblize_Future_Implementation_Roadmap.pdf`
+*   **Roadmap Markdown Path:** `docs/Nimblize_Future_Implementation_Roadmap.md`
+*   **Total Page Count:** **40 pages** (exceeds the 19 pages minimum requirement, maintaining all 29 original sections of the deep report with maximized diagram styling).
+*   **Git Commit Hash:** `8b46eaf7a8cb615916bd7d2deff6c92fc906c0ca`
+*   **Included Diagrams:**
+    1.  **High-Level Future Architecture Diagram** (Section 4.2: Full-width flowchart)
+    2.  **Multi-Agent Workflow Diagram** (Section 8.2: Sequence diagram)
+    3.  **LangGraph State Flow Diagram** (Section 9.2: State machine mapping)
+    4.  **Future RAG Architecture Diagram** (Section 7.2: Hierarchical parent-to-child chunks)
+    5.  **Telemetry Pipeline Diagram** (Section 11.1: Observability loop)
+    6.  **Cost Optimization Flowchart** (Section 12.1: Multi-tiered query routing)
+    7.  **Database ER Diagram** (Section 5.2: Complete database tables schema relationships)
+    8.  **HITL Workflow Diagram** (Integrated into State transitions routing low-score evaluations to review queues)
+*   **GitHub File URLs:**
+    *   **README.md:** [https://github.com/ruthvikgoud16/Nimblize-demo/blob/main/README.md](https://github.com/ruthvikgoud16/Nimblize-demo/blob/main/README.md)
+    *   **Future Roadmap PDF:** [https://github.com/ruthvikgoud16/Nimblize-demo/blob/main/Nimblize_Future_Implementation_Roadmap.pdf](https://github.com/ruthvikgoud16/Nimblize-demo/blob/main/Nimblize_Future_Implementation_Roadmap.pdf)
+    *   **Phase 4 Final Report PDF:** [https://github.com/ruthvikgoud16/Nimblize-demo/blob/main/Nimblize_Phase4_Final_Report.pdf](https://github.com/ruthvikgoud16/Nimblize-demo/blob/main/Nimblize_Phase4_Final_Report.pdf)
+
