@@ -8,7 +8,7 @@
 
 ---
 
-📄 **[Nimblize Future Implementation & Production Roadmap (PDF)](Nimblize_Future_Implementation_Roadmap.pdf)** — Architecture recommendations, scaling strategies, and proposed enhancements beyond Phase 4.
+📄 **[Nimblize Future Implementation & Production Roadmap (PDF)](https://github.com/ruthvikgoud16/Nimblize-demo/blob/main/Nimblize_Future_Implementation_Roadmap.pdf)** — Architecture recommendations, scaling strategies, and proposed enhancements beyond Phase 4.
 
 ---
 
