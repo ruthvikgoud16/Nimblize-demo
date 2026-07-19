@@ -26,8 +26,6 @@ _redis = redis.Redis(
     decode_responses=True,
 )
 
-_openai = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
 CACHE_TTL = 3600          # 1 hour TTL for cached responses
 SIMILARITY_THRESHOLD = 0.15  # Cosine distance threshold (lower = more similar)
 EMBEDDING_MODEL = "text-embedding-3-small"
@@ -36,8 +34,16 @@ CACHE_KEY_PREFIX = "nimblize:cache"
 
 def _embed(text: str) -> List[float]:
     """Generate a 1536-dimensional embedding for the input text."""
-    response = _openai.embeddings.create(model=EMBEDDING_MODEL, input=text)
-    return response.data[0].embedding
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        return [0.0] * 1536
+    try:
+        client = OpenAI(api_key=api_key)
+        response = client.embeddings.create(model=EMBEDDING_MODEL, input=text)
+        return response.data[0].embedding
+    except Exception as e:
+        print(f"[SemanticCache] Embed warning: {e}")
+        return [0.0] * 1536
 
 
 def _cosine_distance(a: List[float], b: List[float]) -> float:

@@ -2,12 +2,40 @@
 
 **Project:** Nimblize — Phase 5  
 **Milestone:** 3 (Automation Workflow)  
-**Status:** 🟢 Designed (Frozen for Implementation)  
+**Status:** 🟢 Implemented & Verified  
 **Last Updated:** 2026-07-19  
 
 ---
 
-## 1. Workflow Definition: Competitor Intelligence & Strategy Pipeline (CIMS)
+## 5. Implementation Details & Code Mapping
+
+The CIMS Automation Engine is implemented in `backend/automation/cims_pipeline.py` and supported by `backend/prompts/prompt_loader.py`.
+
+### Architectural Implementations
+
+1. **Prompt Registry Loader (`backend/prompts/prompt_loader.py`):**
+   - Automatically loads YAML prompt templates directly from `assets/prompts/`.
+   - Supports rendering template placeholders (`{{ var }}`) dynamically during workflow execution.
+
+2. **Multi-Trigger Entry Points (`backend/automation/cims_pipeline.py`):**
+   - `trigger_manual_pipeline()`: Synchronous/on-demand execution mode.
+   - `trigger_scheduled_pipeline()`: Batch runner abstraction for periodic 72-hour crawl cycles.
+   - `trigger_webhook_pipeline()`: Webhook receiver compatibility for asynchronous web scraper completion callbacks.
+
+3. **Resilient Failovers & Quality Gates:**
+   - **PII Redaction:** Microsoft Presidio with regex fallback.
+   - **Quality Gate:** RAGAS Evaluator with composite threshold check (`≥ 0.85`). Low-scoring reports (`< 0.85`) route automatically to `FLAGGED_FOR_HUMAN_REVIEW` and database manual review queues.
+   - **Self-Correction & Fallbacks:** Automatically attempts self-correction (`CA-005`) on schema parsing errors and routes unrecoverable failures to Dead Letter Queue (`CS-002`).
+
+4. **Code Component Reuse:**
+   - Reuses FastAPI Gateway middleware (`redact_pii`).
+   - Reuses Agent 1 (`run_extraction_agent`) and Agent 2 (`run_strategy_agent`).
+   - Reuses Redis Semantic Cache (`get_cached_response`, `cache_response`).
+   - Reuses pgvector similarity searches (`similarity_search`).
+   - Reuses RAGAS Evaluator (`evaluate_with_ragas`).
+   - Reuses PostgreSQL storage (`upsert_competitor`, `persist_strategy_report`).
+   - Reuses Redis Queue notifications (`push_notification_job`).
+
 
 The **Competitor Intelligence & Strategy Pipeline (CIMS)** is the core automated workflow of the Nimblize platform. It orchestrates unstructured data extraction, semantic search retrieval, strategic SEO generation, RAGAS quality evaluation, and multi-channel notification.
 

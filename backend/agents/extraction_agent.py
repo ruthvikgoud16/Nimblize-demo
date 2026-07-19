@@ -11,42 +11,17 @@ from pydantic import ValidationError
 from openai import OpenAI
 from backend.schemas.competitor import IngestedCompetitorPayload
 
-SYSTEM_PROMPT = """\
-================================================================================
-SYSTEM INSTRUCTIONS: NIMBLIZE CORE DATA EXTRACTION ENGINE v4.2.0 (B2B SEO)
-================================================================================
-ROLE: You are an advanced, deterministic Data Extraction Agent engineered for
-Nimblize's B2B SEO Intelligence Suite. Your task is to process unstructured
-competitor text and extract highly precise tactical data.
+from backend.prompts import load_prompt_template
 
-OPERATIONAL PARAMETERS:
-1. Extract ONLY facts explicitly stated in the context. Do not extrapolate.
-2. If a specific metric is missing, return "NOT_DETECTED" for that key.
-3. Maintain extreme neutrality. Strip marketing adjectives and hyperbole.
+def _get_extraction_system_prompt() -> str:
+    """Load system prompt from CA-001 YAML file in Prompt Library."""
+    try:
+        data = load_prompt_template("CA-001")
+        return data.get("prompt_template", "")
+    except Exception as e:
+        print(f"[Agent 1] Warning: Failed to load CA-001 prompt from library ({e}). Using fallback.")
+        return """ROLE: You are an advanced Data Extraction Agent. Extract competitor domain, SEO keywords, traffic, monetization, and affiliate networks as JSON."""
 
-JSON SCHEMA OUTPUT REQUIREMENT:
-{
-  "competitor_domain": "string or NOT_DETECTED",
-  "targeted_seo_keywords": ["array", "of", "strings"],
-  "estimated_monthly_organic_traffic": "integer or NOT_DETECTED",
-  "monetization_infrastructure": ["array", "of", "strings"],
-  "affiliate_networks_detected": ["array", "of", "strings"]
-}
-
-FEW-SHOT EXAMPLE:
-INPUT: "RankVantage targets B2B platforms using 'SaaS attribution dashboard'.
-Generating 120,000 monthly visits, monetized via software licensing and Impact Radius."
-
-OUTPUT:
-{
-  "competitor_domain": "RankVantage",
-  "targeted_seo_keywords": ["SaaS attribution dashboard", "B2B marketing platforms"],
-  "estimated_monthly_organic_traffic": 120000,
-  "monetization_infrastructure": ["software licensing"],
-  "affiliate_networks_detected": ["Impact Radius"]
-}
-================================================================================
-"""
 
 MAX_RETRIES = 3
 
@@ -85,7 +60,7 @@ def run_extraction_agent(raw_content: str, client: OpenAI) -> Dict[str, Any]:
                 model="gpt-4o-mini",
                 temperature=0.0,
                 messages=[
-                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {"role": "system", "content": _get_extraction_system_prompt()},
                     {"role": "user", "content": user_message},
                 ],
                 response_format=IngestedCompetitorPayload,

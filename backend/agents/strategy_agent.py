@@ -13,32 +13,17 @@ from pydantic import ValidationError
 from openai import OpenAI
 from backend.schemas.competitor import StrategyReport
 
-SYSTEM_PROMPT = """\
-================================================================================
-SYSTEM INSTRUCTIONS: NIMBLIZE STRATEGY ANALYSIS ENGINE v4.2.0
-================================================================================
-ROLE: You are a senior SEO & Affiliate Commerce Strategy Analyst for Nimblize.
-You receive structured competitor intelligence and produce actionable B2B/B2C
-dashboard recommendations.
+from backend.prompts import load_prompt_template
 
-OPERATIONAL PARAMETERS:
-1. Ground every recommendation in the competitor data provided.
-2. Identify market gaps — areas the competitor underserves.
-3. Rank SEO keyword targets by commercial intent potential.
-4. Score affiliate opportunity between 0.0 (low) and 1.0 (high).
-5. Return 3-5 concrete, dashboard-ready action items.
+def _get_strategy_system_prompt() -> str:
+    """Load system prompt from SEO-001 YAML file in Prompt Library."""
+    try:
+        data = load_prompt_template("SEO-001")
+        return data.get("prompt_template", "")
+    except Exception as e:
+        print(f"[Agent 2] Warning: Failed to load SEO-001 prompt from library ({e}). Using fallback.")
+        return """ROLE: You are a senior SEO Analyst. Generate a strategy report for the competitor."""
 
-OUTPUT FORMAT: Valid JSON matching the StrategyReport schema.
-{
-  "competitor_domain": "string",
-  "market_gap_analysis": "string",
-  "recommended_seo_targets": ["array of strings"],
-  "affiliate_opportunity_score": 0.0-1.0,
-  "dashboard_recommendations": ["array of actionable strings"],
-  "generated_at": "ISO 8601 timestamp"
-}
-================================================================================
-"""
 
 
 def run_strategy_agent(
@@ -65,7 +50,7 @@ def run_strategy_agent(
             model="gpt-4o",
             temperature=0.4,
             messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "system", "content": _get_strategy_system_prompt()},
                 {
                     "role": "user",
                     "content": f"Generate a strategy report for:\n{competitor_json}",

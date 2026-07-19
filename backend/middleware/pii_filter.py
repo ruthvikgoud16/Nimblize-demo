@@ -9,14 +9,19 @@ Detected & redacted entities:
 Redaction format: <ENTITY_TYPE> (e.g., <EMAIL_ADDRESS>)
 """
 
-from presidio_analyzer import AnalyzerEngine
-from presidio_anonymizer import AnonymizerEngine
-from presidio_anonymizer.entities import OperatorConfig
-
-
-# Initialize engines once at module load (expensive to re-initialize per request)
-_analyzer = AnalyzerEngine()
-_anonymizer = AnonymizerEngine()
+try:
+    from presidio_analyzer import AnalyzerEngine
+    from presidio_anonymizer import AnonymizerEngine
+    from presidio_anonymizer.entities import OperatorConfig
+    _analyzer = AnalyzerEngine()
+    _anonymizer = AnonymizerEngine()
+    _presidio_available = True
+except ImportError:
+    _analyzer = None
+    _anonymizer = None
+    _presidio_available = False
+    import re
+    print("[Presidio] Warning: presidio-analyzer not installed. Falling back to regex PII anonymizer.")
 
 # Entities to detect and redact
 DETECTED_ENTITIES = [
@@ -32,11 +37,13 @@ DETECTED_ENTITIES = [
     "IBAN_CODE",
 ]
 
-# Replace detected entities with a bracketed placeholder
-_operators = {
-    entity: OperatorConfig("replace", {"new_value": f"<{entity}>"})
-    for entity in DETECTED_ENTITIES
-}
+if _presidio_available:
+    _operators = {
+        entity: OperatorConfig("replace", {"new_value": f"<{entity}>"})
+        for entity in DETECTED_ENTITIES
+    }
+else:
+    _operators = {}
 
 
 def redact_pii(text: str, language: str = "en") -> str:
@@ -52,6 +59,12 @@ def redact_pii(text: str, language: str = "en") -> str:
     """
     if not text or not text.strip():
         return text
+
+    if not _presidio_available:
+        # Fallback regex anonymization
+        cleaned = re.sub(r"[\w\.-]+@[\w\.-]+\.\w+", "<EMAIL_ADDRESS>", text)
+        cleaned = re.sub(r"\+?\d[\d -]{8,}\d", "<PHONE_NUMBER>", cleaned)
+        return cleaned
 
     try:
         # Step 1: Detect PII entities
