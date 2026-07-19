@@ -1,82 +1,38 @@
-# Nimblize Studio — Frontend Implementation Roadmap
+# Frontend Implementation Roadmap
 
-**Project:** Nimblize Studio AI SaaS  
-**Objective:** Phase 6 Frontend Development Milestones & Routing Specs  
+This document translates the Figma Design Sprint into actionable development phases for the engineering team.
 
----
+## Phase A: Foundation & Architecture (Loop 1.0)
+*Status: Architecture established.*
+1. Initialize Next.js 15 App Router.
+2. Configure Tailwind CSS v4 and map all `DESIGN_TOKENS.md` into `globals.css` and `tailwind.config.ts`.
+3. Set up `next-themes` for Light/Dark mode toggling.
+4. Build the `AppShell`, `AppSidebar`, and `TopNavbar` components.
+5. Create the global `mock-data.ts` repository to isolate state.
 
-## 1. Technology Stack
-To achieve a high-performance, developer-centric interface that matches Vercel and Linear, the frontend stack uses:
-- **Framework:** Next.js (App Router, React Server Components)
-- **Styling:** TailwindCSS (following standard tokens in `docs/phase6/DESIGN_SYSTEM.md`)
-- **Core Components:** Radix UI primitives (packaged via Shadcn UI)
-- **Visual Charts:** Recharts (responsive line, pie, and bar charts)
-- **Code Editor:** Monaco Editor (`@monaco-editor/react`)
-- **Text Diff Viewer:** `react-diff-viewer-continued`
+## Phase B: Component Library Engineering
+*Status: Core components mapped.*
+1. Install base-ui primitives via shadcn/ui.
+2. Implement core atoms (Buttons, Inputs, Badges, Cards).
+3. Implement complex UI widgets (MetricCard, ExecutionTimeline) using Framer Motion according to `MOTION_GUIDELINES.md`.
+4. Enforce strict TypeScript typing for all props.
 
----
+## Phase C: Page Implementation (Loop 2.0 & Ultimate Loop)
+*Status: Ready for execution.*
+1. **Prompt Library:** Implement the grid, filtering logic, and `PromptPreviewDrawer`.
+2. **Playground:** Build the split-pane layout, variable parsing, and mock execution simulation.
+3. **Automation Studio:** Create the interactive `PipelineGraph` and runtime log viewer.
+4. **Evaluation:** Render charts and metric tables.
+5. **Reports & Workflow:** Add the final routes and interactive canvas elements.
 
-## 2. Route Hierarchy Mapping
+## Phase D: Backend Integration (Future Phase)
+1. Replace `mock-data.ts` with React Server Components (RSC) fetching from the FastAPI backend.
+2. Connect the Playground to the live LLM gateway.
+3. Connect Automation Studio to the live Kafka/Redis queue events.
+4. Implement WebSocket connections for live logs.
 
-The Next.js App Router layout aligns with the 6 core pages:
-
-```
-app/
-├── layout.tsx                     # Global AppSidebar + Top Navbar wrapper
-├── page.tsx                       # Dashboard Overview page (/dashboard)
-├── library/
-│   ├── page.tsx                   # Prompt Catalog Grid (/library)
-│   └── [id]/
-│       └── page.tsx               # Prompt Playground / Parameter Tuner (/library/SEO-001)
-├── automation/
-│   └── page.tsx                   # CIMS Automation Studio Visual Editor (/automation)
-├── evaluation/
-│   └── page.tsx                   # RAGAS metrics & SLA Charts (/evaluation)
-├── review/
-│   └── page.tsx                   # HITL Manual Review Queue list (/review)
-│   └── [reviewId]/
-│       └── page.tsx               # Review Console Workspace (/review/rev-123)
-└── settings/
-    └── page.tsx                   # Environment Variables & Provider config (/settings)
-```
-
----
-
-## 3. Development Milestones
-
-### 🏗️ Milestone 1: Framework Setup & Main Layout (Loop 1)
-*   **Tasks:**
-    - Initialize Next.js project using `npx create-next-app@latest`.
-    - Configure `tailwind.config.js` with the brand colors and typography scale.
-    - Build the collapsible Left Navigation Sidebar (`AppSidebar`) and Top Navbar (`AppNavbar`).
-*   **Success Criteria:** Home page loads with responsive side-nav, top-search bar, and correct color themes.
-
-### 📁 Milestone 2: Prompt Catalog & Playground (Loop 2)
-*   **Tasks:**
-    - Build the Prompt Library catalog page using the responsive `PromptCard` grid.
-    - Implement filter tabs for prompt categories.
-    - Integrate the Monaco YAML editor on the details page.
-    - Connect sliders for Model Configuration (Temperature/Max Tokens).
-*   **Success Criteria:** 29 prompt templates list correctly, filter tabs segment prompts, and code editor renders.
-
-### ⚙️ Milestone 3: CIMS Automation Studio (Loop 3)
-*   **Tasks:**
-    - Implement the CIMS node sequence visualizer.
-    - Nodes should change status color dynamically (e.g. flashing warning when enqueued for review).
-    - Develop the scheduled crawlers logs panel and manual trigger webhook input card.
-*   **Success Criteria:** End-to-end flowchart renders, manual runs can be triggered, and mock timeline logs update dynamically.
-
-### ⚖️ Milestone 4: SLA Center & HITL Console (Loop 4)
-*   **Tasks:**
-    - Render the multi-temperature RAGAS score table.
-    - Add Recharts line charts mapping historical SLA metric compliance.
-    - Build the HITL diff comparison workspace (Redacted vs Raw text side-by-side).
-    - Connect thestrategic parameters editor form.
-*   **Success Criteria:** Table cells color-code dynamically based on score thresholds, and diff comparison renders properly.
-
-### 🚀 Milestone 5: API Integration & Observability (Loop 5)
-*   **Tasks:**
-    - Bind the Next.js routes to the FastAPI gateway endpoints (Auth, CIMS execution, cache checks).
-    - Connect Sentry client-side exception tracking.
-    - Finalize build packaging and execute the production release freeze.
-*   **Success Criteria:** Live API endpoints populate the dashboard metrics, Sentry collects errors, and build compiles successfully without warnings.
+## Engineering Standards
+- **Zero "any" Types:** Strict TypeScript is mandatory.
+- **Component Colocation:** Keep components close to their routes unless reused globally.
+- **Client vs Server:** Default to Server Components. Use `"use client"` only when React state (`useState`) or Framer Motion requires it.
+- **No Inline Styles:** Use Tailwind classes and `cn()` utility exclusively.

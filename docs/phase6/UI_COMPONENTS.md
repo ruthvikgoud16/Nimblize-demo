@@ -1,90 +1,48 @@
-# Nimblize Studio — UI Component Inventory & 21st.dev Mapping
+# UI Component Catalog
 
-**Project:** Nimblize Studio AI SaaS  
-**Objective:** Clean, reusable component definitions mapped to industry-standard UI libraries.  
+This document defines the exact UI components used in Nimblize Studio. It maps Figma components to their code equivalents (shadcn/ui, 21st.dev, and custom implementations).
 
----
+## Core Primitives (shadcn/ui & base-ui)
 
-## 1. Global Navigation & Layout Components
+- **Button:** 
+  - Variants: `default`, `secondary`, `destructive`, `outline`, `ghost`, `link`.
+  - Sizes: `default`, `sm`, `lg`, `icon`.
+- **Input & Textarea:** Standard form fields with defined focus rings and disabled states.
+- **Badge:** Status indicators. Variants: `default`, `secondary`, `outline`, `destructive`. (Custom colors applied via utilities for warning/success).
+- **Card:** Container for metrics, forms, and prompt templates. Uses `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `CardFooter`.
+- **Dropdown Menu:** Context menus and filters.
+- **Dialog & Sheet:** 
+  - `Dialog` (Modal): Used for center-screen focus tasks (e.g., Prompt Comparison, Command Palette).
+  - `Sheet` (Drawer): Used for side-panel inspections (e.g., Prompt Preview).
+- **Tabs:** For switching between views (e.g., YAML vs. Variables in Playground).
+- **Scroll Area:** Custom scrollbars matching the OS aesthetic.
+- **Separator:** Visual dividers (`<hr />` equivalent).
+- **Skeleton:** Loading placeholders.
+- **Tooltip:** Hover labels for icon buttons and truncated text.
 
-### Collapsible Sidebar (`AppSidebar`)
-*   **Figma Location:** Left Panel (Global Frame)
-*   **Purpose:** Exposes primary routes (Dashboard, Library, Automation, Evaluation, Review Queue, Settings).
-*   **UI Library Map:** Shadcn UI `Sidebar` component.
-*   **Customization:** Minimalist dark border (`border-r border-slate-800`), active route highlighted with soft indigo border on the left (`before:border-l-2 before:border-indigo-500`).
+## Complex / Custom Components
 
-### Top Navigation Bar (`AppNavbar`)
-*   **Figma Location:** Top Panel (Global Frame)
-*   **Purpose:** Houses global search trigger, active environment status badge, notifications dropdown, and user profile drawer.
-*   **UI Library Map:** Shadcn UI `NavigationMenu`.
-*   **Customization:** Backdrop blur glass styling (`bg-slate-950/80 backdrop-blur-md`).
+- **AppShell & Navigation:**
+  - `AppSidebar`: The collapsible main navigation.
+  - `TopNavbar`: The glassmorphic top header.
+  - `CommandPalette`: `Cmd+K` global search dialog utilizing `cmdk`.
+- **Dashboard Widgets:**
+  - `MetricCard`: Displays KPI with trend indicator and icon.
+  - `ExecutionTimeline`: Vertical steps representing pipeline stages.
+  - `CategoryChart`: Distribution visualizations.
+- **Prompt Library:**
+  - `PromptCard`: Animated grid item displaying prompt metadata, quality score, and tags.
+  - `CategoryOverview`: Animated summary cards at the top of the library.
+- **Playground & Automation:**
+  - `SplitPane`: Resizable layout separating editor and execution results.
+  - `PipelineGraph`: Interactive flowchart representing execution nodes (Webhook -> LLM -> Validation).
 
----
+## States to Design in Figma
 
-## 2. Core Dashboard Components
-
-### Metric Status Card (`MetricCard`)
-*   **Figma Location:** Dashboard Overview Row 1
-*   **Purpose:** Displays high-level platform health metrics (Prompt counts, pgvector counts, Cache hit rates).
-*   **UI Library Map:** Shadcn UI `Card` with `CardHeader`, `CardTitle`, and `CardContent`.
-*   **Customization:** Top-accent lines colored according to status (e.g. emerald top line for 100% SLA compliance).
-
-### Live Ingestion Timeline (`ExecutionTimeline`)
-*   **Figma Location:** Dashboard Overview Row 2
-*   **Purpose:** Renders a vertical step-by-step progress checklist for the active CIMS ingestion process.
-*   **UI Library Map:** Custom Timeline component built with TailwindCSS lists.
-*   **Customization:** Vertically connected dots that fill with color as stages (`TRIGGER` ➔ `PII_FILTER` ➔ `CACHE` ➔ `RAG_RETRIEVAL` ➔ `EXTRACTION` ➔ `STRATEGY` ➔ `RAGAS_EVALUATION` ➔ `PERSISTENCE`) execute.
-
----
-
-## 3. Prompt Library Components
-
-### Prompt Card (`PromptCard`)
-*   **Figma Location:** Prompt Library Page Catalog
-*   **Purpose:** Card-based template overview showing ID, Name, Model, Category, and active version tag.
-*   **UI Library Map:** 21st.dev Premium Card layout or Shadcn UI `Card`.
-*   **Customization:** Gray hover highlight (translates background from slate-950 to slate-900). Hover triggers a subtle scale expansion.
-
----
-
-## 4. Prompt Playground Components
-
-### YAML Prompt Editor (`PromptEditor`)
-*   **Figma Location:** Playground Page Left Panel
-*   **Purpose:** Live code block editor allowing users to modify YAML properties.
-*   **UI Library Map:** `@monaco-editor/react` (configured to dark theme).
-*   **Customization:** Custom YAML keywords highlight (e.g. id, version, output_schema color-coded).
-
-### Model Config Panel (`ModelSettings`)
-*   **Figma Location:** Playground Page Right Drawer
-*   **Purpose:** Slider adjustments for LLM call configurations.
-*   **UI Library Map:** Shadcn UI `Slider` (for Temperature scale 0.0 - 1.0) and `Select` (for model selector).
-
----
-
-## 5. Evaluation & HITL Review Components
-
-### SLA Comparison Grid (`BenchmarkTable`)
-*   **Figma Location:** Evaluation Center Page Row 1
-*   **Purpose:** A detailed grid showing RAGAS scores across multiple temperatures.
-*   **UI Library Map:** Shadcn UI `Table`.
-*   **Customization:** Cells are color-coded based on thresholds (emerald text for score `>= 0.85`, amber for `< 0.85`).
-
-### Dual Ingestion Text Diff (`PIIComparePanel`)
-*   **Figma Location:** HITL Review Page Left Panel
-*   **Purpose:** Shows scraped raw text alongside redacted PII text to audit Microsoft Presidio performance.
-*   **UI Library Map:** `react-diff-viewer-continued` (configured in split-view dark mode).
-
----
-
-## 6. Command Palette & Alerts
-
-### Global Search Command Palette (`CommandPalette`)
-*   **Figma Location:** Triggered globally via `Cmd + K` or navbar search click.
-*   **Purpose:** Quickly jump to prompts by ID, run automation, or navigate pages.
-*   **UI Library Map:** Shadcn UI `Command` dialog.
-
-### Toast Status Alert (`ToastAlert`)
-*   **Figma Location:** Appears in the bottom-right corner during asynchronous actions.
-*   **Purpose:** Notification trigger alerts for CIMS success or RAGAS gate failures.
-*   **UI Library Map:** Shadcn UI `useToast` hooks.
+Every component must have variants for the following states:
+1. **Default (Light & Dark)**
+2. **Hover**
+3. **Active / Pressed**
+4. **Focus (Focus-visible ring)**
+5. **Disabled (Opacity 50%, unclickable)**
+6. **Loading (Spinner or Skeleton representation)**

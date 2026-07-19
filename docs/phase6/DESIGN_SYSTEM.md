@@ -1,93 +1,39 @@
-# Nimblize Studio — Design System (v1.0)
+# Nimblize Studio Design System
 
-**Project:** Nimblize Studio AI SaaS  
-**Design Persona:** Minimalist, High-Performance, Technical, Developer-Centric  
-**Inspiration:** Vercel, Linear, Cursor, Perplexity  
-
----
+This document outlines the overarching brand identity, visual language, and design principles for Nimblize Studio. It is the foundation for the Phase 6 Figma Sprint.
 
 ## 1. Brand Identity
 
-*   **Product Name:** Nimblize Studio
-*   **Tagline:** Decoupled Prompt Registry & Orchestrated AI Ingestion
-*   **Brand Personality:** Crisp, highly responsive, mathematically clean, dark-mode focused.
-*   **Mission:** Empower engineers to catalog, validate, optimize, and orchestrate AI prompts and agent pipelines without manual code updates.
+**Product Name:** Nimblize Studio  
+**Tagline:** Production-grade AI prompt engineering and orchestration.  
+**Mission:** To provide engineering teams with a deterministic, observable, and reliable environment for developing and evaluating LLM prompts.  
+**Brand Personality:** Professional, precise, technical, developer-centric, unobtrusive.
 
----
+## 2. Visual Language & Aesthetics
 
-## 2. Color Palette (Dark Theme First)
+Nimblize Studio aims to match the caliber of tools like Vercel, Linear, and Cursor.
+- **Dark-Mode First (but Light-Mode Supported):** The default environment is a deep, immersive dark mode utilizing extremely dark slate/blue tones (e.g., `#09090b` for backgrounds).
+- **Subtle Accents:** Core brand color is a vibrant Indigo/Violet (`#4f46e5`). It is used sparingly for primary actions, active states, and focus rings.
+- **High Information Density:** The UI must support complex data (YAML, logs, metrics) without feeling cluttered. Use borders (`border-border`) and subtle background shifts (`bg-card`, `bg-muted`) instead of heavy drop shadows to separate content.
+- **Glassmorphism:** Use blurred translucent backgrounds (`backdrop-blur-md`, `bg-background/80`) for sticky headers, command palettes, and floating elements to provide depth without solid occlusion.
 
-```
-Background:  [#020617] (Slate 950 - Deepest Obsidian)
-Cards/Panels:[#0B0F19] (Slate 900 Modified - Smooth Surface)
-Borders:     [#1E293B] (Slate 800 - Minimal Division)
-Primary:     [#6366F1] (Indigo 500 - Highlight / Core CTA)
-Accent:      [#8B5CF6] (Violet 500 - Secondary Focus)
-Text High:   [#FAFAFA] (Zinc 50 - High Contrast Headers)
-Text Low:    [#A1A1AA] (Zinc 400 - Secondary Descriptive Labels)
-```
+## 3. Design Principles
 
-### Semantic Status Tokens
-- **Success / Ingress:** `#10B981` (Emerald 500)
-- **Warning / HITL Review:** `#F59E0B` (Amber 500)
-- **Error / DLQ Terminal:** `#EF4444` (Rose 500)
+1. **Content is King:** The interface should recede. Prompts, code, and evaluation metrics are the primary focus.
+2. **Speed & Efficiency:** Every action should feel instantaneous. Rely heavily on keyboard shortcuts (`Cmd+K` command palette, `Cmd+S` save, `Cmd+Enter` execute).
+3. **Deterministic Feedback:** Never leave the user guessing. Clear loading states (skeletons, spinners), success toasts, and error boundaries must be strictly implemented.
+4. **Consistency:** A button must look like a button everywhere. Use the strictly defined UI Component catalog. Avoid ad-hoc styling.
 
----
+## 4. Accessibility Rules
 
-## 3. Typography Scale
+- **Contrast:** Ensure all text passes WCAG 2.1 AA requirements (minimum 4.5:1 ratio for normal text). Muted text must still be readable against dark backgrounds.
+- **Focus Rings:** All interactive elements must have a visible focus state (`focus-visible:ring-1 focus-visible:ring-ring`). Do not disable outlines without providing a visual alternative.
+- **Keyboard Navigation:** The entire application, especially the Prompt Library and Workflow Explorer, must be fully navigable via keyboard (`Tab`, `Enter`, `Space`, `Arrow Keys`).
+- **Screen Readers:** Use semantic HTML and appropriate ARIA labels for non-text interactive elements (e.g., icon-only buttons).
 
-*   **Main Interface Font:** `Inter`, `-apple-system`, `BlinkMacSystemFont`, `Segoe UI`, `Roboto`, `sans-serif`
-*   **Code & Editor Font:** `JetBrains Mono`, `Fira Code`, `Courier New`, `monospace` (for Prompt Templates, YAML syntax highlighting, and CLI Console output)
+## 5. Layout Hierarchy
 
-### Scale Mappings
-| Token Name | Font Size | Line Height | Font Weight | Usage |
-|---|---|---|---|---|
-| **Display 1** | 36px (2.25rem) | 44px | 700 (Bold) | Core landing metrics / Brand marks |
-| **Heading 1** | 24px (1.5rem) | 32px | 600 (SemiBold) | Page headers / Primary modules |
-| **Heading 2** | 18px (1.125rem) | 26px | 600 (SemiBold) | Section headers / Panel cards |
-| **Body Large** | 16px (1rem) | 24px | 400 (Regular) | Primary text content / Inputs |
-| **Body Standard** | 14px (0.875rem) | 20px | 400 (Regular) | General dashboard labels / Badges |
-| **Code Standard** | 13px (0.8125rem)| 18px | 450 (Medium) | YAML parameters / Token counts |
-| **Caption** | 12px (0.75rem) | 16px | 500 (Medium) | Tooltips / Metadata tags |
-
----
-
-## 4. Spacing System (Base 8px Grid)
-
-All layouts, paddings, margins, and gaps follow a strict 8px multiplier grid to maintain visual alignment:
-
-```
-4px  (0.25rem) - Subtle Padding (Badges, icon gaps)
-8px  (0.5rem)  - Standard Padding (Inner card margins)
-12px (0.75rem) - Medium Padding (Inputs, list items gap)
-16px (1rem)    - Section Grid Gap (Layout grid columns, inner card spacing)
-24px (1.5rem)  - Outer Padding (Sidebar panel padding, container margins)
-32px (2rem)    - Page Header Margin (Space between header and main grid)
-48px (3rem)    - Layout Section Gap
-64px (4rem)    - Hero / Frame Margins
-```
-
----
-
-## 5. Border Radius & Shadows (Elevation)
-
-### Border Radius
-*   `rounded-sm`: 4px (Buttons, badges, tag chips)
-*   `rounded-md`: 8px (Outer dialogs, input fields, dropdown menus)
-*   `rounded-lg`: 12px (Dashboard panels, prompt playground containers)
-
-### Shadows & Inner Borders
-Instead of heavy shadows which degrade dark mode interfaces, Nimblize Studio uses **subtle inner borders** combined with soft blurred background shadows:
-*   **Default Card:** Border `1px solid #1E293B` (Slate 800) with no shadow.
-*   **Interactive Hover Card:** Border transitions to `1px solid #334155` (Slate 700) with a soft bottom shadow: `0 4px 12px -2px rgba(0, 0, 0, 0.3)`.
-*   **Active Popover / Dialog:** Border `1px solid #6366F1` (Indigo 500) with deep background blur: `backdrop-filter: blur(12px)`.
-
----
-
-## 6. Icons & Motion Design
-
-*   **Icon Family:** Lucide Icons (clean, 1.5px stroke weight, round cap joints).
-*   **Transition Speeds:**
-    - Standard hover states: `150ms ease-out`
-    - Modal/dialog popups: `200ms cubic-bezier(0.16, 1, 0.3, 1)` (smooth deceleration)
-    - Code execution load bars: `300ms linear` progress fills
+- **Global Navigation (Sidebar):** Left-aligned vertical sidebar containing primary routes (Dashboard, Library, Playground, Automation, etc.). Collapsible to icon-only mode to maximize workspace.
+- **Contextual Header (Topbar):** Contains page title, breadcrumbs, search/command trigger, environment selectors, and global actions.
+- **Main Content Area:** The central workspace. Utilizes flexible grids and split-panes (for Playground/Workflows).
+- **Contextual Drawers/Panels (Right side):** Used for inspecting details (Prompt Preview, Node Logs, Evaluation Details) without losing context of the main view.

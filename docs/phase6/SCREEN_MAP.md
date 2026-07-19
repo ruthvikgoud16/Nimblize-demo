@@ -1,163 +1,67 @@
-# Nimblize Studio — Screen Map & Wireframes (ASCII)
+# Screen Map & Layout Anatomy
 
-**Project:** Nimblize Studio AI SaaS  
-**Objective:** Detailed screen layouts, content grids, and wireframe blueprints.  
+This document defines the structural composition of every screen in Nimblize Studio across breakpoints.
 
----
+## Global Layout Anatomy (AppShell)
+- **Desktop (>1024px):** 
+  - Left Sidebar (240px width, collapsible to 64px).
+  - Sticky Topbar (64px height) with breadcrumbs and actions.
+  - Scrollable Main Content Area.
+- **Tablet (768px - 1024px):**
+  - Left Sidebar collapses to icon-only (64px) by default.
+  - Sticky Topbar.
+- **Mobile (<768px):**
+  - Hidden Sidebar.
+  - Sticky Topbar with a Hamburger menu icon.
+  - Hamburger opens a full-screen or slide-out Drawer containing navigation.
 
-## Page 1: Dashboard Overview
+## 1. Dashboard (`/`)
+- **Header:** Welcome message, Date/Time.
+- **Top Row:** 4 Metric Cards (Prompts, Vector Chunks, Cache Hit Rate, SLA).
+- **Middle Row (Split):**
+  - Left (66%): Execution Timeline (vertical stepper).
+  - Right (33%): Category Distribution (horizontal progress bars).
+- **Bottom Row (Split):**
+  - Left (50%): Quick Actions Grid.
+  - Right (50%): Recent Activity Feed.
 
-Displays live platform health, vector counts, and ingestion streams.
+## 2. Prompt Library (`/library`)
+- **Header:** Title, "Compare", "New Prompt" buttons.
+- **Category Overview:** 4 cards showing aggregate stats (count, average quality) per category.
+- **Toolbar:** Search Input (left), Filter/Sort/View Toggles (right).
+- **Grid:** Responsive grid (1 col mobile, 2 col tablet, 3-4 col desktop) of `PromptCard` components.
+- **Overlay:** `PromptPreviewDrawer` slides from the right.
+- **Overlay:** `PromptComparison` opens as a wide, center-screen Dialog.
 
-### 📐 ASCII Wireframe Layout
+## 3. Prompt Playground (`/playground`)
+- **Header:** Title, "Save as Draft", "Run Prompt" buttons.
+- **Layout:** Responsive Split-Pane.
+  - **Left Pane (Configuration):**
+    - Prompt selector dropdown.
+    - Model/Temp indicators.
+    - Split vertically: Top half is YAML Source (read-only), Bottom half is Variables (input forms).
+  - **Right Pane (Execution):**
+    - Output console (streams text).
+    - Bottom half: RAGAS Evaluation scorecard grid.
+  - *Mobile behavior:* Stacks vertically.
 
-```
-+-------------------------------------------------------------------------------+
-| [Logo] Search... (Cmd + K)              [Env: Production] [Notif] [Profile]   |
-+-------------------------------------------------------------------------------+
-| (AppSidebar)     |  Studio Overview                                           |
-|                  |  Live platform metrics and active CIMS streams.            |
-| - Dashboard [A]  |                                                            |
-| - Library        |  +--------------+ +--------------+ +--------------+        |
-| - Playground     |  | Prompts      | | pgvector     | | Cache Rate   |        |
-| - Automation     |  | 29 Templates | | 1,248 Chunks | | 72% Hits     |        |
-| - Evaluation     |  +--------------+ +--------------+ +--------------+        |
-| - HITL Review    |                                                            |
-| - Settings       |  +------------------------------+ +---------------------+  |
-|                  |  | CIMS Execution Timeline      | | Category Share    |  |
-|                  |  | [19:00:10] Ingestion Trigger | | - CA: 5 Prompts   |  |
-|                  |  | [19:00:12] PII Scrub [PASS]  | | - SEO: 5 Prompts  |  |
-|                  |  | [19:00:15] pgvector Retrieval| | - PR: 3 Prompts   |  |
-|                  |  | [19:00:20] RAGAS Gate [0.79] | | - MR: 3 Prompts   |  |
-|                  |  |   --> Paused: Sent to HITL   | | - CS: 3 Prompts   |  |
-|                  |  +------------------------------+ +---------------------+  |
-+------------------+------------------------------------------------------------+
-```
+## 4. Automation Studio (`/automation`)
+- **Header:** Title, "Run Pipeline" button.
+- **Layout:** Responsive Split-Pane.
+  - **Left Pane:** Pipeline Graph (vertical list of connected nodes).
+  - **Right Pane:** Runtime Logs console.
 
----
+## 5. Evaluation Dashboard (`/evaluation`)
+- **Header:** Title, "Filters", "Export" buttons.
+- **Top Row:** 4 Evaluation specific Metric Cards.
+- **Bottom Row (Split):**
+  - Left (66%): Quality Trend Chart (bar chart).
+  - Right (33%): Recent Evaluations Table (scrollable list).
 
-## Page 2: Prompt Library Catalog
+## 6. Reports Center (`/reports`)
+- **Header:** Title, Search/Filter.
+- **Grid/Table:** List of reports with PDF/Markdown icons.
+- **Overlay:** Markdown viewer side-drawer.
 
-A central registry cataloguing the 29 versioned prompt templates.
-
-### 📐 ASCII Wireframe Layout
-
-```
-+-------------------------------------------------------------------------------+
-| [Logo] Search... (Cmd + K)                                                    |
-+-------------------------------------------------------------------------------+
-| (AppSidebar)     |  Prompt Library                                            |
-|                  |  Manage and filter the 29 YAML templates.                   |
-| - Dashboard      |                                                            |
-| - Library [A]    |  [ All ] [ Competitor ] [ SEO ] [ Customer ] [ Report ]    |
-| - Playground     |                                                            |
-| - Automation     |  +------------------+ +------------------+ +--------------+ |
-| - Evaluation     |  | SEO-001          | | CA-001           | | PR-001       | |
-| - HITL Review    |  | SEO Strategy     | | Data Ingest      | | Product Rec  | |
-| - Settings       |  | Model: gpt-4o    | | Model: gpt-4mini | | Model: gpt-4 | |
-|                  |  | Version: v1.1.0  | | Version: v1.1.0  | | Ver: v1.0.0  | |
-|                  |  +------------------+ +------------------+ +--------------+ |
-+------------------+------------------------------------------------------------+
-```
-
----
-
-## Page 3: Prompt Playground
-
-Split-screen parameter tuner and YAML editor.
-
-### 📐 ASCII Wireframe Layout
-
-```
-+-------------------------------------------------------------------------------+
-| [Logo] Search... (Cmd + K)                                                    |
-+-------------------------------------------------------------------------------+
-| (AppSidebar)     |  Playground: SEO-001 (SEO Strategy)   [Run Test] [Save v1.1.1] |
-|                  |                                                            |
-| - Dashboard      |  +--------------------------+ +--------------------------+ |
-| - Library        |  | YAML Prompt Editor       | | Ingestion Output Logs    | |
-| - Playground [A] |  |                          | |                          | |
-| - Automation     |  | id: "SEO-001"            | | Rendered Prompt:         | |
-| - Evaluation     |  | recommended_model: gpt-4 | | "Analyze marketing gaps  | |
-| - HITL Review    |  | temperature: 0.4         | | for competitor domain..."| |
-| - Settings       |  | prompt_template: |       | |                          | |
-|                  |  |   Analyze {{ domain }}.. | | JSON Response Payload:   | |
-|                  |  |                          | | { "market_gap": "SEO"..} | |
-|                  |  +--------------------------+ +--------------------------+ |
-+------------------+------------------------------------------------------------+
-```
-
----
-
-## Page 4: CIMS Automation Studio
-
-Visual graph mapping pipeline execution stages.
-
-### 📐 ASCII Wireframe Layout
-
-```
-+-------------------------------------------------------------------------------+
-| [Logo] Search... (Cmd + K)                                                    |
-+-------------------------------------------------------------------------------+
-| (AppSidebar)     |  Automation Workflow Studio               [Manual Trigger] |
-|                  |                                                            |
-| - Dashboard      |  CIMS Pipeline Sequence Node Map                           |
-| - Library        |                                                            |
-| - Playground     |  [Trigger Ingest] ➔ [Presidio Scrub] ➔ [Redis Cache Check]  |
-| - Automation [A] |                                     |                      |
-| - Evaluation     |                                     v (Cache Miss)         |
-| - HITL Review    |  [Slack Notification] 🔐 [RAGAS Gate] 💻 [pgvector RAG]    |
-| - Settings       |         ^                     |                            |
-|                  |         |                     v (Low Score)                |
-|                  |         +--------------- [HITL Queue]                      |
-+------------------+------------------------------------------------------------+
-```
-
----
-
-## Page 5: Evaluation & SLA Center
-
-RAGAS benchmark dashboard displaying model scores.
-
-### 📐 ASCII Wireframe Layout
-
-```
-+-------------------------------------------------------------------------------+
-| [Logo] Search... (Cmd + K)                                                    |
-+-------------------------------------------------------------------------------+
-| (AppSidebar)     |  Evaluation & SLA Benchmarks                               |
-|                  |  Multi-temperature RAGAS validation metrics.               |
-| - Dashboard      |                                                            |
-| - Library        |  +-------------------------------------------------------+ |
-| - Playground     |  | Prompt ID | Temp | Faithfulness | Recall | Status     | |
-| - Automation     |  |-----------|------|--------------|--------|------------| |
-| - Evaluation [A] |  | SEO-001   | 0.2  | 0.94         | 0.88   | 🟢 PASS    | |
-| - HITL Review    |  | SEO-001   | 0.8  | 0.74         | 0.82   | 🔴 FAIL    | |
-| - Settings       |  +-------------------------------------------------------+ |
-+------------------+------------------------------------------------------------+
-```
-
----
-
-## Page 6: HITL Review Queue
-
-Console for evaluating flagged outputs.
-
-### 📐 ASCII Wireframe Layout
-
-```
-+-------------------------------------------------------------------------------+
-| [Logo] Search... (Cmd + K)                   [Approve Ingress] [Reject / Run] |
-+-------------------------------------------------------------------------------+
-| (AppSidebar)     |  HITL Review: RankVantage (Score: 0.79)                    |
-|                  |                                                            |
-| - Dashboard      |  +--------------------------+ +--------------------------+ |
-| - Library        |  | Redacted Raw Text        | | Generated Strategy       | |
-| - Playground     |  |                          | |                          | |
-| - Automation     |  | RankVantage operates a   | | market_gap_analysis:     | |
-| - Evaluation     |  | B2B SaaS platform in     | | "Underserves mid-market  | |
-| - HITL Review [A]|  | <LOCATION> targeting     | | B2B analytics track..."  | |
-| - Settings       |  | mid-market resellers.    | |                          | |
-|                  |  +--------------------------+ +--------------------------+ |
-+------------------+------------------------------------------------------------+
-```
+## 7. Workflow Explorer (`/workflow`)
+- **Layout:** Full-bleed canvas for interactive node mapping. Floating control palette for zoom/pan.
