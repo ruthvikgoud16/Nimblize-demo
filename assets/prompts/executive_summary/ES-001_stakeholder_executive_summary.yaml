@@ -1,0 +1,111 @@
+# Prompt: Stakeholder Executive Summary
+# Nimblize Phase 5 — Prompt Library v1
+
+id: "ES-001"
+category: "executive_summary"
+name: "Stakeholder Executive Summary"
+version: "1.0.0"
+purpose: >
+  Generate a concise executive summary of competitive intelligence findings
+  suitable for C-suite stakeholders, board presentations, and investor updates.
+
+recommended_model: "gpt-4o"
+temperature: 0.4
+max_tokens: 2000
+
+input_variables:
+  - name: "competitor_insights"
+    type: "array[object]"
+    description: "Array of competitor analysis results and strategy reports"
+  - name: "period"
+    type: "string"
+    description: "Reporting period"
+  - name: "audience"
+    type: "string"
+    description: "Target audience: board | investor | internal_leadership"
+
+output_schema:
+  type: "json"
+  fields:
+    - name: "title"
+      type: "string"
+    - name: "tldr"
+      type: "string"
+      description: "One-paragraph executive summary"
+    - name: "key_findings"
+      type: "array[string]"
+    - name: "strategic_implications"
+      type: "array[string]"
+    - name: "next_steps"
+      type: "array[string]"
+    - name: "risk_factors"
+      type: "array[string]"
+
+prompt_template: |
+  You are a strategic communications specialist. Generate an executive summary
+  of competitive intelligence findings for the specified audience.
+
+  RULES:
+  1. Lead with a single-paragraph TL;DR that captures the critical takeaway.
+  2. Limit key findings to 3-5 bullet points — executives scan, not read.
+  3. Frame strategic implications in terms of revenue, market position, or risk.
+  4. Provide 3-5 concrete, time-bound next steps.
+  5. Identify top 2-3 risk factors with mitigation notes.
+  6. Adjust language formality based on audience type.
+
+  COMPETITOR INSIGHTS: {{ competitor_insights }}
+  PERIOD: {{ period }}
+  AUDIENCE: {{ audience }}
+
+  Return valid JSON:
+  {
+    "title": "string",
+    "tldr": "string",
+    "key_findings": ["max 5 bullet points"],
+    "strategic_implications": ["array"],
+    "next_steps": ["array with timelines"],
+    "risk_factors": ["array with mitigations"]
+  }
+
+example_input: |
+  competitor_insights: [
+    {"competitor_domain": "RankVantage", "market_gap_analysis": "Underserves mid-market SaaS segment", "affiliate_opportunity_score": 0.72}
+  ]
+  period: "Q3 2026"
+  audience: "board"
+
+example_output: |
+  {
+    "title": "Competitive Intelligence Briefing — Q3 2026",
+    "tldr": "Nimblize holds a defensible technology advantage through its multi-agent AI pipeline with quality evaluation gates. Key competitor RankVantage dominates attribution keywords (120K organic/mo) but leaves the mid-market SaaS segment underserved — representing a $680M addressable opportunity for Nimblize.",
+    "key_findings": [
+      "RankVantage commands 120K monthly organic visits on attribution keywords",
+      "Mid-market SaaS segment is underserved by all identified competitors",
+      "Affiliate monetization opportunity scored at 0.72 — viable secondary revenue stream",
+      "AI-powered SEO tools showing strong adoption trend across competitive set"
+    ],
+    "strategic_implications": [
+      "Market window of 6-12 months to capture mid-market SaaS positioning",
+      "Affiliate revenue could contribute $240K-$480K ARR within 18 months",
+      "Technology moat risk: competitors are rapidly adding AI features"
+    ],
+    "next_steps": [
+      "Launch mid-market SaaS content campaign by Q4 2026",
+      "Initiate affiliate partnerships with ShareASale and CJ Affiliate within 30 days",
+      "Accelerate multi-agent pipeline marketing to establish thought leadership"
+    ],
+    "risk_factors": [
+      "RankVantage's traffic moat may require 6-12 months of sustained SEO investment to challenge",
+      "Rapid AI commoditization could erode Nimblize's technical differentiation within 18 months"
+    ]
+  }
+
+notes: >
+  Critical stakeholder-facing prompt. Output quality directly impacts business
+  decisions. Review generated summaries before presenting to executives.
+
+tags:
+  - "executive"
+  - "summary"
+  - "stakeholder"
+  - "strategic"

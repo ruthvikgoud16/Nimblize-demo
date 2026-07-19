@@ -1,0 +1,102 @@
+# Prompt: Quality Assurance Report
+# Nimblize Phase 5 — Prompt Library v1
+
+id: "RG-003"
+category: "report_generation"
+name: "Quality Assurance Report"
+version: "1.0.0"
+purpose: >
+  Generate a QA report analyzing RAGAS evaluation results across pipeline runs,
+  identifying quality trends, failure patterns, and calibration recommendations.
+
+recommended_model: "gpt-4o"
+temperature: 0.2
+max_tokens: 3000
+
+input_variables:
+  - name: "ragas_results"
+    type: "array[object]"
+    description: "Array of RAGAS evaluation results per pipeline run"
+  - name: "threshold_config"
+    type: "object"
+    description: "Current threshold configuration for quality gates"
+
+output_schema:
+  type: "json"
+  fields:
+    - name: "report_title"
+      type: "string"
+    - name: "overall_quality_grade"
+      type: "string"
+    - name: "metric_breakdown"
+      type: "object"
+    - name: "failure_patterns"
+      type: "array[object]"
+    - name: "calibration_recommendations"
+      type: "array[string]"
+
+prompt_template: |
+  You are a quality assurance engineer. Analyze the RAGAS evaluation results
+  and produce a quality assessment report.
+
+  RULES:
+  1. Grade overall quality: A (≥0.90), B (0.85-0.89), C (0.80-0.84), D (0.75-0.79), F (<0.75).
+  2. Break down each metric (faithfulness, relevancy, recall) separately.
+  3. Identify recurring failure patterns with root cause hypotheses.
+  4. Recommend threshold calibrations if needed.
+  5. Compare against targets: Faithfulness ≥0.85, Relevancy ≥0.80, Recall ≥0.75.
+
+  RAGAS RESULTS: {{ ragas_results }}
+  THRESHOLD CONFIG: {{ threshold_config }}
+
+  Return valid JSON:
+  {
+    "report_title": "string",
+    "overall_quality_grade": "A|B|C|D|F",
+    "metric_breakdown": {
+      "faithfulness": {"avg": float, "min": float, "max": float, "trend": "improving|stable|declining"},
+      "answer_relevancy": {"avg": float, "min": float, "max": float, "trend": "string"},
+      "context_recall": {"avg": float, "min": float, "max": float, "trend": "string"}
+    },
+    "failure_patterns": [
+      {"pattern": "string", "frequency": "string", "root_cause": "string"}
+    ],
+    "calibration_recommendations": ["array"]
+  }
+
+example_input: |
+  ragas_results: [
+    {"faithfulness": 0.92, "answer_relevancy": 0.88, "context_recall": 0.85},
+    {"faithfulness": 0.71, "answer_relevancy": 0.94, "context_recall": 0.62},
+    {"faithfulness": 0.89, "answer_relevancy": 0.87, "context_recall": 0.81}
+  ]
+  threshold_config: {"faithfulness": 0.85, "answer_relevancy": 0.80, "context_recall": 0.75, "composite": 0.85}
+
+example_output: |
+  {
+    "report_title": "RAGAS Quality Assurance Report",
+    "overall_quality_grade": "B",
+    "metric_breakdown": {
+      "faithfulness": {"avg": 0.84, "min": 0.71, "max": 0.92, "trend": "stable"},
+      "answer_relevancy": {"avg": 0.90, "min": 0.87, "max": 0.94, "trend": "improving"},
+      "context_recall": {"avg": 0.76, "min": 0.62, "max": 0.85, "trend": "declining"}
+    },
+    "failure_patterns": [
+      {"pattern": "Context recall drops on short input texts", "frequency": "33% of failures", "root_cause": "Insufficient source content for comprehensive extraction"}
+    ],
+    "calibration_recommendations": [
+      "Implement minimum input length validation (>200 chars) before pipeline execution",
+      "Consider lowering context_recall threshold to 0.70 for brief source content",
+      "Add input length as a feature to the RAGAS evaluation dataset"
+    ]
+  }
+
+notes: >
+  Complements RG-001 pipeline performance report. Focuses specifically on
+  AI quality metrics rather than infrastructure performance.
+
+tags:
+  - "report"
+  - "quality"
+  - "ragas"
+  - "evaluation"

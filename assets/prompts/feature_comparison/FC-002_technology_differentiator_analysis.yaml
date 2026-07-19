@@ -1,0 +1,107 @@
+# Prompt: Technology Differentiator Analysis
+# Nimblize Phase 5 — Prompt Library v1
+
+id: "FC-002"
+category: "feature_comparison"
+name: "Technology Differentiator Analysis"
+version: "1.0.0"
+purpose: >
+  Analyze the key technology differentiators between Nimblize and competitors,
+  focusing on AI architecture, infrastructure, and scalability advantages.
+
+recommended_model: "gpt-4o"
+temperature: 0.3
+max_tokens: 2500
+
+input_variables:
+  - name: "nimblize_architecture"
+    type: "object"
+    description: "Nimblize system architecture details"
+  - name: "competitor_tech_stack"
+    type: "object"
+    description: "Competitor technology stack from CA-004 detection"
+
+output_schema:
+  type: "json"
+  fields:
+    - name: "differentiators"
+      type: "array[object]"
+    - name: "technology_moat_score"
+      type: "float"
+    - name: "recommendations"
+      type: "array[string]"
+
+prompt_template: |
+  You are a technology strategy analyst. Compare Nimblize's architecture with
+  competitor technology stacks to identify key differentiators.
+
+  RULES:
+  1. Focus on architectural and infrastructure differences.
+  2. Score the technology moat from 0.0 (no moat) to 1.0 (strong defensible moat).
+  3. Identify areas where Nimblize has unique technical advantages.
+  4. Recommend investments to strengthen or create new differentiators.
+
+  NIMBLIZE ARCHITECTURE: {{ nimblize_architecture }}
+  COMPETITOR TECH STACK: {{ competitor_tech_stack }}
+
+  Return valid JSON:
+  {
+    "differentiators": [
+      {
+        "area": "string",
+        "nimblize_approach": "string",
+        "competitor_approach": "string",
+        "advantage": "nimblize | competitor | neutral",
+        "impact": "HIGH | MEDIUM | LOW"
+      }
+    ],
+    "technology_moat_score": 0.0-1.0,
+    "recommendations": ["array of strategic tech investments"]
+  }
+
+example_input: |
+  nimblize_architecture: {
+    "ai": "LangGraph multi-agent with RAGAS evaluation",
+    "cache": "Redis semantic cache with cosine similarity",
+    "db": "PostgreSQL pgvector with HNSW indexing"
+  }
+  competitor_tech_stack: {
+    "competitor_domain": "RankVantage",
+    "frontend_technologies": ["Next.js"],
+    "backend_signals": ["Vercel Serverless"]
+  }
+
+example_output: |
+  {
+    "differentiators": [
+      {
+        "area": "AI Pipeline Architecture",
+        "nimblize_approach": "Multi-agent LangGraph with self-correction and RAGAS quality gates",
+        "competitor_approach": "Unknown — no multi-agent signals detected",
+        "advantage": "nimblize",
+        "impact": "HIGH"
+      },
+      {
+        "area": "Caching Strategy",
+        "nimblize_approach": "Semantic cache with embedding similarity matching",
+        "competitor_approach": "Standard HTTP caching (inferred)",
+        "advantage": "nimblize",
+        "impact": "MEDIUM"
+      }
+    ],
+    "technology_moat_score": 0.78,
+    "recommendations": [
+      "Invest in proprietary evaluation metrics beyond RAGAS",
+      "Develop real-time streaming pipeline for continuous competitor monitoring"
+    ]
+  }
+
+notes: >
+  Requires outputs from CA-004 tech stack detection. Useful for investor
+  presentations and technical due diligence.
+
+tags:
+  - "comparison"
+  - "technology"
+  - "architecture"
+  - "moat"

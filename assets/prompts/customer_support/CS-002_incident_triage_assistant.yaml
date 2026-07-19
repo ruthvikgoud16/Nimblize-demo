@@ -1,0 +1,87 @@
+# Prompt: Incident Triage Assistant
+# Nimblize Phase 5 — Prompt Library v1
+
+id: "CS-002"
+category: "customer_support"
+name: "Incident Triage Assistant"
+version: "1.0.0"
+purpose: >
+  Triage pipeline incidents and errors by analyzing error logs, categorizing
+  failure types, and suggesting resolution steps for the operations team.
+
+recommended_model: "gpt-4o-mini"
+temperature: 0.1
+max_tokens: 1500
+
+input_variables:
+  - name: "error_log"
+    type: "string"
+    description: "Error log output from the pipeline execution"
+  - name: "pipeline_context"
+    type: "object"
+    description: "Pipeline ID, stage, and configuration context"
+
+output_schema:
+  type: "json"
+  fields:
+    - name: "incident_category"
+      type: "string"
+    - name: "severity"
+      type: "string"
+    - name: "root_cause_hypothesis"
+      type: "string"
+    - name: "resolution_steps"
+      type: "array[string]"
+    - name: "escalation_required"
+      type: "boolean"
+
+prompt_template: |
+  You are a DevOps incident triage specialist. Analyze the following pipeline
+  error and produce a triage assessment.
+
+  RULES:
+  1. Categorize: EXTRACTION_FAILURE, API_ERROR, VALIDATION_ERROR, DB_ERROR, NETWORK_ERROR, UNKNOWN.
+  2. Rate severity: P1 (critical), P2 (high), P3 (medium), P4 (low).
+  3. Propose root cause hypothesis based on the error pattern.
+  4. Provide step-by-step resolution guidance.
+  5. Flag if escalation to engineering is required.
+
+  ERROR LOG: {{ error_log }}
+  PIPELINE CONTEXT: {{ pipeline_context }}
+
+  Return valid JSON:
+  {
+    "incident_category": "string",
+    "severity": "P1|P2|P3|P4",
+    "root_cause_hypothesis": "string",
+    "resolution_steps": ["array of steps"],
+    "escalation_required": true/false
+  }
+
+example_input: |
+  error_log: "[Agent 1] ⚠️ Attempt 3/3 failed: ValidationError - field 'competitor_domain' expected string, got NoneType"
+  pipeline_context: {"pipeline_id": "xyz-789", "stage": "extraction", "input_length": 45}
+
+example_output: |
+  {
+    "incident_category": "EXTRACTION_FAILURE",
+    "severity": "P3",
+    "root_cause_hypothesis": "Input text too short (45 chars) to extract meaningful competitor data. Agent 1 returned null for required field after 3 retries.",
+    "resolution_steps": [
+      "Verify the source scrape returned sufficient content (min 100 chars)",
+      "Check if the competitor URL is still accessible",
+      "Re-queue with expanded scrape scope if content was truncated",
+      "If recurring, adjust minimum content threshold in scrape_worker.py"
+    ],
+    "escalation_required": false
+  }
+
+notes: >
+  Low temperature for consistent triage classification. Output feeds into
+  PagerDuty incident creation and Slack alert workflows.
+
+tags:
+  - "support"
+  - "triage"
+  - "incident"
+  - "devops"

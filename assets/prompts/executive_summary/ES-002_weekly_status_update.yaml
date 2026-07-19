@@ -1,0 +1,100 @@
+# Prompt: Weekly Status Update
+# Nimblize Phase 5 — Prompt Library v1
+
+id: "ES-002"
+category: "executive_summary"
+name: "Weekly Status Update"
+version: "1.0.0"
+purpose: >
+  Generate a concise weekly status update for team leads covering pipeline
+  health, completed competitor analyses, blockers, and priorities for the
+  upcoming week.
+
+recommended_model: "gpt-4o-mini"
+temperature: 0.3
+max_tokens: 1500
+
+input_variables:
+  - name: "completed_items"
+    type: "array[string]"
+    description: "List of completed tasks and analyses"
+  - name: "metrics_snapshot"
+    type: "object"
+    description: "Key metrics for the week"
+  - name: "blockers"
+    type: "array[string]"
+    description: "Current blockers or issues"
+  - name: "next_week_priorities"
+    type: "array[string]"
+    description: "Planned priorities for next week"
+
+output_schema:
+  type: "json"
+  fields:
+    - name: "subject_line"
+      type: "string"
+    - name: "status_emoji"
+      type: "string"
+    - name: "summary"
+      type: "string"
+    - name: "completed"
+      type: "array[string]"
+    - name: "metrics"
+      type: "object"
+    - name: "blockers"
+      type: "array[string]"
+    - name: "next_week"
+      type: "array[string]"
+
+prompt_template: |
+  Generate a concise weekly status update for the Nimblize engineering team.
+
+  RULES:
+  1. Use a status emoji: 🟢 (on track), 🟡 (minor issues), 🔴 (blocked).
+  2. Summarize in 2-3 sentences max.
+  3. List completed items concisely.
+  4. Highlight any blockers prominently.
+  5. Prioritize next week's items by importance.
+
+  COMPLETED: {{ completed_items }}
+  METRICS: {{ metrics_snapshot }}
+  BLOCKERS: {{ blockers }}
+  NEXT WEEK PRIORITIES: {{ next_week_priorities }}
+
+  Return valid JSON:
+  {
+    "subject_line": "string",
+    "status_emoji": "🟢|🟡|🔴",
+    "summary": "string",
+    "completed": ["array"],
+    "metrics": {"key": "value"},
+    "blockers": ["array"],
+    "next_week": ["array"]
+  }
+
+example_input: |
+  completed_items: ["Processed 85 competitor profiles", "RAGAS accuracy improved to 0.89"]
+  metrics_snapshot: {"pipeline_runs": 85, "avg_ragas": 0.89, "uptime": "99.7%"}
+  blockers: ["Redis cache OOM on high-volume queries"]
+  next_week_priorities: ["Optimize cache eviction policy", "Process 50 new competitors"]
+
+example_output: |
+  {
+    "subject_line": "🟡 Nimblize Weekly Status — July 14-19, 2026",
+    "status_emoji": "🟡",
+    "summary": "Pipeline processed 85 profiles with improved quality (RAGAS 0.89). Minor Redis cache issue identified requiring memory optimization.",
+    "completed": ["85 competitor profiles processed and verified", "RAGAS composite accuracy improved to 0.89 avg"],
+    "metrics": {"pipeline_runs": 85, "avg_ragas": 0.89, "uptime": "99.7%"},
+    "blockers": ["Redis cache OOM on high-volume queries — needs eviction policy tuning"],
+    "next_week": ["Optimize Redis cache eviction policy (P1)", "Process 50 new competitor profiles (P2)"]
+  }
+
+notes: >
+  Lightweight prompt for regular status communication. Low cost with gpt-4o-mini.
+  Output can be sent directly to Slack or email.
+
+tags:
+  - "executive"
+  - "status"
+  - "weekly"
+  - "communication"

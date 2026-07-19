@@ -1,0 +1,100 @@
+# Prompt: Keyword Gap Analysis
+# Nimblize Phase 5 — Prompt Library v1
+
+id: "SEO-002"
+category: "seo_analysis"
+name: "Keyword Gap Analysis"
+version: "1.0.0"
+purpose: >
+  Identify high-value keyword gaps between Nimblize and a competitor by analyzing
+  the competitor's SEO keyword portfolio. Surfaces untapped keyword opportunities
+  ranked by commercial intent and difficulty.
+
+recommended_model: "gpt-4o"
+temperature: 0.3
+max_tokens: 2500
+
+input_variables:
+  - name: "competitor_keywords"
+    type: "array[string]"
+    description: "SEO keywords extracted from competitor via CA-001"
+  - name: "nimblize_keywords"
+    type: "array[string]"
+    description: "Current Nimblize targeted keyword portfolio"
+  - name: "industry_vertical"
+    type: "string"
+    description: "Target industry for contextual relevance"
+
+output_schema:
+  type: "json"
+  fields:
+    - name: "gap_keywords"
+      type: "array[object]"
+      description: "Keywords competitor targets that Nimblize does not"
+    - name: "overlap_keywords"
+      type: "array[string]"
+      description: "Keywords both parties target"
+    - name: "opportunity_score"
+      type: "float"
+      description: "Overall opportunity score 0.0-1.0"
+    - name: "priority_targets"
+      type: "array[string]"
+      description: "Top 5 keywords to target immediately"
+
+prompt_template: |
+  You are an SEO keyword strategist for Nimblize. Analyze the keyword gap between
+  Nimblize and the competitor.
+
+  RULES:
+  1. Identify keywords the competitor targets that Nimblize does not.
+  2. Rate each gap keyword by estimated commercial intent: HIGH, MEDIUM, LOW.
+  3. Identify overlapping keywords where both parties compete.
+  4. Recommend the top 5 priority targets based on opportunity value.
+  5. Score overall opportunity from 0.0 to 1.0.
+
+  COMPETITOR KEYWORDS: {{ competitor_keywords }}
+  NIMBLIZE KEYWORDS: {{ nimblize_keywords }}
+  INDUSTRY: {{ industry_vertical }}
+
+  Return valid JSON:
+  {
+    "gap_keywords": [
+      {"keyword": "string", "commercial_intent": "HIGH|MEDIUM|LOW", "rationale": "string"}
+    ],
+    "overlap_keywords": ["array"],
+    "opportunity_score": 0.0-1.0,
+    "priority_targets": ["array of top 5 keywords"]
+  }
+
+example_input: |
+  competitor_keywords: ["SaaS attribution dashboard", "B2B marketing platforms", "revenue attribution"]
+  nimblize_keywords: ["competitor analysis tool", "SEO intelligence"]
+  industry_vertical: "B2B SaaS Analytics"
+
+example_output: |
+  {
+    "gap_keywords": [
+      {"keyword": "SaaS attribution dashboard", "commercial_intent": "HIGH", "rationale": "Direct product search term with strong buying intent"},
+      {"keyword": "B2B marketing platforms", "commercial_intent": "MEDIUM", "rationale": "Broad category term useful for top-of-funnel content"},
+      {"keyword": "revenue attribution", "commercial_intent": "HIGH", "rationale": "Pain-point keyword indicating active solution seeking"}
+    ],
+    "overlap_keywords": [],
+    "opportunity_score": 0.85,
+    "priority_targets": [
+      "SaaS attribution dashboard",
+      "revenue attribution",
+      "B2B marketing platforms",
+      "marketing analytics software",
+      "multi-touch attribution tool"
+    ]
+  }
+
+notes: >
+  Requires CA-001 extraction output as upstream dependency. Used for dashboard
+  keyword planning and content strategy.
+
+tags:
+  - "seo"
+  - "keyword-gap"
+  - "strategic"
+  - "b2b"

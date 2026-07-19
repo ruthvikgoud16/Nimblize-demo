@@ -1,0 +1,106 @@
+# Prompt: Market Landscape Analysis
+# Nimblize Phase 5 — Prompt Library v1
+
+id: "MR-001"
+category: "market_research"
+name: "Market Landscape Analysis"
+version: "1.0.0"
+purpose: >
+  Synthesize multiple competitor profiles into a comprehensive market landscape
+  overview, identifying market segments, key players, trends, and white-space
+  opportunities for Nimblize.
+
+recommended_model: "gpt-4o"
+temperature: 0.4
+max_tokens: 4000
+
+input_variables:
+  - name: "competitor_profiles"
+    type: "array[object]"
+    description: "Array of validated competitor profiles from CA-001 pipeline"
+  - name: "industry_vertical"
+    type: "string"
+    description: "Target industry for market analysis"
+  - name: "time_horizon"
+    type: "string"
+    description: "Analysis timeframe: short-term (6mo), medium-term (1-2yr), long-term (3-5yr)"
+
+output_schema:
+  type: "json"
+  fields:
+    - name: "market_overview"
+      type: "string"
+    - name: "key_segments"
+      type: "array[object]"
+    - name: "market_trends"
+      type: "array[object]"
+    - name: "white_space_opportunities"
+      type: "array[string]"
+    - name: "competitive_intensity"
+      type: "string"
+
+prompt_template: |
+  You are a market research analyst specializing in the B2B SEO and competitive
+  intelligence space. Analyze the following competitor profiles to produce a
+  market landscape report.
+
+  RULES:
+  1. Identify distinct market segments from the competitor data.
+  2. Surface 3-5 market trends with supporting evidence from the data.
+  3. Identify white-space opportunities where no competitor has strong presence.
+  4. Rate competitive intensity: LOW, MODERATE, HIGH, INTENSE.
+  5. Ground all analysis in the provided data — label any inferences clearly.
+
+  COMPETITOR PROFILES: {{ competitor_profiles }}
+  INDUSTRY: {{ industry_vertical }}
+  TIME HORIZON: {{ time_horizon }}
+
+  Return valid JSON:
+  {
+    "market_overview": "string (2-3 paragraph summary)",
+    "key_segments": [
+      {"segment": "string", "key_players": ["array"], "maturity": "emerging|growing|mature|declining"}
+    ],
+    "market_trends": [
+      {"trend": "string", "direction": "growing|stable|declining", "evidence": "string"}
+    ],
+    "white_space_opportunities": ["array of untapped areas"],
+    "competitive_intensity": "LOW|MODERATE|HIGH|INTENSE"
+  }
+
+example_input: |
+  competitor_profiles: [
+    {"competitor_domain": "RankVantage", "targeted_seo_keywords": ["SaaS attribution dashboard"], "estimated_monthly_organic_traffic": 120000},
+    {"competitor_domain": "SEOPulse", "targeted_seo_keywords": ["keyword tracking tool"], "estimated_monthly_organic_traffic": 85000}
+  ]
+  industry_vertical: "B2B SEO Intelligence"
+  time_horizon: "medium-term"
+
+example_output: |
+  {
+    "market_overview": "The B2B SEO intelligence market shows strong growth with established players commanding significant organic traffic. Competition centers on keyword tracking and attribution analytics, with most players focusing on narrow feature sets rather than comprehensive platforms.",
+    "key_segments": [
+      {"segment": "Attribution Analytics", "key_players": ["RankVantage"], "maturity": "growing"},
+      {"segment": "Keyword Tracking", "key_players": ["SEOPulse"], "maturity": "mature"}
+    ],
+    "market_trends": [
+      {"trend": "AI-powered SEO analysis", "direction": "growing", "evidence": "Multiple players investing in automated keyword intelligence"},
+      {"trend": "Attribution-first marketing", "direction": "growing", "evidence": "RankVantage's 120K traffic on attribution terms"}
+    ],
+    "white_space_opportunities": [
+      "Integrated competitor intelligence + recommendation engine",
+      "AI-powered content gap analysis with automated suggestions",
+      "Real-time competitive monitoring with alert systems"
+    ],
+    "competitive_intensity": "MODERATE"
+  }
+
+notes: >
+  Aggregates outputs from multiple CA-001 extraction runs. Ideal for quarterly
+  market reviews and board presentations. Update with fresh data each cycle.
+
+tags:
+  - "market-research"
+  - "landscape"
+  - "strategic"
+  - "b2b"

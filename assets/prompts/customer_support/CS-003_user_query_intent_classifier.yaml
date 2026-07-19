@@ -1,0 +1,81 @@
+# Prompt: User Query Intent Classifier
+# Nimblize Phase 5 — Prompt Library v1
+
+id: "CS-003"
+category: "customer_support"
+name: "User Query Intent Classifier"
+version: "1.0.0"
+purpose: >
+  Classify incoming user queries to route them to the appropriate pipeline
+  (B2B competitor analysis, B2C recommendation, dashboard, or support).
+
+recommended_model: "gpt-4o-mini"
+temperature: 0.0
+max_tokens: 500
+
+input_variables:
+  - name: "user_query"
+    type: "string"
+    description: "Raw user input query"
+
+output_schema:
+  type: "json"
+  fields:
+    - name: "intent"
+      type: "string"
+      description: "COMPETITOR_ANALYSIS | PRODUCT_RECOMMENDATION | DASHBOARD | SUPPORT | UNKNOWN"
+    - name: "confidence"
+      type: "float"
+    - name: "extracted_entities"
+      type: "object"
+    - name: "suggested_endpoint"
+      type: "string"
+
+prompt_template: |
+  Classify the following user query into one of these intents:
+  - COMPETITOR_ANALYSIS: User wants to analyze a competitor
+  - PRODUCT_RECOMMENDATION: User is looking for product suggestions
+  - DASHBOARD: User wants to view reports or data
+  - SUPPORT: User needs help or has an issue
+  - UNKNOWN: Query does not match any intent
+
+  Extract key entities (competitor names, product types, action verbs).
+
+  USER QUERY: {{ user_query }}
+
+  Return valid JSON:
+  {
+    "intent": "string",
+    "confidence": 0.0-1.0,
+    "extracted_entities": {
+      "competitors": ["array"],
+      "products": ["array"],
+      "actions": ["array"]
+    },
+    "suggested_endpoint": "string"
+  }
+
+example_input: |
+  user_query: "Show me how RankVantage's SEO strategy compares to ours"
+
+example_output: |
+  {
+    "intent": "COMPETITOR_ANALYSIS",
+    "confidence": 0.95,
+    "extracted_entities": {
+      "competitors": ["RankVantage"],
+      "products": [],
+      "actions": ["compare", "show"]
+    },
+    "suggested_endpoint": "/api/v1/pipeline/run"
+  }
+
+notes: >
+  Zero temperature for consistent routing. This is a lightweight classifier
+  prompt — should be fast and cheap. Use gpt-4o-mini for cost efficiency.
+
+tags:
+  - "classifier"
+  - "routing"
+  - "intent"
+  - "core"

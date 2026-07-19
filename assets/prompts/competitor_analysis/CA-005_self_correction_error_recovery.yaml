@@ -1,0 +1,89 @@
+# Prompt: Self-Correction Error Recovery
+# Nimblize Phase 5 — Prompt Library v1
+
+id: "CA-005"
+category: "competitor_analysis"
+name: "Self-Correction Error Recovery"
+version: "1.0.0"
+purpose: >
+  When Agent 1 extraction fails Pydantic validation, this prompt feeds the
+  validation error trace back into the model to self-correct on retry. This is
+  the core self-correcting loop mechanism in the LangGraph state machine.
+
+recommended_model: "gpt-4o-mini"
+temperature: 0.0
+max_tokens: 2048
+
+input_variables:
+  - name: "raw_text"
+    type: "string"
+    description: "Original PII-redacted competitor text"
+  - name: "previous_error"
+    type: "string"
+    description: "Pydantic ValidationError or parsing error from previous attempt"
+  - name: "attempt_number"
+    type: "integer"
+    description: "Current retry attempt (2 or 3)"
+
+output_schema:
+  type: "json"
+  fields:
+    - name: "competitor_domain"
+      type: "string"
+    - name: "targeted_seo_keywords"
+      type: "array[string]"
+    - name: "estimated_monthly_organic_traffic"
+      type: "integer | string"
+    - name: "monetization_infrastructure"
+      type: "array[string]"
+    - name: "affiliate_networks_detected"
+      type: "array[string]"
+
+prompt_template: |
+  RAW TEXT:
+  {{ raw_text }}
+
+  PREVIOUS FAILURE (attempt {{ attempt_number }}):
+  {{ previous_error }}
+
+  Correct the JSON structure to strictly match the required schema.
+
+  REQUIRED SCHEMA:
+  {
+    "competitor_domain": "string or NOT_DETECTED",
+    "targeted_seo_keywords": ["array", "of", "strings"],
+    "estimated_monthly_organic_traffic": "integer or NOT_DETECTED",
+    "monetization_infrastructure": ["array", "of", "strings"],
+    "affiliate_networks_detected": ["array", "of", "strings"]
+  }
+
+  IMPORTANT:
+  - Fix the specific error described above.
+  - Ensure all fields are present and correctly typed.
+  - Use "NOT_DETECTED" for any missing data — never return null.
+
+example_input: |
+  raw_text: "SEOBolt uses programmatic SEO and CJ Affiliate."
+  previous_error: "ValidationError: field 'estimated_monthly_organic_traffic' - value is not a valid integer and is not 'NOT_DETECTED'"
+  attempt_number: 2
+
+example_output: |
+  {
+    "competitor_domain": "SEOBolt",
+    "targeted_seo_keywords": ["programmatic SEO"],
+    "estimated_monthly_organic_traffic": "NOT_DETECTED",
+    "monetization_infrastructure": ["programmatic SEO"],
+    "affiliate_networks_detected": ["CJ Affiliate"]
+  }
+
+notes: >
+  This is the retry prompt injected by the LangGraph state machine on
+  extraction validation failure. Maximum 3 attempts before dead-letter routing.
+  Must use identical system prompt as CA-001.
+
+tags:
+  - "core"
+  - "self-correction"
+  - "retry"
+  - "agent-1"
+  - "deterministic"

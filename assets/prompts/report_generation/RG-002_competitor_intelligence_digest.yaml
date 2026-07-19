@@ -1,0 +1,113 @@
+# Prompt: Competitor Intelligence Digest
+# Nimblize Phase 5 — Prompt Library v1
+
+id: "RG-002"
+category: "report_generation"
+name: "Competitor Intelligence Digest"
+version: "1.0.0"
+purpose: >
+  Generate a formatted weekly or monthly competitor intelligence digest
+  summarizing all newly processed competitor profiles, key changes, and
+  strategic highlights.
+
+recommended_model: "gpt-4o"
+temperature: 0.4
+max_tokens: 3500
+
+input_variables:
+  - name: "new_profiles"
+    type: "array[object]"
+    description: "Competitor profiles processed during the digest period"
+  - name: "key_changes"
+    type: "array[object]"
+    description: "Notable changes detected in existing competitor profiles"
+  - name: "digest_period"
+    type: "string"
+    description: "Time period for the digest"
+
+output_schema:
+  type: "json"
+  fields:
+    - name: "digest_title"
+      type: "string"
+    - name: "period"
+      type: "string"
+    - name: "highlights"
+      type: "array[string]"
+    - name: "new_profiles_summary"
+      type: "array[object]"
+    - name: "change_alerts"
+      type: "array[object]"
+    - name: "recommended_actions"
+      type: "array[string]"
+
+prompt_template: |
+  You are a competitive intelligence analyst. Create a digest report
+  summarizing the latest competitor intelligence for the specified period.
+
+  RULES:
+  1. Lead with the 3 most important highlights.
+  2. Summarize each new profile in 2-3 sentences.
+  3. Flag significant changes with impact assessment.
+  4. Recommend 3-5 immediate actions based on the findings.
+  5. Use concise, scannable formatting suitable for executive audiences.
+
+  NEW PROFILES: {{ new_profiles }}
+  KEY CHANGES: {{ key_changes }}
+  DIGEST PERIOD: {{ digest_period }}
+
+  Return valid JSON:
+  {
+    "digest_title": "string",
+    "period": "string",
+    "highlights": ["top 3 key findings"],
+    "new_profiles_summary": [
+      {"domain": "string", "summary": "string", "priority": "HIGH|MEDIUM|LOW"}
+    ],
+    "change_alerts": [
+      {"domain": "string", "change_type": "string", "impact": "string"}
+    ],
+    "recommended_actions": ["array of action items"]
+  }
+
+example_input: |
+  new_profiles: [
+    {"competitor_domain": "RankVantage", "targeted_seo_keywords": ["SaaS attribution dashboard"], "estimated_monthly_organic_traffic": 120000}
+  ]
+  key_changes: [
+    {"domain": "SEOPulse", "change": "Added AI-powered keyword suggestions feature", "detected_date": "2026-07-15"}
+  ]
+  digest_period: "July 14-19, 2026"
+
+example_output: |
+  {
+    "digest_title": "Nimblize Competitor Intelligence Digest — July 14-19, 2026",
+    "period": "July 14-19, 2026",
+    "highlights": [
+      "RankVantage identified as high-priority competitor with 120K monthly organic traffic",
+      "SEOPulse launched AI keyword features — direct competition with our pipeline",
+      "Attribution analytics segment showing accelerating growth signals"
+    ],
+    "new_profiles_summary": [
+      {"domain": "RankVantage", "summary": "B2B SaaS attribution platform with strong organic presence (120K/mo). Monetizes via software licensing with Impact Radius affiliate integration.", "priority": "HIGH"}
+    ],
+    "change_alerts": [
+      {"domain": "SEOPulse", "change_type": "FEATURE_LAUNCH", "impact": "Direct competitive threat — their AI keywords feature overlaps with our extraction pipeline capabilities"}
+    ],
+    "recommended_actions": [
+      "Deep-dive analysis on RankVantage — run full pipeline with expanded scrape",
+      "Monitor SEOPulse AI feature adoption and user response",
+      "Accelerate marketing of Nimblize's multi-agent quality advantage"
+    ]
+  }
+
+notes: >
+  Designed for weekly digest emails and dashboard notifications. Aggregates
+  pipeline outputs from the reporting period. Moderate temperature for
+  engaging yet professional narrative.
+
+tags:
+  - "report"
+  - "digest"
+  - "intelligence"
+  - "weekly"

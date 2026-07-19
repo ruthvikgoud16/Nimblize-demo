@@ -1,0 +1,120 @@
+# Prompt: Competitor Pricing Intelligence
+# Nimblize Phase 5 — Prompt Library v1
+
+id: "CA-003"
+category: "competitor_analysis"
+name: "Competitor Pricing Intelligence"
+version: "1.0.0"
+purpose: >
+  Extract and analyze competitor pricing structures, tiers, and monetization
+  models from scraped webpage content. Produces structured pricing comparison data.
+
+recommended_model: "gpt-4o-mini"
+temperature: 0.0
+max_tokens: 2048
+
+input_variables:
+  - name: "raw_pricing_text"
+    type: "string"
+    description: "PII-redacted scraped competitor pricing page content"
+  - name: "competitor_domain"
+    type: "string"
+    description: "Domain of the competitor being analyzed"
+
+output_schema:
+  type: "json"
+  fields:
+    - name: "competitor_domain"
+      type: "string"
+    - name: "pricing_model"
+      type: "string"
+      description: "subscription | freemium | usage_based | one_time | hybrid"
+    - name: "tiers"
+      type: "array[object]"
+      description: "List of pricing tier objects"
+    - name: "currency"
+      type: "string"
+    - name: "free_trial_available"
+      type: "boolean"
+    - name: "enterprise_custom_pricing"
+      type: "boolean"
+
+prompt_template: |
+  You are a pricing intelligence analyst. Extract structured pricing data from
+  the following competitor webpage content.
+
+  RULES:
+  1. Extract ONLY explicitly stated prices and features.
+  2. Use "NOT_DETECTED" for any unavailable pricing data.
+  3. Classify the pricing model: subscription, freemium, usage_based, one_time, or hybrid.
+  4. Identify all pricing tiers with their names, prices, and key features.
+
+  COMPETITOR: {{ competitor_domain }}
+
+  RAW PRICING PAGE TEXT:
+  {{ raw_pricing_text }}
+
+  Return valid JSON:
+  {
+    "competitor_domain": "string",
+    "pricing_model": "string",
+    "tiers": [
+      {
+        "name": "string",
+        "price_monthly": "number or NOT_DETECTED",
+        "price_annual": "number or NOT_DETECTED",
+        "key_features": ["array of strings"],
+        "limits": "string or NOT_DETECTED"
+      }
+    ],
+    "currency": "string",
+    "free_trial_available": true/false,
+    "enterprise_custom_pricing": true/false
+  }
+
+example_input: |
+  competitor_domain: "RankVantage"
+  raw_pricing_text: "Plans: Starter $29/mo (5 projects, 1K keywords), Pro $99/mo
+  (25 projects, 10K keywords, API access), Enterprise - Contact Sales. 14-day free trial."
+
+example_output: |
+  {
+    "competitor_domain": "RankVantage",
+    "pricing_model": "subscription",
+    "tiers": [
+      {
+        "name": "Starter",
+        "price_monthly": 29,
+        "price_annual": "NOT_DETECTED",
+        "key_features": ["5 projects", "1K keywords"],
+        "limits": "5 projects, 1K keywords"
+      },
+      {
+        "name": "Pro",
+        "price_monthly": 99,
+        "price_annual": "NOT_DETECTED",
+        "key_features": ["25 projects", "10K keywords", "API access"],
+        "limits": "25 projects, 10K keywords"
+      },
+      {
+        "name": "Enterprise",
+        "price_monthly": "NOT_DETECTED",
+        "price_annual": "NOT_DETECTED",
+        "key_features": ["Custom"],
+        "limits": "NOT_DETECTED"
+      }
+    ],
+    "currency": "USD",
+    "free_trial_available": true,
+    "enterprise_custom_pricing": true
+  }
+
+notes: >
+  Temperature 0.0 for deterministic pricing extraction. Pair with CA-001 for
+  comprehensive competitor profiling. Do not hallucinate pricing data.
+
+tags:
+  - "extraction"
+  - "pricing"
+  - "deterministic"
+  - "b2b"

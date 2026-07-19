@@ -1,0 +1,96 @@
+# Prompt: TAM/SAM/SOM Market Sizing
+# Nimblize Phase 5 — Prompt Library v1
+
+id: "MR-003"
+category: "market_research"
+name: "TAM SAM SOM Market Sizing"
+version: "1.0.0"
+purpose: >
+  Estimate Total Addressable Market (TAM), Serviceable Addressable Market (SAM),
+  and Serviceable Obtainable Market (SOM) using competitor data as market proxies.
+
+recommended_model: "gpt-4o"
+temperature: 0.3
+max_tokens: 3000
+
+input_variables:
+  - name: "competitor_profiles"
+    type: "array[object]"
+    description: "Competitor profiles with traffic and monetization data"
+  - name: "nimblize_positioning"
+    type: "string"
+    description: "Nimblize's target market and value proposition"
+  - name: "pricing_assumptions"
+    type: "object"
+    description: "Nimblize pricing model assumptions for revenue estimation"
+
+output_schema:
+  type: "json"
+  fields:
+    - name: "tam"
+      type: "object"
+    - name: "sam"
+      type: "object"
+    - name: "som"
+      type: "object"
+    - name: "methodology"
+      type: "string"
+    - name: "assumptions"
+      type: "array[string]"
+
+prompt_template: |
+  You are a market sizing analyst. Using the competitor data as market proxies,
+  estimate TAM, SAM, and SOM for Nimblize's market position.
+
+  RULES:
+  1. Use bottom-up methodology based on competitor signals.
+  2. Clearly state all assumptions.
+  3. Provide conservative, moderate, and optimistic estimates.
+  4. Express values in USD annual revenue potential.
+  5. Cite which competitor data points inform each estimate.
+
+  COMPETITOR PROFILES: {{ competitor_profiles }}
+  NIMBLIZE POSITIONING: {{ nimblize_positioning }}
+  PRICING ASSUMPTIONS: {{ pricing_assumptions }}
+
+  Return valid JSON:
+  {
+    "tam": {"value_usd": "string", "description": "string"},
+    "sam": {"value_usd": "string", "description": "string"},
+    "som": {"value_usd": "string", "description": "string", "timeline": "string"},
+    "methodology": "string",
+    "assumptions": ["array of assumptions"]
+  }
+
+example_input: |
+  competitor_profiles: [
+    {"competitor_domain": "RankVantage", "estimated_monthly_organic_traffic": 120000, "monetization_infrastructure": ["software licensing"]},
+    {"competitor_domain": "SEOPulse", "estimated_monthly_organic_traffic": 85000, "monetization_infrastructure": ["subscription", "affiliate"]}
+  ]
+  nimblize_positioning: "AI-powered competitor intelligence and SEO analytics for B2B SaaS companies"
+  pricing_assumptions: {"avg_contract_value": 1200, "target_customers": "B2B SaaS companies with 10+ employees"}
+
+example_output: |
+  {
+    "tam": {"value_usd": "$4.2B", "description": "Global SEO and competitive intelligence software market"},
+    "sam": {"value_usd": "$680M", "description": "B2B SaaS-focused SEO intelligence tools (12-16% of TAM)"},
+    "som": {"value_usd": "$8.5M", "description": "Achievable market share in first 24 months based on competitive positioning", "timeline": "24 months"},
+    "methodology": "Bottom-up estimation using competitor traffic as market demand proxies, with conversion rate assumptions applied to Nimblize's pricing model",
+    "assumptions": [
+      "Average organic traffic across competitors represents 10-15% of total market demand",
+      "2-5% visitor-to-trial conversion rate for B2B SaaS tools",
+      "15% trial-to-paid conversion based on industry benchmarks",
+      "$1,200 average annual contract value"
+    ]
+  }
+
+notes: >
+  Designed for investor presentations and strategic planning. Low temperature
+  for conservative, defensible estimates. Always accompany with methodology
+  disclosure and assumption list.
+
+tags:
+  - "market-research"
+  - "market-sizing"
+  - "tam-sam-som"
+  - "strategy"

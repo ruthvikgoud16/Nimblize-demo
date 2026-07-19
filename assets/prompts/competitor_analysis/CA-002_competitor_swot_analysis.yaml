@@ -1,0 +1,116 @@
+# Prompt: Competitor SWOT Analysis
+# Nimblize Phase 5 — Prompt Library v1
+
+id: "CA-002"
+category: "competitor_analysis"
+name: "Competitor SWOT Analysis"
+version: "1.0.0"
+purpose: >
+  Generate a structured SWOT (Strengths, Weaknesses, Opportunities, Threats)
+  analysis from extracted competitor intelligence data. Produces actionable
+  strategic insights for the Nimblize dashboard.
+
+recommended_model: "gpt-4o"
+temperature: 0.3
+max_tokens: 3000
+
+input_variables:
+  - name: "competitor_payload"
+    type: "object"
+    description: "Validated IngestedCompetitorPayload JSON from Agent 1"
+  - name: "industry_context"
+    type: "string"
+    description: "Industry vertical or market segment for contextual analysis"
+
+output_schema:
+  type: "json"
+  fields:
+    - name: "competitor_domain"
+      type: "string"
+    - name: "strengths"
+      type: "array[string]"
+      description: "3-5 identified competitive strengths"
+    - name: "weaknesses"
+      type: "array[string]"
+      description: "3-5 identified competitive weaknesses"
+    - name: "opportunities"
+      type: "array[string]"
+      description: "3-5 market opportunities Nimblize can exploit"
+    - name: "threats"
+      type: "array[string]"
+      description: "3-5 competitive threats to monitor"
+    - name: "strategic_priority"
+      type: "string"
+      enum: ["HIGH", "MEDIUM", "LOW"]
+
+prompt_template: |
+  You are a senior competitive intelligence analyst for Nimblize, a B2B SEO
+  intelligence platform. Analyze the following competitor data and produce a
+  structured SWOT analysis.
+
+  RULES:
+  1. Every point MUST be grounded in the provided data — do not fabricate metrics.
+  2. Identify 3-5 items per SWOT category.
+  3. Rank the strategic priority as HIGH, MEDIUM, or LOW.
+  4. Focus on actionable insights that can drive dashboard decisions.
+
+  COMPETITOR DATA:
+  {{ competitor_payload }}
+
+  INDUSTRY CONTEXT: {{ industry_context }}
+
+  Return valid JSON matching this schema:
+  {
+    "competitor_domain": "string",
+    "strengths": ["array of strings"],
+    "weaknesses": ["array of strings"],
+    "opportunities": ["array of strings"],
+    "threats": ["array of strings"],
+    "strategic_priority": "HIGH | MEDIUM | LOW"
+  }
+
+example_input: |
+  competitor_payload: {
+    "competitor_domain": "RankVantage",
+    "targeted_seo_keywords": ["SaaS attribution dashboard"],
+    "estimated_monthly_organic_traffic": 120000,
+    "monetization_infrastructure": ["software licensing"],
+    "affiliate_networks_detected": ["Impact Radius"]
+  }
+  industry_context: "B2B SaaS Marketing Analytics"
+
+example_output: |
+  {
+    "competitor_domain": "RankVantage",
+    "strengths": [
+      "Strong organic traffic (120K/mo) indicates established domain authority",
+      "Focused on high-intent keyword 'SaaS attribution dashboard'",
+      "Established affiliate network partnership with Impact Radius"
+    ],
+    "weaknesses": [
+      "Single keyword targeting limits broader market capture",
+      "No diversified monetization beyond software licensing",
+      "Limited affiliate network diversity (single partner)"
+    ],
+    "opportunities": [
+      "Target adjacent keywords like 'B2B marketing attribution' to capture overflow",
+      "Build multi-network affiliate strategy to outperform single-network dependency",
+      "Develop content around attribution use cases to capture informational intent"
+    ],
+    "threats": [
+      "RankVantage's established traffic moat may be difficult to displace",
+      "Impact Radius partnership may offer preferential terms we cannot match",
+      "Domain authority gap requires 6-12 month SEO investment to close"
+    ],
+    "strategic_priority": "HIGH"
+  }
+
+notes: >
+  Use after CA-001 extraction to deepen competitive understanding. The SWOT
+  output feeds into the executive dashboard for strategic planning.
+
+tags:
+  - "analysis"
+  - "swot"
+  - "strategic"
+  - "b2b"

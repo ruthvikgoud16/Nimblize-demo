@@ -1,0 +1,122 @@
+# Prompt: Semantic Product Recommendation
+# Nimblize Phase 5 — Prompt Library v1
+
+id: "PR-001"
+category: "product_recommendation"
+name: "Semantic Product Recommendation"
+version: "1.0.0"
+purpose: >
+  Generate personalized product and affiliate recommendations based on
+  semantic similarity search results from the B2C pgvector engine. Transforms
+  raw vector search matches into user-friendly recommendation text.
+
+recommended_model: "gpt-4o-mini"
+temperature: 0.5
+max_tokens: 2000
+
+input_variables:
+  - name: "user_query"
+    type: "string"
+    description: "Original user search query"
+  - name: "search_results"
+    type: "array[object]"
+    description: "Top-K results from pgvector HNSW similarity search"
+  - name: "user_context"
+    type: "object"
+    description: "Optional user tier and preferences"
+
+output_schema:
+  type: "json"
+  fields:
+    - name: "recommendations"
+      type: "array[object]"
+      description: "Ranked list of product recommendations"
+    - name: "summary"
+      type: "string"
+      description: "Natural language summary of recommendations"
+    - name: "query_understanding"
+      type: "string"
+      description: "Interpretation of user intent"
+
+prompt_template: |
+  You are a B2C product recommendation specialist for Nimblize. Given a user query
+  and semantic search results, generate personalized product recommendations.
+
+  RULES:
+  1. Rank recommendations by relevance to the user's stated intent.
+  2. Include a brief rationale for each recommendation.
+  3. Highlight key differentiators (price, features, ratings).
+  4. Provide a natural language summary suitable for a recommendation widget.
+  5. Interpret the user's query intent before making recommendations.
+
+  USER QUERY: {{ user_query }}
+  SEARCH RESULTS: {{ search_results }}
+  USER CONTEXT: {{ user_context }}
+
+  Return valid JSON:
+  {
+    "query_understanding": "string",
+    "recommendations": [
+      {
+        "rank": int,
+        "product_name": "string",
+        "relevance_score": 0.0-1.0,
+        "rationale": "string",
+        "key_features": ["array"],
+        "cta": "string"
+      }
+    ],
+    "summary": "string"
+  }
+
+example_input: |
+  user_query: "best attribution dashboard for SaaS startups"
+  search_results: [
+    {"title": "MetricFlow Pro", "score": 0.94, "category": "analytics"},
+    {"title": "AttributeIQ", "score": 0.89, "category": "attribution"},
+    {"title": "FunnelStack", "score": 0.85, "category": "marketing-ops"}
+  ]
+  user_context: {"tier": "pro", "industry": "SaaS"}
+
+example_output: |
+  {
+    "query_understanding": "User seeking an attribution analytics dashboard specifically suited for early-stage SaaS companies, likely prioritizing ease of setup and cost-effectiveness.",
+    "recommendations": [
+      {
+        "rank": 1,
+        "product_name": "MetricFlow Pro",
+        "relevance_score": 0.94,
+        "rationale": "Highest semantic match with strong SaaS analytics focus",
+        "key_features": ["Real-time dashboards", "SaaS metrics", "API integration"],
+        "cta": "Explore MetricFlow Pro →"
+      },
+      {
+        "rank": 2,
+        "product_name": "AttributeIQ",
+        "relevance_score": 0.89,
+        "rationale": "Purpose-built attribution tool with multi-touch modeling",
+        "key_features": ["Multi-touch attribution", "Custom models", "Startup pricing"],
+        "cta": "Try AttributeIQ Free →"
+      },
+      {
+        "rank": 3,
+        "product_name": "FunnelStack",
+        "relevance_score": 0.85,
+        "rationale": "Full-stack marketing ops with built-in attribution layer",
+        "key_features": ["End-to-end funnel tracking", "Marketing automation", "Reporting"],
+        "cta": "See FunnelStack Demo →"
+      }
+    ],
+    "summary": "Based on your search for SaaS attribution dashboards, we recommend MetricFlow Pro for its deep analytics focus, AttributeIQ for dedicated attribution modeling, and FunnelStack for comprehensive marketing ops coverage."
+  }
+
+notes: >
+  This prompt augments raw pgvector search results with natural language context.
+  Temperature 0.5 for friendly, varied recommendation copy. Cached via Redis
+  semantic cache to avoid redundant LLM calls for similar queries.
+
+tags:
+  - "core"
+  - "recommendation"
+  - "b2c"
+  - "personalization"

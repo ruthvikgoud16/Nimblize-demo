@@ -1,0 +1,107 @@
+# Prompt: Trend Detection and Forecasting
+# Nimblize Phase 5 — Prompt Library v1
+
+id: "MR-002"
+category: "market_research"
+name: "Trend Detection and Forecasting"
+version: "1.0.0"
+purpose: >
+  Detect emerging trends from competitor activity signals and forecast
+  market direction to inform Nimblize's product and content strategy.
+
+recommended_model: "gpt-4o"
+temperature: 0.5
+max_tokens: 3000
+
+input_variables:
+  - name: "competitor_activity_log"
+    type: "array[object]"
+    description: "Time-series competitor data with keyword shifts, traffic changes"
+  - name: "industry_signals"
+    type: "string"
+    description: "External market signals and news context"
+
+output_schema:
+  type: "json"
+  fields:
+    - name: "detected_trends"
+      type: "array[object]"
+    - name: "forecast"
+      type: "object"
+    - name: "strategic_implications"
+      type: "array[string]"
+    - name: "confidence_level"
+      type: "string"
+
+prompt_template: |
+  You are a market intelligence analyst. Detect emerging trends from
+  competitor activity data and provide strategic forecasting.
+
+  RULES:
+  1. Identify patterns across competitor keyword shifts and traffic changes.
+  2. Distinguish between noise (random fluctuations) and signals (genuine trends).
+  3. Forecast market direction with explicit confidence levels.
+  4. Recommend strategic implications for Nimblize.
+  5. Clearly label assumptions vs. data-backed observations.
+
+  COMPETITOR ACTIVITY LOG: {{ competitor_activity_log }}
+  INDUSTRY SIGNALS: {{ industry_signals }}
+
+  Return valid JSON:
+  {
+    "detected_trends": [
+      {
+        "trend_name": "string",
+        "signal_strength": "STRONG|MODERATE|WEAK",
+        "evidence": ["array of data points"],
+        "timeline": "string"
+      }
+    ],
+    "forecast": {
+      "short_term_6mo": "string",
+      "medium_term_1yr": "string",
+      "confidence": "HIGH|MEDIUM|LOW"
+    },
+    "strategic_implications": ["array of action items"],
+    "confidence_level": "HIGH|MEDIUM|LOW"
+  }
+
+example_input: |
+  competitor_activity_log: [
+    {"domain": "RankVantage", "period": "Q1", "keyword_additions": ["AI SEO audit", "GPT analytics"], "traffic_change": "+15%"},
+    {"domain": "SEOPulse", "period": "Q1", "keyword_additions": ["automated SEO"], "traffic_change": "+8%"}
+  ]
+  industry_signals: "OpenAI released GPT-4o-mini, reducing AI costs by 60%. Google Search algorithm update emphasizing E-E-A-T."
+
+example_output: |
+  {
+    "detected_trends": [
+      {
+        "trend_name": "AI-Powered SEO Tool Adoption",
+        "signal_strength": "STRONG",
+        "evidence": ["Multiple competitors adding AI-related keywords", "15% traffic surge on AI terms"],
+        "timeline": "Accelerating over past 2 quarters"
+      }
+    ],
+    "forecast": {
+      "short_term_6mo": "AI-integrated SEO tools will become table stakes; competitors without AI features will lose market share",
+      "medium_term_1yr": "Market consolidation expected as AI capabilities commoditize; differentiation shifts to data quality and evaluation",
+      "confidence": "MEDIUM"
+    },
+    "strategic_implications": [
+      "Accelerate AI feature marketing — Nimblize's multi-agent architecture is a differentiator now, not in 12 months",
+      "Invest in content around 'AI SEO audit' and 'automated competitor analysis' to capture emerging search demand",
+      "Position RAGAS evaluation as a trust differentiator as competitors adopt lower-quality AI features"
+    ],
+    "confidence_level": "MEDIUM"
+  }
+
+notes: >
+  Combines internal extraction data with external signals. Best run quarterly
+  with fresh competitor data. Higher temperature for creative forecasting.
+
+tags:
+  - "market-research"
+  - "trends"
+  - "forecasting"
+  - "strategic"

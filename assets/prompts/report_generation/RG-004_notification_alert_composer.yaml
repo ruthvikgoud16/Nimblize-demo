@@ -1,0 +1,92 @@
+# Prompt: Notification Alert Composer
+# Nimblize Phase 5 — Prompt Library v1
+
+id: "RG-004"
+category: "report_generation"
+name: "Notification Alert Composer"
+version: "1.0.0"
+purpose: >
+  Compose multi-channel alert notifications for pipeline events including
+  HITL review flags, dead-letter entries, quality threshold breaches, and
+  system health alerts. Outputs formatted for Slack, email, and PagerDuty.
+
+recommended_model: "gpt-4o-mini"
+temperature: 0.2
+max_tokens: 1000
+
+input_variables:
+  - name: "event_type"
+    type: "string"
+    description: "HITL_FLAG | DEAD_LETTER | QUALITY_BREACH | SYSTEM_HEALTH"
+  - name: "event_data"
+    type: "object"
+    description: "Event payload with context-specific data"
+  - name: "channel"
+    type: "string"
+    description: "Target channel: slack | email | pagerduty"
+
+output_schema:
+  type: "json"
+  fields:
+    - name: "slack_message"
+      type: "object"
+    - name: "email_content"
+      type: "object"
+    - name: "pagerduty_summary"
+      type: "string"
+
+prompt_template: |
+  Compose a notification alert for the following pipeline event.
+
+  RULES:
+  1. Slack: Use markdown formatting with emoji indicators.
+  2. Email: Use HTML-friendly formatting with clear subject line.
+  3. PagerDuty: Keep to a single-sentence summary with severity.
+  4. Include: event type, pipeline ID, severity, action required.
+  5. Be concise — operators need to act fast.
+
+  EVENT TYPE: {{ event_type }}
+  EVENT DATA: {{ event_data }}
+  CHANNEL: {{ channel }}
+
+  Return valid JSON:
+  {
+    "slack_message": {
+      "text": "string (markdown formatted)",
+      "severity_emoji": "string"
+    },
+    "email_content": {
+      "subject": "string",
+      "body": "string"
+    },
+    "pagerduty_summary": "string"
+  }
+
+example_input: |
+  event_type: "HITL_FLAG"
+  event_data: {"pipeline_id": "abc-123", "domain": "RankVantage", "composite_score": 0.77, "reviewer": "Aastha Shukla"}
+  channel: "slack"
+
+example_output: |
+  {
+    "slack_message": {
+      "text": "⚠️ *HITL Review Required*\n• Pipeline: `abc-123`\n• Domain: RankVantage\n• RAGAS Score: 0.77 (threshold: 0.85)\n• Assigned: Aastha Shukla\n_Please review within 24 hours._",
+      "severity_emoji": "⚠️"
+    },
+    "email_content": {
+      "subject": "[Nimblize] ⚠️ HITL Review Required — Pipeline abc-123",
+      "body": "Pipeline abc-123 for RankVantage scored 0.77 (below 0.85 threshold). Assigned to Aastha Shukla for manual review."
+    },
+    "pagerduty_summary": "HITL flag: Pipeline abc-123 (RankVantage) scored 0.77 — manual review required. Severity: WARNING."
+  }
+
+notes: >
+  Integrates with the notification worker. Output is sent to Redis queue
+  and dispatched by the background worker process. Low temperature for
+  consistent, reliable alert formatting.
+
+tags:
+  - "core"
+  - "notification"
+  - "alerting"
+  - "multi-channel"

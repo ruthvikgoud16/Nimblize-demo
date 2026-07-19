@@ -1,0 +1,96 @@
+# Prompt: Feature-by-Feature Comparison
+# Nimblize Phase 5 — Prompt Library v1
+
+id: "FC-001"
+category: "feature_comparison"
+name: "Feature-by-Feature Comparison"
+version: "1.0.0"
+purpose: >
+  Generate a structured feature comparison matrix between Nimblize and one or
+  more competitors. Produces a tabular comparison suitable for landing pages,
+  sales enablement, and strategic planning.
+
+recommended_model: "gpt-4o"
+temperature: 0.2
+max_tokens: 3000
+
+input_variables:
+  - name: "nimblize_features"
+    type: "object"
+    description: "Nimblize product capabilities and feature set"
+  - name: "competitor_profiles"
+    type: "array[object]"
+    description: "Extracted competitor profiles from CA-001 pipeline"
+  - name: "comparison_dimensions"
+    type: "array[string]"
+    description: "Feature categories to compare (e.g., pricing, SEO, analytics)"
+
+output_schema:
+  type: "json"
+  fields:
+    - name: "comparison_matrix"
+      type: "array[object]"
+      description: "Feature rows with scores per product"
+    - name: "nimblize_advantages"
+      type: "array[string]"
+    - name: "competitor_advantages"
+      type: "array[string]"
+    - name: "overall_assessment"
+      type: "string"
+
+prompt_template: |
+  You are a product comparison analyst. Create a structured feature comparison
+  between Nimblize and the listed competitors.
+
+  RULES:
+  1. Compare only features evidenced in the provided data.
+  2. Rate each feature: ✅ Available, ⚠️ Partial, ❌ Not Available, ❓ Unknown.
+  3. Identify clear advantages for both Nimblize and competitors.
+  4. Be objective — do not bias toward Nimblize.
+  5. Include a balanced overall assessment.
+
+  NIMBLIZE FEATURES: {{ nimblize_features }}
+  COMPETITOR PROFILES: {{ competitor_profiles }}
+  DIMENSIONS: {{ comparison_dimensions }}
+
+  Return valid JSON:
+  {
+    "comparison_matrix": [
+      {
+        "feature": "string",
+        "category": "string",
+        "nimblize": "✅|⚠️|❌|❓",
+        "competitors": {"domain": "✅|⚠️|❌|❓"}
+      }
+    ],
+    "nimblize_advantages": ["array"],
+    "competitor_advantages": ["array"],
+    "overall_assessment": "string"
+  }
+
+example_input: |
+  nimblize_features: {"seo_intelligence": true, "semantic_cache": true, "multi_agent": true}
+  competitor_profiles: [{"competitor_domain": "RankVantage", "monetization_infrastructure": ["software licensing"]}]
+  comparison_dimensions: ["SEO Analysis", "Caching", "AI Architecture"]
+
+example_output: |
+  {
+    "comparison_matrix": [
+      {"feature": "Multi-Agent AI Pipeline", "category": "AI Architecture", "nimblize": "✅", "competitors": {"RankVantage": "❓"}},
+      {"feature": "Semantic Cache", "category": "Caching", "nimblize": "✅", "competitors": {"RankVantage": "❌"}},
+      {"feature": "RAGAS Quality Evaluation", "category": "AI Architecture", "nimblize": "✅", "competitors": {"RankVantage": "❌"}}
+    ],
+    "nimblize_advantages": ["Multi-agent AI pipeline with self-correction", "Semantic caching for cost reduction", "RAGAS quality gates"],
+    "competitor_advantages": ["Established organic traffic base (120K/mo)"],
+    "overall_assessment": "Nimblize demonstrates a technical architecture advantage with multi-agent AI and quality evaluation layers that competitors lack. However, RankVantage holds a significant traffic and market presence advantage."
+  }
+
+notes: >
+  Low temperature for objective comparisons. Output feeds into sales enablement
+  materials and competitive positioning documents.
+
+tags:
+  - "comparison"
+  - "competitive"
+  - "sales-enablement"
+  - "b2b"

@@ -1,0 +1,96 @@
+# Prompt: Content Gap Identifier
+# Nimblize Phase 5 — Prompt Library v1
+
+id: "SEO-005"
+category: "seo_analysis"
+name: "Content Gap Identifier"
+version: "1.0.0"
+purpose: >
+  Identify content gaps and opportunities by comparing competitor content
+  coverage against Nimblize's existing content. Recommends new content
+  topics, formats, and estimated impact.
+
+recommended_model: "gpt-4o"
+temperature: 0.4
+max_tokens: 3000
+
+input_variables:
+  - name: "competitor_content_topics"
+    type: "array[string]"
+    description: "Topics covered by competitor content"
+  - name: "nimblize_content_topics"
+    type: "array[string]"
+    description: "Topics currently covered by Nimblize content"
+  - name: "target_audience"
+    type: "string"
+    description: "Target reader persona"
+
+output_schema:
+  type: "json"
+  fields:
+    - name: "content_gaps"
+      type: "array[object]"
+    - name: "content_overlaps"
+      type: "array[string]"
+    - name: "recommended_content_plan"
+      type: "array[object]"
+    - name: "estimated_traffic_impact"
+      type: "string"
+
+prompt_template: |
+  You are a content strategy analyst. Identify content gaps between Nimblize
+  and competitors, then recommend a prioritized content plan.
+
+  RULES:
+  1. Identify topics competitors cover that Nimblize does not.
+  2. Rate each gap by potential traffic value: HIGH, MEDIUM, LOW.
+  3. Recommend content format for each gap: blog, guide, tool, video, landing page.
+  4. Prioritize based on search intent alignment and competition level.
+  5. Estimate aggregate traffic impact of filling the top 5 gaps.
+
+  COMPETITOR CONTENT TOPICS: {{ competitor_content_topics }}
+  NIMBLIZE CONTENT TOPICS: {{ nimblize_content_topics }}
+  TARGET AUDIENCE: {{ target_audience }}
+
+  Return valid JSON:
+  {
+    "content_gaps": [
+      {"topic": "string", "traffic_value": "HIGH|MEDIUM|LOW", "search_intent": "string", "recommended_format": "string"}
+    ],
+    "content_overlaps": ["array of shared topics"],
+    "recommended_content_plan": [
+      {"priority": int, "topic": "string", "format": "string", "estimated_effort": "string"}
+    ],
+    "estimated_traffic_impact": "string"
+  }
+
+example_input: |
+  competitor_content_topics: ["SaaS attribution guide", "marketing ROI calculator", "competitor analysis template", "SEO audit checklist"]
+  nimblize_content_topics: ["competitor analysis tool", "SEO intelligence platform"]
+  target_audience: "B2B SaaS marketing managers"
+
+example_output: |
+  {
+    "content_gaps": [
+      {"topic": "SaaS attribution guide", "traffic_value": "HIGH", "search_intent": "informational", "recommended_format": "long-form guide"},
+      {"topic": "Marketing ROI calculator", "traffic_value": "HIGH", "search_intent": "transactional", "recommended_format": "interactive tool"},
+      {"topic": "SEO audit checklist", "traffic_value": "MEDIUM", "search_intent": "informational", "recommended_format": "downloadable PDF + blog"}
+    ],
+    "content_overlaps": ["competitor analysis"],
+    "recommended_content_plan": [
+      {"priority": 1, "topic": "Marketing ROI Calculator", "format": "interactive tool", "estimated_effort": "2 weeks"},
+      {"priority": 2, "topic": "SaaS Attribution Guide", "format": "pillar page (3000+ words)", "estimated_effort": "1 week"},
+      {"priority": 3, "topic": "SEO Audit Checklist", "format": "blog + downloadable PDF", "estimated_effort": "3 days"}
+    ],
+    "estimated_traffic_impact": "Filling top 3 gaps could capture 8K-15K additional monthly organic visits within 6 months"
+  }
+
+notes: >
+  Pairs with SEO-002 keyword gap analysis for comprehensive content strategy.
+  Run quarterly alongside competitor scraping cycles.
+
+tags:
+  - "seo"
+  - "content-strategy"
+  - "gap-analysis"
+  - "b2b"

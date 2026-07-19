@@ -1,0 +1,93 @@
+# Prompt: Competitor Technology Stack Detection
+# Nimblize Phase 5 — Prompt Library v1
+
+id: "CA-004"
+category: "competitor_analysis"
+name: "Competitor Technology Stack Detection"
+version: "1.0.0"
+purpose: >
+  Identify and categorize the technology stack used by a competitor based on
+  scraped page content, meta tags, and observed infrastructure signals.
+
+recommended_model: "gpt-4o-mini"
+temperature: 0.0
+max_tokens: 2048
+
+input_variables:
+  - name: "raw_page_content"
+    type: "string"
+    description: "Raw HTML metadata, headers, and page content from competitor site"
+  - name: "competitor_domain"
+    type: "string"
+    description: "Domain of the competitor"
+
+output_schema:
+  type: "json"
+  fields:
+    - name: "competitor_domain"
+      type: "string"
+    - name: "frontend_technologies"
+      type: "array[string]"
+    - name: "backend_signals"
+      type: "array[string]"
+    - name: "analytics_tools"
+      type: "array[string]"
+    - name: "cdn_provider"
+      type: "string"
+    - name: "hosting_signals"
+      type: "array[string]"
+    - name: "confidence_level"
+      type: "string"
+      description: "HIGH | MEDIUM | LOW"
+
+prompt_template: |
+  You are a technology intelligence analyst. Analyze the following competitor
+  webpage content and identify their technology stack.
+
+  RULES:
+  1. Extract ONLY technologies you can confirm from the provided evidence.
+  2. Distinguish between confirmed signals and inferred indicators.
+  3. Return "NOT_DETECTED" for any category with no evidence.
+  4. Rate your overall confidence: HIGH (strong signals), MEDIUM (partial signals), LOW (inferred).
+
+  COMPETITOR: {{ competitor_domain }}
+
+  PAGE CONTENT AND METADATA:
+  {{ raw_page_content }}
+
+  Return valid JSON:
+  {
+    "competitor_domain": "string",
+    "frontend_technologies": ["array of strings"],
+    "backend_signals": ["array of strings"],
+    "analytics_tools": ["array of strings"],
+    "cdn_provider": "string or NOT_DETECTED",
+    "hosting_signals": ["array of strings"],
+    "confidence_level": "HIGH | MEDIUM | LOW"
+  }
+
+example_input: |
+  competitor_domain: "RankVantage"
+  raw_page_content: "... <script src='/_next/static/...'> ... Google Tag Manager ...
+  Powered by Vercel ... Intercom widget loaded ... Stripe.js checkout ..."
+
+example_output: |
+  {
+    "competitor_domain": "RankVantage",
+    "frontend_technologies": ["Next.js", "React"],
+    "backend_signals": ["Vercel Serverless", "Stripe Payment Processing"],
+    "analytics_tools": ["Google Tag Manager", "Intercom"],
+    "cdn_provider": "Vercel Edge Network",
+    "hosting_signals": ["Vercel"],
+    "confidence_level": "HIGH"
+  }
+
+notes: >
+  Use deterministic temperature for consistent tech stack identification.
+  Best paired with CA-001 extraction for a full competitor profile.
+
+tags:
+  - "extraction"
+  - "tech-stack"
+  - "deterministic"
+  - "b2b"

@@ -1,0 +1,132 @@
+# Prompt: Pipeline Performance Report
+# Nimblize Phase 5 — Prompt Library v1
+
+id: "RG-001"
+category: "report_generation"
+name: "Pipeline Performance Report"
+version: "1.0.0"
+purpose: >
+  Generate a comprehensive performance report for the Nimblize AI pipeline,
+  including throughput metrics, quality scores, error rates, and optimization
+  recommendations.
+
+recommended_model: "gpt-4o"
+temperature: 0.3
+max_tokens: 4000
+
+input_variables:
+  - name: "metrics_data"
+    type: "object"
+    description: "Pipeline performance metrics from Prometheus/Grafana"
+  - name: "ragas_summary"
+    type: "object"
+    description: "Aggregate RAGAS scores across pipeline runs"
+  - name: "reporting_period"
+    type: "string"
+    description: "Period covered by the report (e.g., '2026-07-01 to 2026-07-19')"
+
+output_schema:
+  type: "json"
+  fields:
+    - name: "report_title"
+      type: "string"
+    - name: "executive_summary"
+      type: "string"
+    - name: "kpi_dashboard"
+      type: "object"
+    - name: "quality_analysis"
+      type: "object"
+    - name: "recommendations"
+      type: "array[string]"
+    - name: "generated_at"
+      type: "string"
+
+prompt_template: |
+  You are a data analytics report writer. Generate a professional pipeline
+  performance report from the provided metrics.
+
+  RULES:
+  1. Structure with executive summary, KPI dashboard, quality analysis, and recommendations.
+  2. Highlight trends — improvements and degradations.
+  3. Compare against target benchmarks: RAGAS ≥ 0.85, P95 latency < 2s, error rate < 1%.
+  4. Provide 3-5 data-driven optimization recommendations.
+  5. Use professional, concise language suitable for stakeholder review.
+
+  METRICS DATA: {{ metrics_data }}
+  RAGAS SUMMARY: {{ ragas_summary }}
+  REPORTING PERIOD: {{ reporting_period }}
+
+  Return valid JSON:
+  {
+    "report_title": "string",
+    "executive_summary": "string (2-3 paragraphs)",
+    "kpi_dashboard": {
+      "total_pipeline_runs": int,
+      "success_rate": "string",
+      "avg_ragas_score": float,
+      "p95_latency_ms": float,
+      "error_rate": "string",
+      "cache_hit_rate": "string"
+    },
+    "quality_analysis": {
+      "faithfulness_avg": float,
+      "answer_relevancy_avg": float,
+      "context_recall_avg": float,
+      "hitl_review_count": int,
+      "dead_letter_count": int
+    },
+    "recommendations": ["array of optimization suggestions"],
+    "generated_at": "ISO 8601"
+  }
+
+example_input: |
+  metrics_data: {
+    "total_runs": 1247,
+    "successful": 1189,
+    "hitl_flagged": 42,
+    "dead_letter": 16,
+    "avg_latency_ms": 1340,
+    "p95_latency_ms": 2100,
+    "cache_hits": 312,
+    "cache_misses": 498
+  }
+  ragas_summary: {"faithfulness_avg": 0.88, "answer_relevancy_avg": 0.91, "context_recall_avg": 0.82}
+  reporting_period: "2026-07-01 to 2026-07-19"
+
+example_output: |
+  {
+    "report_title": "Nimblize Pipeline Performance Report — July 1-19, 2026",
+    "executive_summary": "The Nimblize pipeline processed 1,247 runs with a 95.3% success rate during the reporting period. Average RAGAS composite score of 0.87 exceeds the 0.85 threshold. P95 latency of 2.1s slightly exceeds the 2s target, requiring optimization attention. Cache hit rate of 38.5% indicates room for improvement in semantic cache effectiveness.",
+    "kpi_dashboard": {
+      "total_pipeline_runs": 1247,
+      "success_rate": "95.3%",
+      "avg_ragas_score": 0.87,
+      "p95_latency_ms": 2100,
+      "error_rate": "1.3%",
+      "cache_hit_rate": "38.5%"
+    },
+    "quality_analysis": {
+      "faithfulness_avg": 0.88,
+      "answer_relevancy_avg": 0.91,
+      "context_recall_avg": 0.82,
+      "hitl_review_count": 42,
+      "dead_letter_count": 16
+    },
+    "recommendations": [
+      "Optimize P95 latency: investigate slow extraction runs exceeding 2s SLA",
+      "Improve context recall (0.82 < 0.85): expand chunking window from 1024 to 1536 tokens",
+      "Boost cache hit rate: lower similarity threshold from 0.15 to 0.18 cosine distance",
+      "Reduce dead-letter rate: add pre-validation for minimum input content length"
+    ],
+    "generated_at": "2026-07-19T12:00:00Z"
+  }
+
+notes: >
+  Designed for weekly/bi-weekly stakeholder reports. Pulls from Prometheus
+  metrics and RAGAS evaluation logs. Low temperature for data-driven objectivity.
+
+tags:
+  - "report"
+  - "performance"
+  - "analytics"
+  - "stakeholder"

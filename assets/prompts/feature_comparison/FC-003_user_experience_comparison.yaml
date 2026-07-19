@@ -1,0 +1,84 @@
+# Prompt: User Experience Comparison
+# Nimblize Phase 5 — Prompt Library v1
+
+id: "FC-003"
+category: "feature_comparison"
+name: "User Experience Comparison"
+version: "1.0.0"
+purpose: >
+  Compare the user experience and workflow design between Nimblize and competitors,
+  identifying UX strengths, friction points, and improvement opportunities.
+
+recommended_model: "gpt-4o"
+temperature: 0.4
+max_tokens: 2500
+
+input_variables:
+  - name: "nimblize_ux_description"
+    type: "string"
+    description: "Description of Nimblize user workflows and interface design"
+  - name: "competitor_ux_data"
+    type: "string"
+    description: "Competitor UX observations from scraped or reviewed content"
+
+output_schema:
+  type: "json"
+  fields:
+    - name: "ux_comparison"
+      type: "array[object]"
+    - name: "nimblize_ux_strengths"
+      type: "array[string]"
+    - name: "improvement_opportunities"
+      type: "array[string]"
+    - name: "ux_score"
+      type: "object"
+
+prompt_template: |
+  You are a UX/product analyst. Compare the user experience between Nimblize
+  and the competitor based on the provided descriptions.
+
+  RULES:
+  1. Evaluate on: onboarding ease, dashboard clarity, workflow efficiency, data visualization.
+  2. Identify specific UX friction points for each product.
+  3. Recommend concrete UX improvements for Nimblize.
+  4. Score each dimension 1-10.
+
+  NIMBLIZE UX: {{ nimblize_ux_description }}
+  COMPETITOR UX: {{ competitor_ux_data }}
+
+  Return valid JSON:
+  {
+    "ux_comparison": [
+      {"dimension": "string", "nimblize_score": 1-10, "competitor_score": 1-10, "notes": "string"}
+    ],
+    "nimblize_ux_strengths": ["array"],
+    "improvement_opportunities": ["array"],
+    "ux_score": {"nimblize_total": int, "competitor_total": int}
+  }
+
+example_input: |
+  nimblize_ux_description: "API-first platform with Swagger docs. Dashboard shows verified profiles, HITL review queue, RAGAS scores. Real-time pipeline status updates."
+  competitor_ux_data: "Visual drag-and-drop SEO dashboard. Pre-built report templates. One-click competitor tracking setup."
+
+example_output: |
+  {
+    "ux_comparison": [
+      {"dimension": "Onboarding", "nimblize_score": 6, "competitor_score": 8, "notes": "Competitor offers visual setup wizard vs API-first approach"},
+      {"dimension": "Dashboard Clarity", "nimblize_score": 8, "competitor_score": 7, "notes": "Nimblize RAGAS scores and pipeline status provide granular insight"},
+      {"dimension": "Workflow Efficiency", "nimblize_score": 7, "competitor_score": 7, "notes": "Both offer automated workflows; different complexity levels"},
+      {"dimension": "Data Visualization", "nimblize_score": 6, "competitor_score": 8, "notes": "Competitor has more visual reporting templates"}
+    ],
+    "nimblize_ux_strengths": ["Granular pipeline transparency", "HITL review workflow", "Real-time RAGAS quality indicators"],
+    "improvement_opportunities": ["Add visual onboarding wizard", "Build pre-built report templates", "Add drag-and-drop dashboard customization"],
+    "ux_score": {"nimblize_total": 27, "competitor_total": 30}
+  }
+
+notes: >
+  Useful for product roadmap planning and UX investment decisions.
+  Moderate temperature for nuanced qualitative assessment.
+
+tags:
+  - "comparison"
+  - "ux"
+  - "product"
+  - "design"

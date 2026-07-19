@@ -1,0 +1,93 @@
+# Prompt: ROI Impact Analysis
+# Nimblize Phase 5 — Prompt Library v1
+
+id: "ES-003"
+category: "executive_summary"
+name: "ROI Impact Analysis"
+version: "1.0.0"
+purpose: >
+  Generate an ROI analysis quantifying the business impact of Nimblize's AI
+  pipeline compared to manual competitor analysis processes. Suitable for
+  business case justification and stakeholder buy-in.
+
+recommended_model: "gpt-4o"
+temperature: 0.3
+max_tokens: 2500
+
+input_variables:
+  - name: "pipeline_metrics"
+    type: "object"
+    description: "Pipeline throughput and cost metrics"
+  - name: "manual_baseline"
+    type: "object"
+    description: "Baseline manual process metrics for comparison"
+  - name: "cost_model"
+    type: "object"
+    description: "Cost assumptions: analyst salary, API costs, infrastructure"
+
+output_schema:
+  type: "json"
+  fields:
+    - name: "time_savings"
+      type: "object"
+    - name: "cost_savings"
+      type: "object"
+    - name: "quality_improvement"
+      type: "object"
+    - name: "roi_percentage"
+      type: "float"
+    - name: "payback_period"
+      type: "string"
+    - name: "executive_narrative"
+      type: "string"
+
+prompt_template: |
+  You are a business analyst. Calculate and present the ROI of Nimblize's
+  automated AI pipeline vs. manual competitor analysis.
+
+  RULES:
+  1. Quantify time savings in hours and FTE equivalents.
+  2. Calculate cost savings with explicit assumptions.
+  3. Measure quality improvement via error rate reduction.
+  4. Compute ROI percentage: (Benefits - Costs) / Costs × 100.
+  5. Estimate payback period for the automation investment.
+  6. Write a compelling executive narrative summarizing the business case.
+
+  PIPELINE METRICS: {{ pipeline_metrics }}
+  MANUAL BASELINE: {{ manual_baseline }}
+  COST MODEL: {{ cost_model }}
+
+  Return valid JSON:
+  {
+    "time_savings": {"hours_per_month": float, "fte_equivalent": float},
+    "cost_savings": {"monthly_usd": float, "annual_usd": float},
+    "quality_improvement": {"error_rate_reduction": "string", "consistency_improvement": "string"},
+    "roi_percentage": float,
+    "payback_period": "string",
+    "executive_narrative": "string"
+  }
+
+example_input: |
+  pipeline_metrics: {"profiles_per_day": 50, "avg_processing_time_sec": 30, "monthly_api_cost": 800}
+  manual_baseline: {"profiles_per_day_per_analyst": 2, "hours_per_profile": 4, "error_rate": "18%"}
+  cost_model: {"analyst_hourly_rate": 45, "infrastructure_monthly": 500, "api_monthly": 800}
+
+example_output: |
+  {
+    "time_savings": {"hours_per_month": 4400, "fte_equivalent": 25.0},
+    "cost_savings": {"monthly_usd": 196700, "annual_usd": 2360400},
+    "quality_improvement": {"error_rate_reduction": "18% → <1% (94% reduction)", "consistency_improvement": "100% schema adherence via Pydantic enforcement"},
+    "roi_percentage": 15046.0,
+    "payback_period": "< 1 month",
+    "executive_narrative": "Nimblize's AI pipeline processes 50 competitor profiles daily in 30 seconds each — equivalent to 25 full-time analysts at a fraction of the cost. The pipeline achieves a 94% reduction in data quality errors while delivering $2.36M in annual cost savings against a $1,300/month operating cost, resulting in an ROI exceeding 15,000%."
+  }
+
+notes: >
+  Critical for business justification. Ensure all assumptions are clearly
+  stated and defensible. Use conservative estimates when presenting to investors.
+
+tags:
+  - "executive"
+  - "roi"
+  - "business-case"
+  - "financial"

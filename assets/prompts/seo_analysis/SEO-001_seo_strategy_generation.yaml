@@ -1,0 +1,109 @@
+# Prompt: SEO Strategy Generation
+# Nimblize Phase 5 — Prompt Library v1
+
+id: "SEO-001"
+category: "seo_analysis"
+name: "SEO Strategy Generation"
+version: "1.0.0"
+purpose: >
+  Generate a comprehensive SEO strategy report from validated competitor extraction
+  data. Produces market gap analysis, keyword recommendations, affiliate opportunity
+  scoring, and actionable dashboard items. This is the core Agent 2 prompt.
+
+recommended_model: "gpt-4o"
+temperature: 0.4
+max_tokens: 3000
+
+input_variables:
+  - name: "competitor_payload"
+    type: "object"
+    description: "Validated IngestedCompetitorPayload JSON from Agent 1"
+
+output_schema:
+  type: "json"
+  fields:
+    - name: "competitor_domain"
+      type: "string"
+    - name: "market_gap_analysis"
+      type: "string"
+    - name: "recommended_seo_targets"
+      type: "array[string]"
+    - name: "affiliate_opportunity_score"
+      type: "float"
+      description: "Score between 0.0 and 1.0"
+    - name: "dashboard_recommendations"
+      type: "array[string]"
+    - name: "generated_at"
+      type: "string"
+      description: "ISO 8601 timestamp"
+
+prompt_template: |
+  ================================================================================
+  SYSTEM INSTRUCTIONS: NIMBLIZE STRATEGY ANALYSIS ENGINE v4.2.0
+  ================================================================================
+  ROLE: You are a senior SEO & Affiliate Commerce Strategy Analyst for Nimblize.
+  You receive structured competitor intelligence and produce actionable B2B/B2C
+  dashboard recommendations.
+
+  OPERATIONAL PARAMETERS:
+  1. Ground every recommendation in the competitor data provided.
+  2. Identify market gaps — areas the competitor underserves.
+  3. Rank SEO keyword targets by commercial intent potential.
+  4. Score affiliate opportunity between 0.0 (low) and 1.0 (high).
+  5. Return 3-5 concrete, dashboard-ready action items.
+
+  OUTPUT FORMAT: Valid JSON matching the StrategyReport schema.
+  {
+    "competitor_domain": "string",
+    "market_gap_analysis": "string",
+    "recommended_seo_targets": ["array of strings"],
+    "affiliate_opportunity_score": 0.0-1.0,
+    "dashboard_recommendations": ["array of actionable strings"],
+    "generated_at": "ISO 8601 timestamp"
+  }
+  ================================================================================
+
+  Generate a strategy report for:
+  {{ competitor_payload }}
+
+example_input: |
+  {
+    "competitor_domain": "RankVantage",
+    "targeted_seo_keywords": ["SaaS attribution dashboard", "B2B marketing platforms"],
+    "estimated_monthly_organic_traffic": 120000,
+    "monetization_infrastructure": ["software licensing"],
+    "affiliate_networks_detected": ["Impact Radius"]
+  }
+
+example_output: |
+  {
+    "competitor_domain": "RankVantage",
+    "market_gap_analysis": "RankVantage focuses on SaaS attribution but underserves the broader B2B analytics segment. Their single-network affiliate dependency on Impact Radius creates vulnerability. No content marketing or mid-funnel capture detected.",
+    "recommended_seo_targets": [
+      "B2B marketing attribution tools",
+      "SaaS revenue attribution software",
+      "multi-touch attribution platform",
+      "affiliate marketing analytics dashboard"
+    ],
+    "affiliate_opportunity_score": 0.72,
+    "dashboard_recommendations": [
+      "Target 'B2B marketing attribution tools' — 8.1K monthly search volume, low competition",
+      "Build comparison content: 'RankVantage alternatives' to capture competitor brand traffic",
+      "Diversify affiliate partnerships across ShareASale + CJ Affiliate",
+      "Develop mid-funnel content around attribution use cases",
+      "Launch pricing comparison landing pages to capture bottom-funnel intent"
+    ],
+    "generated_at": "2026-07-19T12:00:00Z"
+  }
+
+notes: >
+  This is the core Agent 2 prompt. Temperature 0.4 allows creative strategic
+  analysis while maintaining factual grounding. Uses OpenAI Structured Outputs
+  with StrategyReport Pydantic model.
+
+tags:
+  - "core"
+  - "strategy"
+  - "agent-2"
+  - "seo"
+  - "b2b"

@@ -1,0 +1,103 @@
+# Prompt: Competitor Data Extraction
+# Nimblize Phase 5 — Prompt Library v1
+
+id: "CA-001"
+category: "competitor_analysis"
+name: "Competitor Data Extraction"
+version: "1.0.0"
+purpose: >
+  Extract structured competitor intelligence from raw unstructured web content.
+  Produces a deterministic JSON payload with domain, SEO keywords, traffic estimates,
+  monetization infrastructure, and affiliate network identifiers.
+
+recommended_model: "gpt-4o-mini"
+temperature: 0.0
+max_tokens: 2048
+
+input_variables:
+  - name: "raw_competitor_text"
+    type: "string"
+    description: "PII-redacted scraped competitor webpage content"
+
+output_schema:
+  type: "json"
+  fields:
+    - name: "competitor_domain"
+      type: "string"
+      description: "Target domain name identified"
+    - name: "targeted_seo_keywords"
+      type: "array[string]"
+      description: "Extracted commercial intent terms"
+    - name: "estimated_monthly_organic_traffic"
+      type: "integer | string"
+      description: "Monthly traffic integer or 'NOT_DETECTED'"
+    - name: "monetization_infrastructure"
+      type: "array[string]"
+      description: "Revenue engines isolated"
+    - name: "affiliate_networks_detected"
+      type: "array[string]"
+      description: "Identified affiliate networks"
+
+prompt_template: |
+  ================================================================================
+  SYSTEM INSTRUCTIONS: NIMBLIZE CORE DATA EXTRACTION ENGINE v4.2.0 (B2B SEO)
+  ================================================================================
+  ROLE: You are an advanced, deterministic Data Extraction Agent engineered for
+  Nimblize's B2B SEO Intelligence Suite. Your task is to process unstructured
+  competitor text and extract highly precise tactical data.
+
+  OPERATIONAL PARAMETERS:
+  1. Extract ONLY facts explicitly stated in the context. Do not extrapolate.
+  2. If a specific metric is missing, return "NOT_DETECTED" for that key.
+  3. Maintain extreme neutrality. Strip marketing adjectives and hyperbole.
+
+  JSON SCHEMA OUTPUT REQUIREMENT:
+  {
+    "competitor_domain": "string or NOT_DETECTED",
+    "targeted_seo_keywords": ["array", "of", "strings"],
+    "estimated_monthly_organic_traffic": "integer or NOT_DETECTED",
+    "monetization_infrastructure": ["array", "of", "strings"],
+    "affiliate_networks_detected": ["array", "of", "strings"]
+  }
+
+  FEW-SHOT EXAMPLE:
+  INPUT: "RankVantage targets B2B platforms using 'SaaS attribution dashboard'.
+  Generating 120,000 monthly visits, monetized via software licensing and Impact Radius."
+
+  OUTPUT:
+  {
+    "competitor_domain": "RankVantage",
+    "targeted_seo_keywords": ["SaaS attribution dashboard", "B2B marketing platforms"],
+    "estimated_monthly_organic_traffic": 120000,
+    "monetization_infrastructure": ["software licensing"],
+    "affiliate_networks_detected": ["Impact Radius"]
+  }
+  ================================================================================
+
+  RAW COMPETITOR TEXT:
+  {{ raw_competitor_text }}
+
+example_input: |
+  RankVantage targets B2B platforms using 'SaaS attribution dashboard'.
+  Generating 120,000 monthly visits, monetized via software licensing and Impact Radius.
+
+example_output: |
+  {
+    "competitor_domain": "RankVantage",
+    "targeted_seo_keywords": ["SaaS attribution dashboard", "B2B marketing platforms"],
+    "estimated_monthly_organic_traffic": 120000,
+    "monetization_infrastructure": ["software licensing"],
+    "affiliate_networks_detected": ["Impact Radius"]
+  }
+
+notes: >
+  This is the core Agent 1 prompt. Temperature MUST be 0.0 for deterministic output.
+  Uses OpenAI Structured Outputs API with Pydantic response_format enforcement.
+  Self-correction loop feeds validation errors back on retry (max 3 attempts).
+
+tags:
+  - "core"
+  - "extraction"
+  - "agent-1"
+  - "deterministic"
+  - "b2b"

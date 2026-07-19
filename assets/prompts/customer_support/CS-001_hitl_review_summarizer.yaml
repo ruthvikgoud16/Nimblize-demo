@@ -1,0 +1,93 @@
+# Prompt: HITL Review Summarizer
+# Nimblize Phase 5 — Prompt Library v1
+
+id: "CS-001"
+category: "customer_support"
+name: "HITL Review Summarizer"
+version: "1.0.0"
+purpose: >
+  Summarize flagged pipeline payloads from the HITL (Human-in-the-Loop) review
+  queue for domain leaders. Provides context, RAGAS scores, and recommended
+  actions to streamline manual review decisions.
+
+recommended_model: "gpt-4o-mini"
+temperature: 0.2
+max_tokens: 1500
+
+input_variables:
+  - name: "pipeline_payload"
+    type: "object"
+    description: "Full pipeline state from the HITL review queue"
+  - name: "ragas_scores"
+    type: "object"
+    description: "RAGAS evaluation scores that triggered the review"
+  - name: "reviewer_name"
+    type: "string"
+    description: "Name of the assigned domain evaluator"
+
+output_schema:
+  type: "json"
+  fields:
+    - name: "summary"
+      type: "string"
+    - name: "failure_reason"
+      type: "string"
+    - name: "recommended_action"
+      type: "string"
+    - name: "confidence_assessment"
+      type: "string"
+    - name: "priority"
+      type: "string"
+
+prompt_template: |
+  You are a quality assurance analyst for the Nimblize pipeline. Summarize
+  the following flagged payload for human review.
+
+  RULES:
+  1. Explain WHY this payload was flagged (which RAGAS metric failed).
+  2. Recommend one of: APPROVE, REJECT, RE-PROCESS, ESCALATE.
+  3. Highlight specific data quality issues found.
+  4. Keep the summary concise and actionable for the reviewer.
+  5. Rate priority: CRITICAL, HIGH, MEDIUM, LOW.
+
+  PIPELINE PAYLOAD: {{ pipeline_payload }}
+  RAGAS SCORES: {{ ragas_scores }}
+  ASSIGNED REVIEWER: {{ reviewer_name }}
+
+  Return valid JSON:
+  {
+    "summary": "string (2-3 sentences)",
+    "failure_reason": "string",
+    "recommended_action": "APPROVE | REJECT | RE-PROCESS | ESCALATE",
+    "confidence_assessment": "string",
+    "priority": "CRITICAL | HIGH | MEDIUM | LOW"
+  }
+
+example_input: |
+  pipeline_payload: {
+    "pipeline_id": "abc-123",
+    "competitor_domain": "RankVantage",
+    "extracted_data": {"targeted_seo_keywords": ["SaaS dashboard"]},
+    "status": "FLAGGED_FOR_HUMAN_REVIEW"
+  }
+  ragas_scores: {"faithfulness": 0.72, "answer_relevancy": 0.91, "context_recall": 0.68}
+  reviewer_name: "Aastha Shukla"
+
+example_output: |
+  {
+    "summary": "Pipeline abc-123 for RankVantage was flagged due to below-threshold Faithfulness (0.72) and Context Recall (0.68). The extraction captured only 1 SEO keyword, suggesting insufficient source content.",
+    "failure_reason": "Faithfulness (0.72) and Context Recall (0.68) both below respective thresholds of 0.85 and 0.75. Composite score: 0.77 < 0.85 threshold.",
+    "recommended_action": "RE-PROCESS",
+    "confidence_assessment": "The low context recall suggests the source text may have been too brief. Re-processing with expanded scrape data could improve scores.",
+    "priority": "MEDIUM"
+  }
+
+notes: >
+  Feeds into the HITL notification worker. Output is dispatched via Slack,
+  email, and dashboard notifications. Keep language professional and concise.
+
+tags:
+  - "core"
+  - "hitl"
+  - "quality"
+  - "review"

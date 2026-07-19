@@ -1,0 +1,111 @@
+# Prompt: Affiliate Product Matching
+# Nimblize Phase 5 — Prompt Library v1
+
+id: "PR-002"
+category: "product_recommendation"
+name: "Affiliate Product Matching"
+version: "1.0.0"
+purpose: >
+  Match user intent with affiliate product offerings, scoring monetization
+  potential and generating affiliate-optimized recommendation content with
+  proper disclosure language.
+
+recommended_model: "gpt-4o"
+temperature: 0.4
+max_tokens: 2000
+
+input_variables:
+  - name: "user_query"
+    type: "string"
+    description: "User's product search query"
+  - name: "affiliate_catalog"
+    type: "array[object]"
+    description: "Available affiliate products with commission rates"
+  - name: "competitor_context"
+    type: "object"
+    description: "Competitor intelligence context from extraction pipeline"
+
+output_schema:
+  type: "json"
+  fields:
+    - name: "matched_products"
+      type: "array[object]"
+    - name: "monetization_score"
+      type: "float"
+    - name: "recommended_placement"
+      type: "string"
+    - name: "disclosure_text"
+      type: "string"
+
+prompt_template: |
+  You are an affiliate commerce optimization specialist. Match the user's intent
+  with the best affiliate products while maximizing both relevance and monetization.
+
+  RULES:
+  1. Prioritize user relevance over commission rates.
+  2. Score each match on relevance (0-1) and monetization potential (0-1).
+  3. Generate natural, non-salesy recommendation copy.
+  4. Include FTC-compliant disclosure language.
+  5. Suggest optimal placement strategy (inline, sidebar, comparison table).
+
+  USER QUERY: {{ user_query }}
+  AFFILIATE CATALOG: {{ affiliate_catalog }}
+  COMPETITOR CONTEXT: {{ competitor_context }}
+
+  Return valid JSON:
+  {
+    "matched_products": [
+      {
+        "product_name": "string",
+        "affiliate_network": "string",
+        "relevance_score": 0.0-1.0,
+        "monetization_score": 0.0-1.0,
+        "recommendation_copy": "string"
+      }
+    ],
+    "monetization_score": 0.0-1.0,
+    "recommended_placement": "inline | sidebar | comparison_table",
+    "disclosure_text": "string"
+  }
+
+example_input: |
+  user_query: "best SEO tools for small business"
+  affiliate_catalog: [
+    {"name": "Ahrefs", "network": "Impact", "commission": "25%"},
+    {"name": "SEMrush", "network": "ShareASale", "commission": "40%"}
+  ]
+  competitor_context: {"competitor_domain": "RankVantage", "affiliate_networks_detected": ["Impact Radius"]}
+
+example_output: |
+  {
+    "matched_products": [
+      {
+        "product_name": "Ahrefs",
+        "affiliate_network": "Impact",
+        "relevance_score": 0.92,
+        "monetization_score": 0.65,
+        "recommendation_copy": "Ahrefs offers comprehensive keyword research and backlink analysis — ideal for small businesses building their SEO foundation."
+      },
+      {
+        "product_name": "SEMrush",
+        "affiliate_network": "ShareASale",
+        "relevance_score": 0.88,
+        "monetization_score": 0.85,
+        "recommendation_copy": "SEMrush provides an all-in-one SEO toolkit with competitive analysis features that rival enterprise-grade solutions."
+      }
+    ],
+    "monetization_score": 0.75,
+    "recommended_placement": "comparison_table",
+    "disclosure_text": "This page contains affiliate links. We may earn a commission at no extra cost to you if you make a purchase through these links."
+  }
+
+notes: >
+  Critical for B2C revenue generation. Must balance user trust with monetization.
+  Always include disclosure text. Feeds into the recommendation engine alongside
+  PR-001 semantic results.
+
+tags:
+  - "affiliate"
+  - "monetization"
+  - "b2c"
+  - "recommendation"

@@ -1,0 +1,119 @@
+# Prompt: Backlink Profile Analysis
+# Nimblize Phase 5 — Prompt Library v1
+
+id: "SEO-004"
+category: "seo_analysis"
+name: "Backlink Profile Analysis"
+version: "1.0.0"
+purpose: >
+  Analyze competitor backlink profile data to identify link-building opportunities,
+  referring domain quality signals, and anchor text distribution patterns.
+
+recommended_model: "gpt-4o"
+temperature: 0.2
+max_tokens: 2500
+
+input_variables:
+  - name: "backlink_data"
+    type: "string"
+    description: "Structured or semi-structured backlink data from third-party tools"
+  - name: "competitor_domain"
+    type: "string"
+    description: "Domain of the competitor"
+
+output_schema:
+  type: "json"
+  fields:
+    - name: "competitor_domain"
+      type: "string"
+    - name: "total_backlinks"
+      type: "integer"
+    - name: "referring_domains"
+      type: "integer"
+    - name: "domain_authority_estimate"
+      type: "string"
+    - name: "anchor_text_distribution"
+      type: "object"
+    - name: "top_referring_domains"
+      type: "array[object]"
+    - name: "link_building_opportunities"
+      type: "array[string]"
+    - name: "risk_signals"
+      type: "array[string]"
+
+prompt_template: |
+  You are a backlink intelligence analyst. Analyze the following competitor
+  backlink data and produce actionable insights.
+
+  RULES:
+  1. Identify the top 5 most valuable referring domains by authority.
+  2. Classify anchor text distribution: branded, exact-match, generic, naked URL.
+  3. Flag any toxic or spammy link patterns.
+  4. Recommend 3-5 link-building opportunities based on the competitor's profile.
+  5. Extract only facts present in the data — do not fabricate metrics.
+
+  COMPETITOR: {{ competitor_domain }}
+
+  BACKLINK DATA:
+  {{ backlink_data }}
+
+  Return valid JSON:
+  {
+    "competitor_domain": "string",
+    "total_backlinks": int,
+    "referring_domains": int,
+    "domain_authority_estimate": "string",
+    "anchor_text_distribution": {
+      "branded": "percentage",
+      "exact_match": "percentage",
+      "generic": "percentage",
+      "naked_url": "percentage"
+    },
+    "top_referring_domains": [{"domain": "string", "authority": "string", "link_type": "string"}],
+    "link_building_opportunities": ["array of strings"],
+    "risk_signals": ["array of strings"]
+  }
+
+example_input: |
+  competitor_domain: "RankVantage"
+  backlink_data: "Total backlinks: 12,400. Referring domains: 890. Top referrers:
+  techcrunch.com (DA 94), g2.com (DA 88), capterra.com (DA 85). Anchor text:
+  45% branded, 20% exact-match, 25% generic, 10% naked URL."
+
+example_output: |
+  {
+    "competitor_domain": "RankVantage",
+    "total_backlinks": 12400,
+    "referring_domains": 890,
+    "domain_authority_estimate": "HIGH (based on referrer quality)",
+    "anchor_text_distribution": {
+      "branded": "45%",
+      "exact_match": "20%",
+      "generic": "25%",
+      "naked_url": "10%"
+    },
+    "top_referring_domains": [
+      {"domain": "techcrunch.com", "authority": "DA 94", "link_type": "editorial"},
+      {"domain": "g2.com", "authority": "DA 88", "link_type": "review"},
+      {"domain": "capterra.com", "authority": "DA 85", "link_type": "listing"}
+    ],
+    "link_building_opportunities": [
+      "Pursue G2 and Capterra listings for review-based backlinks",
+      "Pitch data-driven content to TechCrunch for editorial mentions",
+      "Guest post on SaaS industry blogs targeting 'attribution' keywords",
+      "Build resource pages and link-worthy tools for natural link acquisition"
+    ],
+    "risk_signals": [
+      "20% exact-match anchor text is borderline — could signal manipulation"
+    ]
+  }
+
+notes: >
+  Requires external backlink data as input (e.g., from Ahrefs, Moz, or SEMrush exports).
+  Use with SEO-001 and SEO-002 for comprehensive SEO competitive analysis.
+
+tags:
+  - "seo"
+  - "backlinks"
+  - "link-building"
+  - "b2b"

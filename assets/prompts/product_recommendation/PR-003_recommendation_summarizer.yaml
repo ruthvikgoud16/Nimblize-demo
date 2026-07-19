@@ -1,0 +1,85 @@
+# Prompt: Product Recommendation Summarizer
+# Nimblize Phase 5 — Prompt Library v1
+
+id: "PR-003"
+category: "product_recommendation"
+name: "Product Recommendation Summarizer"
+version: "1.0.0"
+purpose: >
+  Generate a concise, user-friendly summary of multiple product recommendations
+  suitable for email digests, dashboard widgets, or notification messages.
+
+recommended_model: "gpt-4o-mini"
+temperature: 0.6
+max_tokens: 1000
+
+input_variables:
+  - name: "recommendations"
+    type: "array[object]"
+    description: "List of ranked product recommendations from PR-001 or PR-002"
+  - name: "format"
+    type: "string"
+    description: "Output format: email | dashboard_widget | notification"
+
+output_schema:
+  type: "json"
+  fields:
+    - name: "summary_text"
+      type: "string"
+    - name: "headline"
+      type: "string"
+    - name: "bullet_points"
+      type: "array[string]"
+    - name: "cta_text"
+      type: "string"
+
+prompt_template: |
+  Summarize the following product recommendations into a concise, engaging
+  format for the specified channel.
+
+  FORMAT: {{ format }}
+
+  RULES:
+  1. Keep the summary under 150 words for notifications, 300 for email, 50 for widgets.
+  2. Lead with the strongest recommendation.
+  3. Use clear, action-oriented language.
+  4. Include a compelling call-to-action.
+
+  RECOMMENDATIONS:
+  {{ recommendations }}
+
+  Return valid JSON:
+  {
+    "headline": "string",
+    "summary_text": "string",
+    "bullet_points": ["array of key points"],
+    "cta_text": "string"
+  }
+
+example_input: |
+  recommendations: [
+    {"rank": 1, "product_name": "MetricFlow Pro", "rationale": "Top match for SaaS analytics"},
+    {"rank": 2, "product_name": "AttributeIQ", "rationale": "Best for attribution modeling"}
+  ]
+  format: "dashboard_widget"
+
+example_output: |
+  {
+    "headline": "Top Picks for You",
+    "summary_text": "MetricFlow Pro leads our recommendations for SaaS analytics, with AttributeIQ as a strong alternative for dedicated attribution.",
+    "bullet_points": [
+      "MetricFlow Pro — Best overall for SaaS dashboards",
+      "AttributeIQ — Specialized multi-touch attribution"
+    ],
+    "cta_text": "View All Recommendations →"
+  }
+
+notes: >
+  Downstream prompt — consumes output from PR-001 or PR-002. Higher temperature
+  for natural-sounding copy that varies across sessions.
+
+tags:
+  - "summarization"
+  - "b2c"
+  - "recommendation"
+  - "content"
