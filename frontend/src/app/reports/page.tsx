@@ -17,12 +17,7 @@ import {
 import { 
   Search, 
   Download, 
-  FileText, 
-  Eye, 
   Calendar, 
-  User, 
-  TrendingUp, 
-  TrendingDown,
   Filter
 } from "lucide-react";
 

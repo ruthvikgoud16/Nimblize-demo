@@ -8,10 +8,7 @@ import {
   ArrowRight, 
   Terminal, 
   ShieldCheck, 
-  Zap, 
-  Code2, 
-  Activity, 
-  GitBranch 
+  Zap 
 } from "lucide-react";
 
 export default function LandingPage() {

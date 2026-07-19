@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { PageHeader } from "@/components/common/page-header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   Play, 
@@ -96,7 +96,7 @@ export default function AutomationStudioPage() {
     if (isExecuting) return;
     setIsExecuting(true);
     
-    let currentNodes = [...initialNodes];
+    const currentNodes = [...initialNodes];
     setNodes(currentNodes);
     
     for (let i = 0; i < currentNodes.length; i++) {

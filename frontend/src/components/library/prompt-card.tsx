@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Star, MoreVertical, Copy, ArrowUpRight, CheckCircle2, Clock } from "lucide-react";
+import { Star, CheckCircle2, Clock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

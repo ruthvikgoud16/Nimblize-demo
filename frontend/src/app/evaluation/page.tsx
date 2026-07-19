@@ -52,7 +52,8 @@ export default function EvaluationPage() {
           <CardContent className="flex-1 flex items-end gap-2 p-6 pt-0">
             {/* Extremely simple mock bar chart using CSS */}
             {Array.from({ length: 30 }).map((_, i) => {
-              const height = 40 + Math.random() * 60;
+              const heights = [72, 85, 45, 90, 60, 80, 95, 70, 55, 88, 62, 78, 84, 91, 50, 75, 82, 68, 93, 76, 83, 79, 87, 89, 94, 73, 81, 86, 65, 92];
+              const height = heights[i % heights.length];
               const isWarning = height < 70;
               return (
                 <div key={i} className="flex-1 group relative bg-muted/30 rounded-t-sm h-full flex flex-col justify-end">

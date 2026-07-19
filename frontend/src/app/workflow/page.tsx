@@ -3,15 +3,13 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PageHeader } from "@/components/common/page-header";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   Network, 
   Terminal, 
   ArrowRight, 
-  Settings2,
-  FileCode2,
+  FileCode2, 
   ListOrdered
 } from "lucide-react";
 import { cn } from "@/lib/utils";
