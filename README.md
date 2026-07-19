@@ -233,3 +233,38 @@ The script exercises these four core flows:
     *   **Future Roadmap PDF:** [https://github.com/ruthvikgoud16/Nimblize-demo/blob/main/Nimblize_Future_Implementation_Roadmap.pdf](https://github.com/ruthvikgoud16/Nimblize-demo/blob/main/Nimblize_Future_Implementation_Roadmap.pdf)
     *   **Phase 4 Final Report PDF:** [https://github.com/ruthvikgoud16/Nimblize-demo/blob/main/Nimblize_Phase4_Final_Report.pdf](https://github.com/ruthvikgoud16/Nimblize-demo/blob/main/Nimblize_Phase4_Final_Report.pdf)
 
+---
+
+## 10. Phase 5 — AI Assets & Automation
+
+> **Status:** 🟡 In Progress | **Branch:** `phase5`
+
+Phase 5 extends the production-ready Phase 4 foundation with structured AI assets and automation capabilities.
+
+### Objectives
+
+- **Prompt Library:** Versioned, catalogued prompt templates for all LLM-driven pipelines
+- **Automation Workflows:** Event-driven and scheduled workflow definitions with CI/CD integration
+- **Evaluation & Benchmarking:** Systematic quality assessment using RAGAS and custom metrics
+- **Documentation:** Complete Phase 5 engineering documentation package
+
+### Phase 5 Documents
+
+| Document | Description |
+|---|---|
+| [`PHASE5_PLAN.md`](docs/phase5/PHASE5_PLAN.md) | Master plan — objectives, scope, deliverables, risk register |
+| [`PROMPT_LIBRARY.md`](docs/phase5/PROMPT_LIBRARY.md) | LLM prompt registry with versioning and quality criteria |
+| [`AUTOMATION_WORKFLOW.md`](docs/phase5/AUTOMATION_WORKFLOW.md) | Workflow definitions, triggers, and integration specs |
+| [`EVALUATION_REPORT.md`](docs/phase5/EVALUATION_REPORT.md) | Evaluation framework, metrics, and test results |
+| [`CHANGELOG.md`](docs/phase5/CHANGELOG.md) | Phase 5 change log |
+| [`TASKS.md`](TASKS.md) | Phase 5 milestone tracker |
+
+### Directory Structure
+
+```
+docs/phase5/            # Phase 5 documentation workspace
+├── screenshots/        # UI captures and demo evidence
+├── diagrams/           # Architecture and flow diagrams
+assets/prompts/         # Versioned prompt template files (YAML)
+```
+
