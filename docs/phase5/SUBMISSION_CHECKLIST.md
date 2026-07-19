@@ -42,6 +42,8 @@
 - [x] Root `README.md` polished with Phase 5 accomplishments summary and document links
 - [x] Visual asset index created in `docs/phase5/VISUAL_ASSET_INDEX.md`
 - [x] Mermaid sequence & architecture diagrams verified in Markdown specs
+- [x] Timer-calibrated 3-minute presenter guide created in `docs/phase5/DEMO_SCRIPT.md`
+- [x] Independent evaluator Quality Assurance report completed in `docs/phase5/FINAL_QA_REPORT.md`
 - [x] Release notes created in `RELEASE_NOTES_v1.0.md`
 - [x] Submission checklist created in `SUBMISSION_CHECKLIST.md`
 - [x] Git working tree verified clean (`nothing to commit, working tree clean`)

@@ -17,6 +17,8 @@ docs/phase5/
 ├── CONSISTENCY_REPORT.md                 # Milestone 2 documentation consistency report
 ├── IMPLEMENTATION_VERIFICATION_REPORT.md # CIMS runtime verification & audit report
 ├── MILESTONE3_FREEZE_REPORT.md           # Formal Milestone 3 freeze & audit document
+├── DEMO_SCRIPT.md                        # Timer-calibrated 3-minute presenter guide
+├── FINAL_QA_REPORT.md                    # Independent Quality Assurance evaluation report
 ├── SUBMISSION_CHECKLIST.md               # Final Phase 5 submission verification checklist
 ├── RELEASE_NOTES_v1.0.md                 # Phase 5 v1.0 Release Notes
 ├── README.md                             # This file — master index
@@ -46,6 +48,8 @@ backend/prompts/                          # PromptRegistry YAML template loader 
 | [CONSISTENCY_REPORT.md](./CONSISTENCY_REPORT.md) | Prompt count and schema consistency audit | 🟢 Complete |
 | [IMPLEMENTATION_VERIFICATION_REPORT.md](./IMPLEMENTATION_VERIFICATION_REPORT.md) | Runtime verification, prompt trace, and audit findings | 🟢 Complete |
 | [MILESTONE3_FREEZE_REPORT.md](./MILESTONE3_FREEZE_REPORT.md) | Milestone 3 freeze and repository readiness audit | 🟢 Complete |
+| [DEMO_SCRIPT.md](./DEMO_SCRIPT.md) | Timer-calibrated 3-minute presenter guide and sequence script | 🟢 Complete |
+| [FINAL_QA_REPORT.md](./FINAL_QA_REPORT.md) | Independent Quality Assurance audit and scoring evaluation | 🟢 Complete |
 | [SUBMISSION_CHECKLIST.md](./SUBMISSION_CHECKLIST.md) | Final Phase 5 submission verification checklist | 🟢 Complete |
 | [RELEASE_NOTES_v1.0.md](./RELEASE_NOTES_v1.0.md) | Phase 5 release notes and accomplishments summary | 🟢 Complete |
 
