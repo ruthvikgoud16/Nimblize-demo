@@ -89,7 +89,7 @@ app = FastAPI(
 # CORS stack config
 _allowed_origins = [
     o.strip()
-    for o in os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(",")
+    for o in os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,https://frontend-two-weld-39.vercel.app").split(",")
     if o.strip()
 ]
 app.add_middleware(
