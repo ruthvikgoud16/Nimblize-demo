@@ -12,11 +12,11 @@ const path = require("path");
 
 const MD_PATH = path.resolve(
   __dirname,
-  "../docs/Nimblize_Future_Implementation_Roadmap.md"
+  "../docs/phase4/Nimblize_Future_Implementation_Roadmap.md"
 );
 const PDF_PATH = path.resolve(
   __dirname,
-  "../Nimblize_Future_Implementation_Roadmap.pdf"
+  "../docs/phase4/Nimblize_Future_Implementation_Roadmap.pdf"
 );
 
 // ── Minimal Markdown→HTML converter (no external libs) ───────────────────────

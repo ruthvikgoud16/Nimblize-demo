@@ -215,8 +215,8 @@ The script exercises these four core flows:
 
 ## 9. Future Implementation Roadmap & Verification Metadata
 
-*   **Roadmap PDF Path:** `Nimblize_Future_Implementation_Roadmap.pdf`
-*   **Roadmap Markdown Path:** `docs/Nimblize_Future_Implementation_Roadmap.md`
+*   **Roadmap PDF Path:** `docs/phase4/Nimblize_Future_Implementation_Roadmap.pdf`
+*   **Roadmap Markdown Path:** `docs/phase4/Nimblize_Future_Implementation_Roadmap.md`
 *   **Total Page Count:** **29 pages** (exceeds the 19 pages minimum requirement, maintaining all 29 original sections of the deep report with maximized diagram styling).
 *   **Git Commit Hash:** `9647d282d0c99a9a091058f02c5f8b13d2f54be6`
 *   **Included Diagrams:**
@@ -230,8 +230,8 @@ The script exercises these four core flows:
     8.  **HITL Workflow Diagram** (Integrated into State transitions routing low-score evaluations to review queues)
 *   **GitHub File URLs:**
     *   **README.md:** [https://github.com/ruthvikgoud16/Nimblize-demo/blob/main/README.md](https://github.com/ruthvikgoud16/Nimblize-demo/blob/main/README.md)
-    *   **Future Roadmap PDF:** [https://github.com/ruthvikgoud16/Nimblize-demo/blob/main/Nimblize_Future_Implementation_Roadmap.pdf](https://github.com/ruthvikgoud16/Nimblize-demo/blob/main/Nimblize_Future_Implementation_Roadmap.pdf)
-    *   **Phase 4 Final Report PDF:** [https://github.com/ruthvikgoud16/Nimblize-demo/blob/main/Nimblize_Phase4_Final_Report.pdf](https://github.com/ruthvikgoud16/Nimblize-demo/blob/main/Nimblize_Phase4_Final_Report.pdf)
+    *   **Future Roadmap PDF:** [https://github.com/ruthvikgoud16/Nimblize-demo/blob/main/docs/phase4/Nimblize_Future_Implementation_Roadmap.pdf](https://github.com/ruthvikgoud16/Nimblize-demo/blob/main/docs/phase4/Nimblize_Future_Implementation_Roadmap.pdf)
+    *   **Phase 4 Final Report PDF:** [https://github.com/ruthvikgoud16/Nimblize-demo/blob/main/docs/phase4/Nimblize_Phase4_Final_Report.pdf](https://github.com/ruthvikgoud16/Nimblize-demo/blob/main/docs/phase4/Nimblize_Phase4_Final_Report.pdf)
 
 ---
 
@@ -261,6 +261,9 @@ Phase 5 extends the production-ready Phase 4 foundation with structured AI promp
 | [`docs/phase5/EVALUATION_REPORT.md`](docs/phase5/EVALUATION_REPORT.md) | Multi-temperature quality benchmarks & evaluation matrix | 🟢 Complete |
 | [`docs/phase5/IMPLEMENTATION_VERIFICATION_REPORT.md`](docs/phase5/IMPLEMENTATION_VERIFICATION_REPORT.md) | Runtime verification, prompt trace, and audit findings | 🟢 Complete |
 | [`docs/phase5/MILESTONE3_FREEZE_REPORT.md`](docs/phase5/MILESTONE3_FREEZE_REPORT.md) | Milestone 3 freeze and repository readiness audit | 🟢 Complete |
+| [`docs/phase5/DEMO_SCRIPT.md`](docs/phase5/DEMO_SCRIPT.md) | Timer-calibrated 3-minute presenter guide and sequence script | 🟢 Complete |
+| [`docs/phase5/FINAL_QA_REPORT.md`](docs/phase5/FINAL_QA_REPORT.md) | Independent Quality Assurance audit and scoring evaluation | 🟢 Complete |
+| [`docs/phase5/REPOSITORY_SUMMARY.md`](docs/phase5/REPOSITORY_SUMMARY.md) | Final Phase 5 repository statistics and structural audit | 🟢 Complete |
 | [`docs/phase5/SUBMISSION_CHECKLIST.md`](docs/phase5/SUBMISSION_CHECKLIST.md) | Final Phase 5 submission verification checklist | 🟢 Complete |
 | [`docs/phase5/RELEASE_NOTES_v1.0.md`](docs/phase5/RELEASE_NOTES_v1.0.md) | Phase 5 release notes and accomplishments summary | 🟢 Complete |
 | [`TASKS.md`](TASKS.md) | Phase 5 milestone progress tracker | 🟢 Complete |

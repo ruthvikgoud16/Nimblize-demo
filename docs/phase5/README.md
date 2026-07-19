@@ -19,6 +19,7 @@ docs/phase5/
 ├── MILESTONE3_FREEZE_REPORT.md           # Formal Milestone 3 freeze & audit document
 ├── DEMO_SCRIPT.md                        # Timer-calibrated 3-minute presenter guide
 ├── FINAL_QA_REPORT.md                    # Independent Quality Assurance evaluation report
+├── REPOSITORY_SUMMARY.md                 # Final Phase 5 repository statistics and structural audit
 ├── SUBMISSION_CHECKLIST.md               # Final Phase 5 submission verification checklist
 ├── RELEASE_NOTES_v1.0.md                 # Phase 5 v1.0 Release Notes
 ├── README.md                             # This file — master index
@@ -50,6 +51,7 @@ backend/prompts/                          # PromptRegistry YAML template loader 
 | [MILESTONE3_FREEZE_REPORT.md](./MILESTONE3_FREEZE_REPORT.md) | Milestone 3 freeze and repository readiness audit | 🟢 Complete |
 | [DEMO_SCRIPT.md](./DEMO_SCRIPT.md) | Timer-calibrated 3-minute presenter guide and sequence script | 🟢 Complete |
 | [FINAL_QA_REPORT.md](./FINAL_QA_REPORT.md) | Independent Quality Assurance audit and scoring evaluation | 🟢 Complete |
+| [REPOSITORY_SUMMARY.md](./REPOSITORY_SUMMARY.md) | Final Phase 5 repository statistics and structural audit | 🟢 Complete |
 | [SUBMISSION_CHECKLIST.md](./SUBMISSION_CHECKLIST.md) | Final Phase 5 submission verification checklist | 🟢 Complete |
 | [RELEASE_NOTES_v1.0.md](./RELEASE_NOTES_v1.0.md) | Phase 5 release notes and accomplishments summary | 🟢 Complete |
 
