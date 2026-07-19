@@ -158,3 +158,44 @@ python3 -m uvicorn backend.main:app --port 8000 --loop asyncio
 ```
 Once started, you can access the live interactive Swagger documentation and execute test runs at:  
 👉 **[http://localhost:8000/docs](http://localhost:8000/docs)**
+
+---
+
+## 7. Frontend Nimblize Studio UI Setup
+
+### Tech Stack
+- **Framework:** Next.js 15 (App Router, React 19)
+- **Styling:** TailwindCSS v4
+- **UI:** shadcn/ui (Base-UI primitives) & Lucide Icons
+- **Animation:** Framer Motion
+
+### Directory Layout
+```
+frontend/
+├── src/
+│   ├── app/                      # Next.js App Router Pages
+│   │   ├── layout.tsx            # Global layout wrapper
+│   │   ├── page.tsx              # Dashboard landing page
+│   │   └── [subfolders]/         # Library, playground, automation, etc.
+│   ├── components/
+│   │   ├── layout/               # AppShell, AppSidebar, TopNavbar, CommandPalette
+│   │   ├── common/               # MetricCard, PageHeader, EmptyState, Skeletons
+│   │   ├── dashboard/            # ExecutionTimeline, CategoryChart, QuickActions
+│   │   └── ui/                   # shadcn UI components
+│   ├── lib/                      # Utilities, navigation configuration, and mock-data
+│   └── providers/                # ThemeProvider & TooltipProvider wrapper
+```
+
+### Development & Commands
+To run the frontend dev environment:
+```bash
+cd frontend
+npm run dev
+```
+Open **[http://localhost:3000](http://localhost:3000)** in your browser to view the premium dashboard.
+
+To build the static application:
+```bash
+npm run build
+```
+
