@@ -14,12 +14,16 @@ from backend.schemas.competitor import IngestedCompetitorPayload
 from backend.prompts import load_prompt_template
 
 def _get_extraction_system_prompt() -> str:
-    """Load system prompt from CA-001 YAML file in Prompt Library."""
+    """
+    Loads system prompt dynamically from CA-001 YAML file in Prompt Library via PromptRegistry.
+    If the YAML file is unreadable/missing, returns an intentional offline fallback prompt string.
+    """
     try:
         data = load_prompt_template("CA-001")
         return data.get("prompt_template", "")
     except Exception as e:
-        print(f"[Agent 1] Warning: Failed to load CA-001 prompt from library ({e}). Using fallback.")
+        print(f"[Agent 1] Warning: Failed to load CA-001 prompt from library ({e}). Using offline fallback prompt.")
+        # INTENTIONAL OFFLINE FALLBACK PROMPT (Used only if YAML loading fails)
         return """ROLE: You are an advanced Data Extraction Agent. Extract competitor domain, SEO keywords, traffic, monetization, and affiliate networks as JSON."""
 
 

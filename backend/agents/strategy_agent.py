@@ -16,12 +16,16 @@ from backend.schemas.competitor import StrategyReport
 from backend.prompts import load_prompt_template
 
 def _get_strategy_system_prompt() -> str:
-    """Load system prompt from SEO-001 YAML file in Prompt Library."""
+    """
+    Loads system prompt dynamically from SEO-001 YAML file in Prompt Library via PromptRegistry.
+    If the YAML file is unreadable/missing, returns an intentional offline fallback prompt string.
+    """
     try:
         data = load_prompt_template("SEO-001")
         return data.get("prompt_template", "")
     except Exception as e:
-        print(f"[Agent 2] Warning: Failed to load SEO-001 prompt from library ({e}). Using fallback.")
+        print(f"[Agent 2] Warning: Failed to load SEO-001 prompt from library ({e}). Using offline fallback prompt.")
+        # INTENTIONAL OFFLINE FALLBACK PROMPT (Used only if YAML loading fails)
         return """ROLE: You are a senior SEO Analyst. Generate a strategy report for the competitor."""
 
 

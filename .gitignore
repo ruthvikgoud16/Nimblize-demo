@@ -45,3 +45,7 @@ htmlcov/
 
 # Internal build scripts output
 scratch/
+
+# Node
+node_modules/
+

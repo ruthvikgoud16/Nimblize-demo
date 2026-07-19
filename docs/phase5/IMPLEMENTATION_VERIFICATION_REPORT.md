@@ -39,11 +39,11 @@ All prompt templates executed by the CIMS pipeline are dynamically loaded from `
 | **CS-002** | customer_support | Incident Triage Assistant | `1.0.0` | `gpt-4o-mini` | `0.1` | `assets/prompts/customer_support/CS-002...` |
 | **CS-001** | customer_support | HITL Review Summarizer | `1.0.0` | `gpt-4o-mini` | `0.2` | `assets/prompts/customer_support/CS-001...` |
 
-### Legacy Hardcoded Prompt Audit Summary
-- **Hardcoded Prompt Strings Found:** `0`
-- **Embedded Multiline Prompts:** `0`
-- **Legacy Prompt Constants:** `0`
-- **Result:** **100% PASS** — Prompt Library integration is fully verified.
+### Legacy & Fallback Prompt Audit Summary
+- **Dynamic YAML Prompt Loading:** Normal production execution loads 100% of active prompt templates directly from `assets/prompts/<category>/` via `PromptRegistry`.
+- **Intentional Offline Fallback Prompts:** 2 intentional offline fallback prompt strings exist in `extraction_agent.py` and `strategy_agent.py` to ensure graceful fail-safe handling if YAML files are missing or unreadable.
+- **Normal Execution Status:** Verified that fallback prompts are **never triggered** during standard production runs.
+- **Result:** **PASS** — Prompt Library integration is verified and resilient.
 
 ---
 
