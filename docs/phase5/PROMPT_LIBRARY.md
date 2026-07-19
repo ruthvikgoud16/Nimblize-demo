@@ -2,8 +2,8 @@
 
 **Project:** Nimblize  
 **Phase:** 5 — AI Assets & Automation  
-**Version:** 1.0.0  
-**Total Prompts:** 26  
+**Version:** 1.1.0  
+**Total Prompts:** 29  
 **Last Updated:** 2026-07-19  
 
 ---
