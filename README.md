@@ -1,273 +1,160 @@
-# Nimblize Phase 4 — Production Implementation
+# Nimblize — Production AI Assets & Automation Engine
 
-**Domain:** AI & Automation | **Version:** 4.2.0-PROD
-**Domain Leader:** Aastha Shukla
-**CTO & Co-Founder:** Anshul Sinha
-**Target Organization:** Nimblize
-**Document Classification:** Production-Ready Engineering Blueprint
-
----
-
-### 📂 Project Documentation & Blueprints
-*   📄 **[Phase 4 Final Report (PDF)](https://github.com/ruthvikgoud16/Nimblize-demo/blob/main/Nimblize_Phase4_Final_Report.pdf)** — Complete production-ready implementation, validation metrics, and Phase 4 execution results.
-*   📄 **[Future Implementation & Production Roadmap (PDF)](https://github.com/ruthvikgoud16/Nimblize-demo/blob/main/Nimblize_Future_Implementation_Roadmap.pdf)** — Future architecture recommendations, scaling roadmap, and long-term AI evolution.
+**Internship Domain:** AI & Automation  
+**Intern Name:** Ruthvik Goud  
+**Domain Leader:** Aastha Shukla  
+**CTO & Co-Founder:** Anshul Sinha  
+**Target Organization:** Nimblize  
+**Release Version:** v1.0.0-RC1 (Production Release)  
 
 ---
 
-## 1. Project Overview
+## 1. About Nimblize
 
-Nimblize is a high-performance competitor intelligence and product recommendation platform. This repository contains the Phase 4 production-ready implementation, providing:
-* **B2B Growth Ecosystem:** An automated SEO intelligence pipeline that crawls competitor websites, extracts structured SEO and monetization indicators via Agentic self-correcting loops, runs LLM-as-a-judge quality evaluations (RAGAS), and gates results through strict confidence levels.
-* **B2C Product Recommendation Engine:** Sub-15ms semantic recommendation capabilities powered by hierarchical parent-child chunking and HNSW vector similarity search over PostgreSQL pgvector, optimized with Redis semantic caches.
+**Nimblize** is a high-performance, enterprise-grade competitor intelligence and semantic product recommendation platform. The platform is designed to automate growth marketing analysis and serve highly relevant product comparisons to B2C users.
+
+The core platform consists of two main computing pipelines:
+1. **B2B Competitor Intelligence & Strategy Pipeline (CIMS):** An automated pipeline that ingests raw, scraped competitor website data, anonymizes PII locally using Microsoft Presidio, extracts structured profiles via self-correcting agentic loops (LangGraph), evaluates output quality using inline RAGAS metrics, and outputs executive reports and Slack alerts.
+2. **B2C Semantic Product Recommendation Engine:** A sub-15ms search and recommendation layer powered by pgvector (HNSW indexing) and optimized with a Redis semantic cache (0.15 cosine similarity threshold) to serve mid-market resellers and resellers with minimal API token costs.
 
 ---
 
-## 2. System Architecture
+## 2. Current Production State (Phase 5 Completion)
 
-```mermaid
-graph TD
-    User([User / Client])
-    Gateway[FastAPI Gateway]
-    Auth[JWT Auth & Redis Rate Limiter]
-    Cache[Redis Semantic Cache]
-    Orchestrator[LangGraph Orchestrator]
-    PII[Presidio PII Redaction]
-    Agent1[Agent 1: Extraction Specialist]
-    Agent2[Agent 2: Strategy Generator]
-    Ragas[RAGAS Evaluator]
-    DB[(PostgreSQL + pgvector)]
-    Queue[Redis Notification Queue]
-    Worker[Notification Worker]
-    Slack[Slack Webhook]
-    Sendgrid[SendGrid Email]
-    PagerDuty[PagerDuty Incident]
+At the completion of Phase 5, the repository has transitioned from initial prototypes into a fully audited, verified, and structured production release:
 
-    User -->|API Requests| Gateway
-    Gateway --> Auth
-    Auth -->|Check Cache| Cache
-    Cache -->|Cache Hit| User
-    Cache -->|Cache Miss| Orchestrator
-    Orchestrator --> PII
-    PII --> Agent1
-    Agent1 -->|Self-Correction Loop / Retry| Agent1
-    Agent1 --> Agent2
-    Agent2 --> Ragas
-    Ragas -->|Composite Score >= 0.85| DB
-    Ragas -->|Composite Score < 0.85| Queue
-    Queue --> Worker
-    Worker --> Slack
-    Worker --> Sendgrid
-    Worker --> PagerDuty
-    Worker -->|Log HITL| DB
+*   **Dynamic Prompt Registry:** Hardcoded prompt strings have been completely decoupled from the python codebase. The system loads **29 YAML prompt templates** across **8 categories** dynamically from the prompt library via the `PromptRegistry` class.
+*   **CIMS Automation Workflow:** End-to-end execution from scraping webhook triggers to alert delivery is managed by the CIMS automation engine, supporting Manual, Scheduled (72-hour beats), and Webhook ingestion modes.
+*   **Data Integrity & Security:** MS Presidio scrubs incoming text on startup lifespans. Redis Rate Limiters enforce client caps. Inline RAGAS evaluations act as database circuit breakers, rerouting strategy reports with scores `< 0.85` to a Human-in-the-Loop (HITL) review queue.
+*   **Operational Verification:** 100% of prompts pass validator schema compliance, and local unit test suites verify registry loading.
+
+---
+
+## 3. Development Phases & Milestones
+
+### 🏗️ Phase 4: Production Core Foundation
+- Developed the FastAPI gateway, JWT auth, and token-bucket rate limiters.
+- Configured PostgreSQL pgvector databases with HNSW similarity indexes.
+- Designed the Redis semantic cache and LangGraph agentic self-correction state machines.
+- Set up observability dashboards using OpenTelemetry, Sentry, Prometheus, and Grafana.
+
+### ⚙️ Phase 5: AI Assets & Automation
+- **Milestone 2 (Prompt Library):** Authored 29 production-grade prompt templates in YAML format. Conducted multi-temperature evaluations and documented findings in the `EVALUATION_REPORT.md` and `CHANGELOG.md`.
+- **Milestone 3 (CIMS Engine):** Decoupled prompt strings from code into `PromptRegistry`. Coded the CIMS trigger and stage layers, RAGAS quality gate, Redis DLQ error routing, and Slack/email alert composers.
+- **Milestone 4 (Final Freeze & QA):** Automated screenshots evidence generation, restructured the directory layout to separate Phase 4/5 files, compiled a presenter script, and successfully passed an independent QA audit (9.7/10).
+
+---
+
+## 4. Screenshot Evidence
+
+Below are key screenshots showcasing the platform in its certified production-ready state (view the full folder at [docs/phase5/screenshots/](file:///Users/ruthvikgoud/Music/Nimblize-demo/docs/phase5/screenshots/)):
+
+### Workspace Repository Overview
+![SS01_Repository](docs/phase5/screenshots/SS01_Repository.png)
+
+### Prompt Library Registry Index
+![SS02_Prompt_Library](docs/phase5/screenshots/SS02_Prompt_Library.png)
+
+### Automated Prompt Schema Validation Suite
+![SS04_Prompt_Validation](docs/phase5/screenshots/SS04_Prompt_Validation.png)
+
+### CIMS System Integration Architecture
+![SS06_Workflow_Architecture](docs/phase5/screenshots/SS06_Workflow_Architecture.png)
+
+### Dynamic Prompt Loading & Unit Test Run
+![SS08_Runtime_Verification](docs/phase5/screenshots/SS08_Runtime_Verification.png)
+
+### Official Release Candidate Certificate
+![SS11_Release_Certificate](docs/phase5/screenshots/SS11_Release_Certificate.png)
+
+---
+
+## 5. Repository Directory Structure
+
+The repository structure has been organized to keep directories clean and separate Phases 4 and 5 deliverables:
+
+```
+Nimblize-demo/
+├── assets/
+│   └── prompts/                           # 29 Dynamic YAML prompt templates
+│       ├── competitor_analysis/           # CA-001 through CA-005
+│       ├── seo_analysis/                  # SEO-001 through SEO-005
+│       ├── product_recommendation/        # PR-001 through PR-003
+│       ├── feature_comparison/            # FC-001 through FC-003
+│       ├── market_research/               # MR-001 through MR-003
+│       ├── customer_support/              # CS-001 through CS-003
+│       ├── report_generation/             # RG-001 through RG-004
+│       └── executive_summary/             # ES-001 through ES-003
+├── backend/
+│   ├── agents/                            # LangGraph State Machine nodes
+│   ├── automation/                        # CIMS Pipeline Engine (cims_pipeline.py)
+│   ├── cache/                             # Redis Semantic Cache layer
+│   ├── db/                                # PostgreSQL pgvector interface
+│   ├── evaluation/                        # RAGAS Quality Gate evaluator
+│   ├── middleware/                        # Presidio PII scrubber & rate limiter
+│   ├── prompts/                           # Dynamic YAML PromptRegistry loader
+│   ├── tests/                             # Operational unit test suite
+│   └── telemetry/                         # OpenTelemetry tracing spans
+├── docs/
+│   ├── phase4/                            # Phase 4 Legacy Reports & PDF Blueprints
+│   │   ├── DEMO_AND_TEST_RESULTS.md       # Phase 4 test execution logs
+│   │   ├── Nimblize_Future_Roadmap.md     # Section-by-section future roadmap
+│   │   ├── Nimblize_Future_Roadmap.pdf    # Rendered roadmap PDF
+│   │   ├── Nimblize_Phase4_Final_Report.pdf # Final Phase 4 Internship Report
+│   │   ├── presentation_blueprint.md      # Presenter slides script
+│   │   └── project_closure_package.md     # Phase 4 closing matrix
+│   └── phase5/                            # Phase 5 AI Assets & Automation docs
+│       ├── screenshots/                   # 13 high-fidelity PNG evidence screenshots
+│       ├── diagrams/                      # Staged folder for structural diagrams
+│       ├── AUTOMATION_WORKFLOW.md         # CIMS Pipeline specifications
+│       ├── CHANGELOG.md                   # Prompt Library release logs
+│       ├── CONSISTENCY_REPORT.md          # Milestone 2 schema audit
+│       ├── DEMO_SCRIPT.md                 # 3-minute presenter guide
+│       ├── EVALUATION_REPORT.md           # Multi-temp temperature metrics
+│       ├── FINAL_QA_REPORT.md             # Independent evaluator QA audit (9.7/10)
+│       ├── IMPLEMENTATION_VERIFICATION.md  # Runtime prompt loading verify trace
+│       ├── MILESTONE3_FREEZE_REPORT.md    # CIMS code decouple freeze audit
+│       ├── PHASE5_PLAN.md                 # Phase roadmap and deliverables status
+│       ├── PHASE5_RELEASE_CERTIFICATE.md  # Official release candidate certificate
+│       ├── PROMPT_LIBRARY.md              # 29-Prompt Library specs
+│       ├── README.md                      # Phase 5 master index
+│       ├── RELEASE_NOTES_v1.0.md          # Release candidate release notes
+│       ├── REPOSITORY_SUMMARY.md          # Final statistics and structure report
+│       └── SUBMISSION_CHECKLIST.md         # Master submission compliance checklist
+├── scripts/
+│   ├── demo_test.sh                       # Live FastAPI integration verify script
+│   ├── generate_pdf.js                    # Markdown-to-PDF headless converter
+│   ├── generate_screenshots.js            # Puppeteer screenshot automated runner
+│   └── validate_prompts.py                # YAML Schema prompt validation engine
+├── requirements.txt                       # Backend python requirements list
+├── docker-compose.yml                     # Production Docker Services Compose file
+└── README.md                              # Root repository index (This file)
 ```
 
 ---
 
-## 3. LangGraph Execution Flow
+## 6. Installation & Verification Guide
 
-```mermaid
-stateDiagram-v2
-    [*] --> PII_Filter
-    PII_Filter --> Extraction
-    Extraction --> Validation
-    state Validation <<choice>>
-    Validation --> Strategy : Successful Extraction
-    Validation --> Extraction : Schema Error (Retry < 3)
-    Validation --> Dead_Letter : Retry >= 3
-    
-    Strategy --> Evaluate
-    Evaluate --> Confidence_Gate
-    state Confidence_Gate <<choice>>
-    Confidence_Gate --> Persist : RAGAS Score >= 0.85
-    Confidence_Gate --> Queue_HITL : RAGAS Score < 0.85
-
-    Persist --> [*]
-    Queue_HITL --> [*]
-    Dead_Letter --> [*]
-```
-
----
-
-## 4. Installation & Setup
-
-### Prerequisites
-* Docker & Docker Compose
-* Python 3.12 (if running locally)
-* PostgreSQL (with pgvector extension) & Redis (if running locally)
-
-### Step-by-Step Installation
-1. Clone the repository and navigate to the project directory:
+### Local Installation
+1. Clone the repository and install all dependencies:
    ```bash
-   cd nimblize
-   ```
-2. Create and configure your environment file:
-   ```bash
-   cp .env.example .env
-   # Edit .env and supply your OPENAI_API_KEY and other credentials.
-   ```
-3. Set up a local Python virtual environment (if running without Docker):
-   ```bash
-   python3 -m venv .venv
-   source .venv/bin/activate
-   pip install -r requirements.txt
-   python -m spacy download en_core_web_lg
+   python3 -m pip install -r requirements.txt --user
    ```
 
----
-
-## 5. Environment Variables
-
-Configure these values in your `.env` file:
-
-| Variable | Description | Default | Required |
-|---|---|---|---|
-| `OPENAI_API_KEY` | OpenAI API Key for models and embeddings | - | **Yes** |
-| `POSTGRES_PASSWORD` | Database password for PostgreSQL | `nimblize_dev` | No |
-| `DATABASE_URL` | Full PostgreSQL connection URL | `postgresql://nimblize:nimblize_dev@postgres:5432/nimblize` | No |
-| `REDIS_HOST` | Redis host address | `redis` (Docker) / `localhost` | No |
-| `REDIS_PORT` | Redis port number | `6379` | No |
-| `JWT_SECRET` | Secret key for generating JWT tokens | `nimblize-dev-secret` | **Yes (Prod)** |
-| `ENV` | Environment identifier | `production` / `development` | No |
-| `SLACK_WEBHOOK_URL` | Webhook URL for HITL Slack notifications | - | No |
-| `SENDGRID_API_KEY` | SendGrid API Key for HITL email alerts | - | No |
-| `PAGERDUTY_ROUTING_KEY` | PagerDuty integration key for incidents | - | No |
-
----
-
-## 6. Running with Docker Compose
-
-To build and start the entire production container stack:
+### Run Validation Checks
+Confirm that the prompt library and dynamic registry are fully operational:
 ```bash
-# 1. Start database and cache first to allow healthchecks to succeed
-docker compose up postgres redis -d
+# 1. Run the prompt schema validation checks
+python3 scripts/validate_prompts.py
 
-# 2. Wait 10 seconds, then run database migrations and schema provision
-docker compose run --rm api python backend/db/schema.sql.py
-
-# 3. Spin up all remaining services (API, Workers, Telemetry stack)
-docker compose up --build -d
+# 2. Run the prompt registry unit tests
+python3 -m unittest backend.tests.test_prompt_registry
 ```
 
-### Container Endpoints
-* **FastAPI Gateway:** http://localhost:8000
-* **API Swagger Documentation:** http://localhost:8000/docs
-* **Prometheus Metrics Exporter:** http://localhost:9090
-* **Grafana Dashboards:** http://localhost:3000 (Credentials: `admin` / `nimblize_admin`)
-* **OTel Collector (gRPC):** http://localhost:4317
-
----
-
-## 7. Running the API Locally (Development Mode)
-
-If you prefer to run individual components locally:
+### Start the FastAPI Server Localhost
+To run the server locally on your PC (bypassing slow spaCy downloads and uvloop async issues):
 ```bash
-# Start local Redis and Postgres services
-# Then run:
-source .venv/bin/activate
-
-# 1. Provision the local database schema
-python backend/db/schema.sql.py
-
-# 2. Start the FastAPI gateway server
-uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
-
-# 3. Start the notification queue worker in a separate shell
-python workers/notification_worker.py
+python3 -m uvicorn backend.main:app --port 8000 --loop asyncio
 ```
-
----
-
-## 8. Live Demo Walkthrough Flow
-
-You can run our automated validation script to verify all pipelines in action:
-```bash
-./scripts/demo_test.sh http://localhost:8000
-```
-
-The script exercises these four core flows:
-
-1. **Happy Path (Automatic Approval):**
-   * Raw input containing rich competitor text (e.g. `RankVantage`) is sent.
-   * Microsoft Presidio automatically redacts any PII.
-   * Agent 1 extracts structured competitor statistics on the first try.
-   * Agent 2 generates a qualitative strategic gap analysis report.
-   * RAGAS score passes the `0.85` threshold.
-   * Profile is saved in `competitor_profiles` and strategic insights in `strategy_reports`.
-   
-2. **HITL Review Queue Path (Low Confidence):**
-   * Short or highly ambiguous competitor text is sent.
-   * Extraction succeeds but RAGAS evaluation scores fall below `0.85`.
-   * State machine flags the payload and triggers `node_queue_hitl`.
-   * Job is enqueued in Redis; background notification worker dispatches alerts and logs the event to the `manual_review_queue` table.
-   
-3. **Dead-Letter Path (Failed Extraction):**
-   * Unstructured garbage input (e.g. random noise) is sent.
-   * Agent 1 Pydantic parsing fails and feeds the validation trace back into the model.
-   * After 3 retries, the orchestrator terminates the loop and routes the payload to `DEAD_LETTER`.
-
-4. **B2C Semantic Cache and Recommendation:**
-   * A B2C recommendation query is submitted.
-   * The system computes a semantic hash and checks the Redis cache.
-   * On cache miss, it embeds the query and runs a pgvector similarity search over PostgreSQL.
-   * The results are cached in Redis. Submitting a similar query again results in a sub-millisecond Cache Hit.
-
----
-
-## 9. Future Implementation Roadmap & Verification Metadata
-
-*   **Roadmap PDF Path:** `docs/phase4/Nimblize_Future_Implementation_Roadmap.pdf`
-*   **Roadmap Markdown Path:** `docs/phase4/Nimblize_Future_Implementation_Roadmap.md`
-*   **Total Page Count:** **29 pages** (exceeds the 19 pages minimum requirement, maintaining all 29 original sections of the deep report with maximized diagram styling).
-*   **Git Commit Hash:** `9647d282d0c99a9a091058f02c5f8b13d2f54be6`
-*   **Included Diagrams:**
-    1.  **High-Level Future Architecture Diagram** (Section 4.2: Full-width flowchart)
-    2.  **Multi-Agent Workflow Diagram** (Section 8.2: Sequence diagram)
-    3.  **LangGraph State Flow Diagram** (Section 9.2: State machine mapping)
-    4.  **Future RAG Architecture Diagram** (Section 7.2: Hierarchical parent-to-child chunks)
-    5.  **Telemetry Pipeline Diagram** (Section 11.1: Observability loop)
-    6.  **Cost Optimization Flowchart** (Section 12.1: Multi-tiered query routing)
-    7.  **Database ER Diagram** (Section 5.2: Complete database tables schema relationships)
-    8.  **HITL Workflow Diagram** (Integrated into State transitions routing low-score evaluations to review queues)
-*   **GitHub File URLs:**
-    *   **README.md:** [https://github.com/ruthvikgoud16/Nimblize-demo/blob/main/README.md](https://github.com/ruthvikgoud16/Nimblize-demo/blob/main/README.md)
-    *   **Future Roadmap PDF:** [https://github.com/ruthvikgoud16/Nimblize-demo/blob/main/docs/phase4/Nimblize_Future_Implementation_Roadmap.pdf](https://github.com/ruthvikgoud16/Nimblize-demo/blob/main/docs/phase4/Nimblize_Future_Implementation_Roadmap.pdf)
-    *   **Phase 4 Final Report PDF:** [https://github.com/ruthvikgoud16/Nimblize-demo/blob/main/docs/phase4/Nimblize_Phase4_Final_Report.pdf](https://github.com/ruthvikgoud16/Nimblize-demo/blob/main/docs/phase4/Nimblize_Phase4_Final_Report.pdf)
-
----
-
-## 10. Phase 5 — AI Assets & Automation
-
-> **Status:** 🟢 Completed & Frozen | **Version:** v1.0.0 | **Branch:** `phase5`
-
-Phase 5 extends the production-ready Phase 4 foundation with structured AI prompt assets, dynamic prompt registries, and automated workflow orchestration engines.
-
-### Key Phase 5 Accomplishments
-
-- **Prompt Library (Milestone 2):** Created and verified **29 production-ready YAML prompt templates** across 8 categories (`assets/prompts/`), managed dynamically via `PromptRegistry` (`backend/prompts/prompt_loader.py`).
-- **Automation Engine (Milestone 3):** Designed, implemented, and runtime-verified the **Competitor Intelligence & Strategy Pipeline (CIMS)** workflow engine (`backend/automation/cims_pipeline.py`) supporting manual, scheduled, and webhook trigger modes.
-- **RAGAS Quality Gate:** Integrated 0.85 score quality thresholding and automated HITL review queue routing.
-- **Verification & Audit:** Verified 100% prompt loading compliance, zero hardcoded system prompts, and 100% clean repository status (`nothing to commit, working tree clean`).
-
-### Phase 5 Master Document Index
-
-| Document | Description | Status |
-|---|---|---|
-| [`docs/phase5/README.md`](docs/phase5/README.md) | Phase 5 Master Directory Index | 🟢 Complete |
-| [`docs/phase5/PHASE5_PLAN.md`](docs/phase5/PHASE5_PLAN.md) | Master plan, scope, milestones, and success criteria | 🟢 Complete |
-| [`docs/phase5/PROMPT_LIBRARY.md`](docs/phase5/PROMPT_LIBRARY.md) | 29-Prompt Library registry and versioning policy (v1.1.0) | 🟢 Complete |
-| [`docs/phase5/AUTOMATION_WORKFLOW.md`](docs/phase5/AUTOMATION_WORKFLOW.md) | Competitor Intelligence Pipeline (CIMS) engine specs | 🟢 Complete |
-| [`docs/phase5/WORKFLOW_ARCHITECTURE.md`](docs/phase5/WORKFLOW_ARCHITECTURE.md) | Architectural integration diagram & failure matrix | 🟢 Complete |
-| [`docs/phase5/WORKFLOW_SEQUENCE.md`](docs/phase5/WORKFLOW_SEQUENCE.md) | Step-by-step sequence flows with Mermaid diagrams | 🟢 Complete |
-| [`docs/phase5/EVALUATION_REPORT.md`](docs/phase5/EVALUATION_REPORT.md) | Multi-temperature quality benchmarks & evaluation matrix | 🟢 Complete |
-| [`docs/phase5/IMPLEMENTATION_VERIFICATION_REPORT.md`](docs/phase5/IMPLEMENTATION_VERIFICATION_REPORT.md) | Runtime verification, prompt trace, and audit findings | 🟢 Complete |
-| [`docs/phase5/MILESTONE3_FREEZE_REPORT.md`](docs/phase5/MILESTONE3_FREEZE_REPORT.md) | Milestone 3 freeze and repository readiness audit | 🟢 Complete |
-| [`docs/phase5/DEMO_SCRIPT.md`](docs/phase5/DEMO_SCRIPT.md) | Timer-calibrated 3-minute presenter guide and sequence script | 🟢 Complete |
-| [`docs/phase5/FINAL_QA_REPORT.md`](docs/phase5/FINAL_QA_REPORT.md) | Independent Quality Assurance audit and scoring evaluation | 🟢 Complete |
-| [`docs/phase5/REPOSITORY_SUMMARY.md`](docs/phase5/REPOSITORY_SUMMARY.md) | Final Phase 5 repository statistics and structural audit | 🟢 Complete |
-| [`docs/phase5/SUBMISSION_CHECKLIST.md`](docs/phase5/SUBMISSION_CHECKLIST.md) | Final Phase 5 submission verification checklist | 🟢 Complete |
-| [`docs/phase5/RELEASE_NOTES_v1.0.md`](docs/phase5/RELEASE_NOTES_v1.0.md) | Phase 5 release notes and accomplishments summary | 🟢 Complete |
-| [`TASKS.md`](TASKS.md) | Phase 5 milestone progress tracker | 🟢 Complete |
-
----
-
-
+Once started, you can access the live interactive Swagger documentation and execute test runs at:  
+👉 **[http://localhost:8000/docs](http://localhost:8000/docs)**
