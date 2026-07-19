@@ -6,6 +6,8 @@ import {
   BarChart3,
   UserCheck,
   Settings,
+  FileText,
+  Network,
   type LucideIcon,
 } from "lucide-react";
 
@@ -42,10 +44,22 @@ export const navigation: NavItem[] = [
     description: "CIMS pipeline orchestration",
   },
   {
+    label: "Workflow Explorer",
+    href: "/workflow",
+    icon: Network,
+    description: "System architecture and node tracing",
+  },
+  {
     label: "Evaluation",
     href: "/evaluation",
     icon: BarChart3,
     description: "RAGAS quality metrics and SLA",
+  },
+  {
+    label: "Reports Center",
+    href: "/reports",
+    icon: FileText,
+    description: "Generated markdown and PDF reports",
   },
   {
     label: "Review Queue",
