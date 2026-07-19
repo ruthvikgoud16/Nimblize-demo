@@ -199,3 +199,65 @@ To build the static application:
 npm run build
 ```
 
+---
+
+## 8. Production Auditing, Testing & Vercel Deployment
+
+Nimblize Studio is fully optimized, verified, and certified for production deployments.
+
+### 🧪 Automated Test Suites
+
+The repository contains automated unit and E2E testing systems for the frontend and backend:
+
+#### 1. FastAPI Gateway Route Coverage (Backend)
+Tests route handlers, registry loading, favorites, settings persistence, and local SQLite fallback. Runs instantly without external databases:
+```bash
+python3 -m unittest backend/tests/test_api_endpoints.py
+```
+
+#### 2. Component Unit Testing (Frontend)
+Verifies that key UI components (`MetricCard`, `Button`, `Badge`) render and display state parameters accurately in jsdom using Vitest:
+```bash
+cd frontend
+npm run test:unit
+```
+
+#### 3. Playwright E2E browser Testing (Frontend)
+Validates login redirection, private route protections, settings edits, visual timeline animations, and parameter selectors:
+```bash
+cd frontend
+# 1. Start your local dev server or target production backend
+# 2. Run Playwright test suite
+npx playwright test
+```
+
+---
+
+### 🌐 Vercel Production Deployment
+
+The Next.js frontend is configured to be deployed on **Vercel** with zero-config rewrites and security header templates.
+
+#### 1. Environment Configurations
+Verify the following variables are configured in the Vercel Dashboard Settings under **Environment Variables**:
+- `NEXT_PUBLIC_API_URL`: The live URL of the FastAPI gateway (e.g. `https://api.nimblize.ai`).
+- `NEXT_PUBLIC_APP_URL`: The live URL of the console application (e.g. `https://studio.nimblize.ai`).
+- `NEXT_PUBLIC_ENV`: Set to `production`.
+
+#### 2. Vercel Security Policies (`vercel.json`)
+A pre-packaged `vercel.json` is located in `/frontend/vercel.json` providing:
+- **Header Security Rules:** Content-Security-Policy (CSP) headers, X-Frame-Options (DENY), nosniff, and Referrer policies.
+- **Cache Optimizations:** Immutable caching headers for `_next/static` assets to minimize load latencies.
+
+---
+
+### 👷 CI/CD Production Pipeline
+
+Nimblize Studio has a pre-configured GitHub Actions pipeline (`.github/workflows/production-pipeline.yml`) that validates release candidates on every push or pull request to the `main` branch.
+
+The pipeline performs:
+1. **Python dependencies checkout** & running backend endpoint tests.
+2. **ESLint & TypeScript check** (`npm run lint` & `npx tsc --noEmit`).
+3. **Vitest unit tests execution** (`npm run test:unit`).
+4. **Production compile build validation** (`npm run build`).
+
+

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { Providers } from "@/providers";
 import { AppShell } from "@/components/layout/app-shell";
+import { ErrorBoundary } from "@/components/common/error-boundary";
 import "./globals.css";
 
 const inter = Inter({
@@ -35,7 +36,9 @@ export default function RootLayout({
     >
       <body className="min-h-full">
         <Providers>
-          <AppShell>{children}</AppShell>
+          <ErrorBoundary>
+            <AppShell>{children}</AppShell>
+          </ErrorBoundary>
         </Providers>
       </body>
     </html>

@@ -1,16 +1,21 @@
 "use client";
 
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useMemo } from "react";
+import { motion } from "framer-motion";
 import { PageHeader } from "@/components/common/page-header";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { fetchFromAPI } from "@/lib/api";
 import { 
   Network, 
   Terminal, 
-  ArrowRight, 
   FileCode2, 
-  ListOrdered
+  ListOrdered,
+  BookOpen,
+  Cpu,
+  Layers,
+  ArrowUpRight,
+  ShieldAlert
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -18,186 +23,253 @@ interface ArchitectureNode {
   id: string;
   label: string;
   purpose: string;
+  layer: "Ingestion" | "Core Processing" | "Validation & Security" | "Metrics & Output";
   dependencies: string[];
+  upstream: string[];
   files: string[];
+  documentation: string;
   executionOrder: number;
-  type: "orchestrator" | "storage" | "validator" | "external";
+  type: "orchestrator" | "storage" | "validator" | "external" | "security";
+  healthStatus: "healthy" | "warning";
 }
 
-const mockNodes: ArchitectureNode[] = [
-  {
-    id: "registry",
-    label: "Prompt Registry",
-    purpose: "Validates and parses incoming prompt declarations defined in YAML assets.",
-    dependencies: ["semantic-cache"],
-    files: ["backend/prompt_registry.py", "assets/prompts/**/*.yaml"],
-    executionOrder: 1,
-    type: "orchestrator"
-  },
-  {
-    id: "cache",
-    label: "Semantic Cache",
-    purpose: "Queries Redis Vector DB to match semantically equivalent queries using embeddings.",
-    dependencies: ["llm-gateway"],
-    files: ["backend/semantic_cache.py", "backend/redis_client.py"],
-    executionOrder: 2,
-    type: "storage"
-  },
-  {
-    id: "llm-gateway",
-    label: "LLM Gateway",
-    purpose: "Distributes calls to Anthropic, OpenAI, or local Llama models with automatic retry logic.",
-    dependencies: ["validator"],
-    files: ["backend/llm_gateway.py", "backend/providers/"],
-    executionOrder: 3,
-    type: "external"
-  },
-  {
-    id: "validator",
-    label: "Fidelity Validator",
-    purpose: "Applies Pydantic strict schemas on the generated LLM text outputs.",
-    dependencies: ["ragas-eval"],
-    files: ["backend/validation/validator.py", "backend/schemas/"],
-    executionOrder: 4,
-    type: "validator"
-  },
-  {
-    id: "ragas-eval",
-    label: "RAGAS Evaluator",
-    purpose: "Runs evaluations for Faithfulness, Latency, and Context recall to check against SLA.",
-    dependencies: [],
-    files: ["backend/evaluation/ragas_evaluator.py"],
-    executionOrder: 5,
-    type: "validator"
-  }
-];
-
 export default function WorkflowPage() {
+  const [nodes, setNodes] = useState<ArchitectureNode[]>([]);
   const [selectedNodeId, setSelectedNodeId] = useState<string>("registry");
 
-  const selectedNode = mockNodes.find(n => n.id === selectedNodeId);
+  useEffect(() => {
+    fetchFromAPI("/api/v1/workflow/nodes")
+      .then(data => {
+        setNodes(data.nodes);
+        if (data.nodes.length > 0) {
+          // Default to registry if present, or first node
+          const hasRegistry = data.nodes.some((n: ArchitectureNode) => n.id === "registry");
+          setSelectedNodeId(hasRegistry ? "registry" : data.nodes[0].id);
+        }
+      })
+      .catch(err => console.error("Workflow fetch error:", err));
+  }, []);
+
+  const selectedNode = useMemo(() => {
+    return nodes.find(n => n.id === selectedNodeId);
+  }, [nodes, selectedNodeId]);
+
+  // Group nodes by layer for the architectural grid layout
+  const layers = useMemo(() => {
+    return {
+      "Ingestion": nodes.filter(n => n.layer === "Ingestion"),
+      "Core Processing": nodes.filter(n => n.layer === "Core Processing"),
+      "Validation & Security": nodes.filter(n => n.layer === "Validation & Security"),
+      "Metrics & Output": nodes.filter(n => n.layer === "Metrics & Output")
+    };
+  }, [nodes]);
+
+  const isRelated = (nodeId: string) => {
+    if (!selectedNode) return false;
+    if (nodeId === selectedNodeId) return true;
+    return selectedNode.dependencies.includes(nodeId) || selectedNode.upstream.includes(nodeId);
+  };
+
+  if (nodes.length === 0) {
+    return (
+      <div className="h-[calc(100vh-theme(spacing.24))] flex flex-col items-center justify-center bg-[#070A11]">
+        <div className="flex flex-col items-center gap-3">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+            className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent"
+          />
+          <span className="text-xs font-mono text-muted-foreground uppercase tracking-widest animate-pulse">
+            Inspecting Backend Architecture...
+          </span>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-theme(spacing.16)-2rem)]">
+    <div className="flex flex-col h-[calc(100vh-theme(spacing.16)-1.5rem)]">
       <PageHeader
         title="Workflow Explorer"
         description="Trace the system architecture and runtime module dependencies in real-time."
       />
 
-      <div className="flex-1 grid lg:grid-cols-[1fr_400px] gap-6 mt-6 overflow-hidden">
+      <div className="flex-1 grid lg:grid-cols-[1fr_420px] gap-5 mt-4 overflow-hidden">
         {/* Node Layout Canvas */}
-        <div className="flex flex-col rounded-md border border-border bg-card overflow-hidden relative">
-          <div className="flex items-center px-4 py-3 border-b border-border/50 bg-muted/50">
-            <div className="flex items-center gap-2 text-sm font-medium">
-              <Network className="h-4 w-4 text-primary" />
-              Architecture Trace Canvas
+        <div className="flex flex-col rounded-xl border border-border bg-[#070A11] overflow-hidden relative">
+          <div className="flex items-center px-4 py-3 border-b border-border/50 bg-muted/30 justify-between">
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <Network className="h-3.5 w-3.5 text-primary" />
+              Architecture Trace Map
+            </div>
+            <div className="flex gap-4 text-[10px] text-muted-foreground font-mono">
+              <span className="flex items-center gap-1">
+                <span className="h-2 w-2 rounded-full bg-primary" /> Core
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="h-2 w-2 rounded-full bg-success animate-pulse" /> Healthy
+              </span>
             </div>
           </div>
           
-          <div className="flex-1 flex flex-col justify-center items-center p-8 bg-[#09090b]">
-            <div className="w-full max-w-lg space-y-4">
-              {mockNodes.map((node, index) => {
-                const isActive = node.id === selectedNodeId;
-                const isLast = index === mockNodes.length - 1;
-                
-                return (
-                  <div key={node.id} className="flex flex-col items-center">
-                    <motion.div
-                      className={cn(
-                        "w-full max-w-sm p-4 rounded-lg border cursor-pointer transition-all flex items-center justify-between",
-                        isActive ? "bg-primary/10 border-primary shadow-[0_0_15px_rgba(99,102,241,0.15)]" : "bg-zinc-950 border-zinc-900 hover:border-zinc-800"
-                      )}
-                      onClick={() => setSelectedNodeId(node.id)}
-                      whileHover={{ scale: 1.01 }}
-                      whileTap={{ scale: 0.99 }}
-                    >
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className="h-5 w-5 rounded bg-muted flex items-center justify-center text-[10px] font-mono font-bold">
-                            {node.executionOrder}
-                          </span>
-                          <span className="text-sm font-semibold">{node.label}</span>
-                        </div>
-                        <p className="text-xs text-muted-foreground line-clamp-1">{node.purpose}</p>
-                      </div>
-                      <Badge variant="secondary" className="text-[10px] uppercase tracking-wider font-mono">
-                        {node.type}
-                      </Badge>
-                    </motion.div>
-                    
-                    {!isLast && (
-                      <div className="h-6 w-[2px] bg-border my-1 relative">
-                        <ArrowRight className="h-3 w-3 absolute -bottom-1 -left-[5px] rotate-90 text-muted-foreground" />
-                      </div>
-                    )}
+          <ScrollArea className="flex-1 p-6 relative animate-fadeIn">
+            <div className="space-y-8 max-w-2xl mx-auto py-2">
+              {(Object.keys(layers) as Array<keyof typeof layers>).map(layerName => (
+                <div key={layerName} className="space-y-3">
+                  <div className="flex items-center gap-2 border-b border-border/20 pb-1.5">
+                    <Layers className="h-3.5 w-3.5 text-primary/70" />
+                    <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
+                      {layerName} Layer
+                    </span>
                   </div>
-                );
-              })}
+                  
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    {layers[layerName].map(node => {
+                      const isActive = node.id === selectedNodeId;
+                      const related = isRelated(node.id);
+                      
+                      return (
+                        <motion.div
+                          key={node.id}
+                          className={cn(
+                            "relative p-4 rounded-xl border cursor-pointer transition-all duration-200",
+                            isActive 
+                              ? "bg-primary/10 border-primary shadow-[0_0_15px_rgba(99,102,241,0.15)]" 
+                              : related 
+                              ? "bg-background/80 border-primary/45 shadow-sm"
+                              : "bg-zinc-950/90 border-border/80 hover:border-border",
+                            node.healthStatus === "warning" && !isActive && "border-warning/50 bg-warning/5"
+                          )}
+                          onClick={() => setSelectedNodeId(node.id)}
+                          whileHover={{ scale: 1.01 }}
+                          whileTap={{ scale: 0.99 }}
+                        >
+                          {/* Inner contents */}
+                          <div className="flex justify-between items-start">
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-[10px] font-mono font-bold text-muted-foreground bg-muted/40 h-4 min-w-4 px-1 rounded flex items-center justify-center border">
+                                  {node.executionOrder}
+                                </span>
+                                <span className="text-xs font-bold text-foreground">{node.label}</span>
+                              </div>
+                              <p className="text-[10px] text-muted-foreground line-clamp-1 leading-normal">
+                                {node.purpose}
+                              </p>
+                            </div>
+                            
+                            {/* Health indicator */}
+                            <span className={cn(
+                              "h-2 w-2 rounded-full mt-1 shrink-0",
+                              node.healthStatus === "healthy" ? "bg-success" : "bg-warning"
+                            )} />
+                          </div>
+
+                          {/* Upstream/Downstream indicators */}
+                          {related && !isActive && (
+                            <div className="absolute bottom-2 right-2 text-[9px] font-mono text-primary/70 flex items-center gap-1">
+                              {selectedNode && selectedNode.dependencies.includes(node.id) ? (
+                                <>
+                                  Downstream <ArrowUpRight className="h-2.5 w-2.5" />
+                                </>
+                              ) : (
+                                <>
+                                  Upstream <ArrowUpRight className="h-2.5 w-2.5 rotate-180" />
+                                </>
+                              )}
+                            </div>
+                          )}
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
+          </ScrollArea>
         </div>
 
-        {/* Sidebar Info Panel */}
-        <div className="flex flex-col rounded-md border border-border bg-card overflow-hidden">
-          <div className="flex items-center px-4 py-3 border-b border-border/50 bg-muted/50">
-            <div className="text-sm font-medium">Module Details</div>
+        {/* Right Info Panel */}
+        <div className="flex flex-col rounded-xl border border-border bg-card overflow-hidden">
+          <div className="flex items-center px-4 py-3 border-b border-border/50 bg-muted/30">
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <BookOpen className="h-3.5 w-3.5 text-primary" />
+              Module Specifications
+            </div>
           </div>
-
-          <ScrollArea className="flex-1 p-6">
-            <AnimatePresence mode="wait">
-              {selectedNode ? (
-                <motion.div
-                  key={selectedNode.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="space-y-6"
-                >
-                  <div>
-                    <h3 className="text-base font-bold">{selectedNode.label}</h3>
-                    <p className="text-xs text-muted-foreground mt-1">Order of Execution: {selectedNode.executionOrder}</p>
+          
+          <ScrollArea className="flex-1 p-5 bg-[#070A10]">
+            {selectedNode ? (
+              <div className="space-y-6">
+                {/* Node Title & Health Warning */}
+                <div className="space-y-3">
+                  <div className="flex justify-between items-start">
+                    <h2 className="text-sm font-extrabold text-foreground">{selectedNode.label}</h2>
+                    <Badge variant="outline" className={cn(
+                      "text-[9px] uppercase tracking-wider font-bold",
+                      selectedNode.healthStatus === "healthy" ? "bg-success/10 text-success border-success/20" : "bg-warning/10 text-warning border-warning/20"
+                    )}>
+                      {selectedNode.healthStatus}
+                    </Badge>
                   </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{selectedNode.purpose}</p>
+                </div>
 
-                  <div className="space-y-2">
-                    <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Purpose</h4>
-                    <p className="text-sm leading-relaxed text-zinc-300">{selectedNode.purpose}</p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                      <ListOrdered className="h-3.5 w-3.5" /> Direct Downstream Dependencies
-                    </h4>
-                    <div className="flex flex-wrap gap-1.5">
-                      {selectedNode.dependencies.length > 0 ? (
-                        selectedNode.dependencies.map(dep => (
-                          <Badge key={dep} variant="outline" className="font-mono text-[10px] bg-zinc-950">
-                            {dep}
-                          </Badge>
-                        ))
-                      ) : (
-                        <span className="text-xs text-muted-foreground font-italic">None</span>
-                      )}
+                {/* Health Warning Alert Box */}
+                {selectedNode.healthStatus === "warning" && (
+                  <div className="p-3 rounded-lg border border-warning/30 bg-warning/5 text-[10px] text-warning flex items-start gap-2 leading-relaxed">
+                    <ShieldAlert className="h-4 w-4 shrink-0 mt-0.5" />
+                    <div>
+                      <span className="font-bold block uppercase tracking-wider mb-0.5">SLA Threshold Alert</span>
+                      Evaluating scores may drop below 0.85 depending on scraped content density. Trigger enqueues HITL exception logs.
                     </div>
                   </div>
+                )}
 
-                  <div className="space-y-2">
-                    <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                      <FileCode2 className="h-3.5 w-3.5" /> Code & File Sources
-                    </h4>
-                    <div className="space-y-1.5">
-                      {selectedNode.files.map(file => (
-                        <div key={file} className="flex items-center gap-2 p-2 rounded bg-zinc-950/60 border border-zinc-900 font-mono text-[10px] text-zinc-400">
-                          <Terminal className="h-3.5 w-3.5 shrink-0 text-primary" />
-                          <span className="truncate">{file}</span>
-                        </div>
-                      ))}
-                    </div>
+                {/* Execution Order and Type */}
+                <div className="grid grid-cols-2 gap-3 text-[10px] font-mono">
+                  <div className="p-3 border border-border/40 rounded-lg bg-background/20">
+                    <span className="text-zinc-500 uppercase block tracking-wider mb-1 text-[8px] flex items-center gap-1">
+                      <ListOrdered className="h-3 w-3" /> Execution Step
+                    </span>
+                    <span className="font-bold text-zinc-200"># 0{selectedNode.executionOrder}</span>
                   </div>
-                </motion.div>
-              ) : (
-                <div className="text-sm text-muted-foreground text-center pt-10">Select an architecture module node to explore detail</div>
-              )}
-            </AnimatePresence>
+                  <div className="p-3 border border-border/40 rounded-lg bg-background/20">
+                    <span className="text-zinc-500 uppercase block tracking-wider mb-1 text-[8px] flex items-center gap-1">
+                      <Cpu className="h-3 w-3" /> Module Type
+                    </span>
+                    <span className="font-bold text-zinc-200 uppercase">{selectedNode.type}</span>
+                  </div>
+                </div>
+
+                {/* Code files mapping */}
+                <div className="space-y-2">
+                  <span className="text-[9px] uppercase font-bold text-zinc-500 tracking-wider flex items-center gap-1.5">
+                    <FileCode2 className="h-3 w-3" /> Source Code Files
+                  </span>
+                  <div className="rounded-lg border border-border/30 bg-background/20 p-3 space-y-1.5 font-mono text-[10px]">
+                    {selectedNode.files.map(file => (
+                      <div key={file} className="flex justify-between items-center text-zinc-400">
+                        <span className="truncate max-w-[280px]">{file}</span>
+                        <ArrowUpRight className="h-3 w-3 text-zinc-600 shrink-0" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Inline python docstrings / Class specifications */}
+                <div className="space-y-2">
+                  <span className="text-[9px] uppercase font-bold text-zinc-500 tracking-wider flex items-center gap-1.5">
+                    <Terminal className="h-3 w-3" /> Python Class Docstring
+                  </span>
+                  <div className="rounded-lg border border-border/30 bg-zinc-950 p-4 font-mono text-[10px] leading-relaxed overflow-hidden text-zinc-300 select-text whitespace-pre-wrap">
+                    {selectedNode.documentation}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-xs text-zinc-500 text-center mt-10">Select a pipeline module to trace trace specs</div>
+            )}
           </ScrollArea>
         </div>
       </div>

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { TopNavbar } from "@/components/layout/top-navbar";
 import { MobileNav } from "@/components/layout/mobile-nav";
+import { AuthProvider } from "@/context/auth-context";
 import { cn } from "@/lib/utils";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -27,7 +28,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const sidebarWidth = sidebarCollapsed ? 64 : 240;
 
   return (
-    <div className="flex min-h-screen">
+    <AuthProvider>
+      <div className="flex min-h-screen">
       {/* Desktop sidebar */}
       <AppSidebar
         collapsed={sidebarCollapsed}
@@ -67,5 +69,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </footer>
       </div>
     </div>
+  </AuthProvider>
   );
 }

@@ -109,6 +109,50 @@ CREATE TABLE IF NOT EXISTS manual_review_queue (
 );
 
 -- ─────────────────────────────────────────────────────────────────────────────
+-- User Settings
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS user_settings (
+    key                 VARCHAR(100) PRIMARY KEY,
+    value               JSONB DEFAULT '{}',
+    updated_at          TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Prompt Favorites
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS prompt_favorites (
+    prompt_id           VARCHAR(50) PRIMARY KEY,
+    created_at          TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- System Notifications
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS system_notifications (
+    id                  VARCHAR(50) PRIMARY KEY,
+    title               VARCHAR(255) NOT NULL,
+    message             TEXT NOT NULL,
+    timestamp           VARCHAR(50) NOT NULL,
+    read                BOOLEAN DEFAULT FALSE,
+    type                VARCHAR(50) DEFAULT 'info',
+    created_at          TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Playground Executions & Evaluations
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS playground_history (
+    id                  VARCHAR(50) PRIMARY KEY,
+    prompt_id           VARCHAR(50) NOT NULL,
+    prompt_name         VARCHAR(255) NOT NULL,
+    timestamp           VARCHAR(50) NOT NULL,
+    variables           JSONB NOT NULL DEFAULT '{}',
+    response            TEXT NOT NULL,
+    metrics             JSONB NOT NULL DEFAULT '{}',
+    created_at          TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ─────────────────────────────────────────────────────────────────────────────
 -- Nightly maintenance: soft-expire stale vectors (run via cron at 02:00 UTC)
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE OR REPLACE FUNCTION expire_stale_vectors()

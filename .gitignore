@@ -49,3 +49,6 @@ scratch/
 # Node
 node_modules/
 
+# Fallback database
+nimblize_fallback.db
+

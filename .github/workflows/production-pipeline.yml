@@ -1,0 +1,76 @@
+name: Nimblize Studio — Production QA & CI Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  backend-qa:
+    name: Backend Lint & Unit Testing
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libpq-dev
+
+      - name: Install Python Dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Backend Unit Tests
+        env:
+          ENV: testing
+        run: |
+          python3 -m unittest discover -s backend/tests -p "test_*.py"
+
+  frontend-qa:
+    name: Frontend Lint, Type-Check & Testing
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Frontend Dependencies
+        working-directory: frontend
+        run: |
+          npm ci --legacy-peer-deps
+
+      - name: Run ESLint Linter
+        working-directory: frontend
+        run: |
+          npm run lint
+
+      - name: TypeScript Type Validation
+        working-directory: frontend
+        run: |
+          npx tsc --noEmit
+
+      - name: Run Vitest Unit Tests
+        working-directory: frontend
+        run: |
+          npm run test:unit
+
+      - name: Verify Production Static Compilation Build
+        working-directory: frontend
+        run: |
+          npm run build
