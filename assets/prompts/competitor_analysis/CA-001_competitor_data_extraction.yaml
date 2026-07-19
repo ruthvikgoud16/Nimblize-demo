@@ -1,10 +1,10 @@
 # Prompt: Competitor Data Extraction
-# Nimblize Phase 5 — Prompt Library v1
+# Nimblize Phase 5 — Prompt Library v1.1
 
 id: "CA-001"
 category: "competitor_analysis"
 name: "Competitor Data Extraction"
-version: "1.0.0"
+version: "1.1.0"
 purpose: >
   Extract structured competitor intelligence from raw unstructured web content.
   Produces a deterministic JSON payload with domain, SEO keywords, traffic estimates,
@@ -50,6 +50,14 @@ prompt_template: |
   1. Extract ONLY facts explicitly stated in the context. Do not extrapolate.
   2. If a specific metric is missing, return "NOT_DETECTED" for that key.
   3. Maintain extreme neutrality. Strip marketing adjectives and hyperbole.
+  4. Never fabricate, estimate, or infer data not present in the source text.
+  5. If the input text is too short or ambiguous to extract any field, use "NOT_DETECTED".
+  6. Return empty arrays [] when no items are found for array fields.
+
+  EDGE CASES:
+  - If no competitor domain is identifiable, set competitor_domain to "NOT_DETECTED".
+  - If traffic figures use vague terms ("thousands", "growing"), return "NOT_DETECTED".
+  - If keywords are implied but not explicitly stated, do not include them.
 
   JSON SCHEMA OUTPUT REQUIREMENT:
   {
@@ -60,7 +68,7 @@ prompt_template: |
     "affiliate_networks_detected": ["array", "of", "strings"]
   }
 
-  FEW-SHOT EXAMPLE:
+  FEW-SHOT EXAMPLE 1 (complete data):
   INPUT: "RankVantage targets B2B platforms using 'SaaS attribution dashboard'.
   Generating 120,000 monthly visits, monetized via software licensing and Impact Radius."
 
@@ -71,6 +79,18 @@ prompt_template: |
     "estimated_monthly_organic_traffic": 120000,
     "monetization_infrastructure": ["software licensing"],
     "affiliate_networks_detected": ["Impact Radius"]
+  }
+
+  FEW-SHOT EXAMPLE 2 (incomplete data):
+  INPUT: "A new analytics tool is gaining traction in the market."
+
+  OUTPUT:
+  {
+    "competitor_domain": "NOT_DETECTED",
+    "targeted_seo_keywords": [],
+    "estimated_monthly_organic_traffic": "NOT_DETECTED",
+    "monetization_infrastructure": [],
+    "affiliate_networks_detected": []
   }
   ================================================================================
 

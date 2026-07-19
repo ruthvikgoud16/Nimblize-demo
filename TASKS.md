@@ -18,17 +18,17 @@
 
 ---
 
-## Milestone 2: Prompt Library 🔲
+## Milestone 2: Prompt Library ✅
 
-- [ ] Audit existing LLM calls in `backend/` to inventory current prompts
-- [ ] Extract and templatize Agent 1 (Extraction Specialist) prompts
-- [ ] Extract and templatize Agent 2 (Strategy Generator) prompts
-- [ ] Extract and templatize RAGAS evaluation prompts
-- [ ] Extract and templatize B2C recommendation prompts
-- [ ] Define YAML schema for prompt templates
-- [ ] Write prompt template files in `assets/prompts/`
-- [ ] Add test cases per prompt (happy path, edge case, failure)
-- [ ] Update `PROMPT_LIBRARY.md` with the complete registry
+- [x] Audit existing LLM calls in `backend/` to inventory current prompts
+- [x] Extract and templatize Agent 1 (Extraction Specialist) prompts
+- [x] Extract and templatize Agent 2 (Strategy Generator) prompts
+- [x] Extract and templatize RAGAS evaluation prompts
+- [x] Extract and templatize B2C recommendation prompts
+- [x] Define YAML schema for prompt templates
+- [x] Write prompt template files in `assets/prompts/`
+- [x] Add test cases per prompt (happy path, edge case, failure)
+- [x] Update `PROMPT_LIBRARY.md` with the complete registry
 
 ---
 

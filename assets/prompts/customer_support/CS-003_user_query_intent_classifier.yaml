@@ -1,10 +1,10 @@
 # Prompt: User Query Intent Classifier
-# Nimblize Phase 5 — Prompt Library v1
+# Nimblize Phase 5 — Prompt Library v1.1
 
 id: "CS-003"
 category: "customer_support"
 name: "User Query Intent Classifier"
-version: "1.0.0"
+version: "1.1.0"
 purpose: >
   Classify incoming user queries to route them to the appropriate pipeline
   (B2B competitor analysis, B2C recommendation, dashboard, or support).
@@ -39,7 +39,24 @@ prompt_template: |
   - SUPPORT: User needs help or has an issue
   - UNKNOWN: Query does not match any intent
 
+  ENDPOINT MAPPING:
+  - COMPETITOR_ANALYSIS → /api/v1/pipeline/run
+  - PRODUCT_RECOMMENDATION → /api/v1/b2c/recommend
+  - DASHBOARD → /api/v1/dashboard/profiles
+  - SUPPORT → /support
+  - UNKNOWN → /support
+
+  FALLBACK RULE: If confidence is below 0.6, classify as UNKNOWN.
+
   Extract key entities (competitor names, product types, action verbs).
+  Set confidence between 0.0 and 1.0 based on how clearly the query matches an intent.
+
+  EXAMPLES:
+  - "Analyze RankVantage" → COMPETITOR_ANALYSIS (0.98)
+  - "Recommend me a good SEO tool" → PRODUCT_RECOMMENDATION (0.92)
+  - "Show my dashboard" → DASHBOARD (0.90)
+  - "I can't log in" → SUPPORT (0.95)
+  - "Hello" → UNKNOWN (0.30)
 
   USER QUERY: {{ user_query }}
 

@@ -1,10 +1,10 @@
 # Prompt: SEO Strategy Generation
-# Nimblize Phase 5 — Prompt Library v1
+# Nimblize Phase 5 — Prompt Library v1.1
 
 id: "SEO-001"
 category: "seo_analysis"
 name: "SEO Strategy Generation"
-version: "1.0.0"
+version: "1.1.0"
 purpose: >
   Generate a comprehensive SEO strategy report from validated competitor extraction
   data. Produces market gap analysis, keyword recommendations, affiliate opportunity
@@ -52,13 +52,20 @@ prompt_template: |
   4. Score affiliate opportunity between 0.0 (low) and 1.0 (high).
   5. Return 3-5 concrete, dashboard-ready action items.
 
+  ANTI-HALLUCINATION CONSTRAINTS:
+  - Do NOT invent search volumes, traffic numbers, or market statistics.
+  - Every recommendation MUST cite which field from the competitor data supports it.
+  - If insufficient data exists for a recommendation, state the data gap explicitly.
+  - Limit recommended_seo_targets to a maximum of 6 items.
+  - Limit dashboard_recommendations to a maximum of 5 items.
+
   OUTPUT FORMAT: Valid JSON matching the StrategyReport schema.
   {
     "competitor_domain": "string",
     "market_gap_analysis": "string",
-    "recommended_seo_targets": ["array of strings"],
+    "recommended_seo_targets": ["array of strings (max 6)"],
     "affiliate_opportunity_score": 0.0-1.0,
-    "dashboard_recommendations": ["array of actionable strings"],
+    "dashboard_recommendations": ["array of actionable strings (max 5)"],
     "generated_at": "ISO 8601 timestamp"
   }
   ================================================================================

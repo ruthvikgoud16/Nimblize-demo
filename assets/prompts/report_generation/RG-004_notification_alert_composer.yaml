@@ -1,10 +1,10 @@
 # Prompt: Notification Alert Composer
-# Nimblize Phase 5 — Prompt Library v1
+# Nimblize Phase 5 — Prompt Library v1.1
 
 id: "RG-004"
 category: "report_generation"
 name: "Notification Alert Composer"
-version: "1.0.0"
+version: "1.1.0"
 purpose: >
   Compose multi-channel alert notifications for pipeline events including
   HITL review flags, dead-letter entries, quality threshold breaches, and
@@ -38,12 +38,20 @@ output_schema:
 prompt_template: |
   Compose a notification alert for the following pipeline event.
 
+  SEVERITY MAPPING:
+  - DEAD_LETTER + extraction_attempts ≥ 3 → 🔴 CRITICAL (respond in 15 min)
+  - QUALITY_BREACH + composite < 0.70 → 🔴 CRITICAL (respond in 15 min)
+  - HITL_FLAG + composite < 0.80 → 🟠 WARNING (respond in 4 hours)
+  - HITL_FLAG + composite ≥ 0.80 → 🟡 INFO (respond in 24 hours)
+  - SYSTEM_HEALTH → severity based on error type
+
   RULES:
   1. Slack: Use markdown formatting with emoji indicators.
   2. Email: Use HTML-friendly formatting with clear subject line.
   3. PagerDuty: Keep to a single-sentence summary with severity.
-  4. Include: event type, pipeline ID, severity, action required.
+  4. Include: event type, pipeline ID, severity, action required, SLA deadline.
   5. Be concise — operators need to act fast.
+  6. Generate ALL three channel formats in every response.
 
   EVENT TYPE: {{ event_type }}
   EVENT DATA: {{ event_data }}
