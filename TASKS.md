@@ -18,7 +18,7 @@
 
 ---
 
-## Milestone 2: Prompt Library ✅
+## Milestone 2: Prompt Library ✅ [COMPLETED & FROZEN 2026-07-19]
 
 - [x] Audit existing LLM calls in `backend/` to inventory current prompts
 - [x] Extract and templatize Agent 1 (Extraction Specialist) prompts

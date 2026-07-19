@@ -29,10 +29,10 @@ assets/prompts/               # Versioned prompt template files (YAML)
 
 | Document | Purpose | Status |
 |---|---|---|
-| [PHASE5_PLAN.md](./PHASE5_PLAN.md) | Strategic plan, scope, risks, success criteria | 🟡 Draft |
-| [PROMPT_LIBRARY.md](./PROMPT_LIBRARY.md) | LLM prompt registry and versioning policy | 🔲 Not Started |
+| [PHASE5_PLAN.md](./PHASE5_PLAN.md) | Strategic plan, scope, risks, success criteria | 🟢 Active |
+| [PROMPT_LIBRARY.md](./PROMPT_LIBRARY.md) | LLM prompt registry and versioning policy | 🟢 Complete |
 | [AUTOMATION_WORKFLOW.md](./AUTOMATION_WORKFLOW.md) | Workflow definitions, triggers, integration points | 🔲 Not Started |
-| [EVALUATION_REPORT.md](./EVALUATION_REPORT.md) | Evaluation framework, metrics, test results | 🔲 Not Started |
+| [EVALUATION_REPORT.md](./EVALUATION_REPORT.md) | Evaluation framework, metrics, test results | 🟢 Complete |
 | [CHANGELOG.md](./CHANGELOG.md) | Phase 5 change log | 🟢 Active |
 
 ---
