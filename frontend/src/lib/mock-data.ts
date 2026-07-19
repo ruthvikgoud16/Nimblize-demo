@@ -178,3 +178,198 @@ export const recentActivity = [
     type: "info" as const,
   },
 ];
+
+export type PromptStatus = "active" | "draft" | "archived" | "review";
+
+export interface PromptTemplate {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  version: string;
+  qualityScore: number;
+  tags: string[];
+  updatedAt: string;
+  status: PromptStatus;
+  isFavorite: boolean;
+  yamlContent: string;
+}
+
+export const mockPrompts: PromptTemplate[] = [
+  {
+    id: "SEO-001",
+    name: "SEO Strategy Generation",
+    description: "Generates comprehensive SEO keyword strategy and content gaps.",
+    category: "SEO Analysis",
+    version: "v1.4.2",
+    qualityScore: 0.94,
+    tags: ["keywords", "content-gap", "serp"],
+    updatedAt: "2 minutes ago",
+    status: "active",
+    isFavorite: true,
+    yamlContent: `name: "SEO Strategy Generation"
+version: "1.4.2"
+description: "Generates comprehensive SEO keyword strategy"
+model: "gpt-4-turbo"
+temperature: 0.4
+system_prompt: |
+  You are an expert SEO strategist. 
+  Analyze the provided domain and generate a keyword strategy.
+parameters:
+  - name: "domain"
+    type: "string"
+    required: true
+  - name: "target_audience"
+    type: "string"
+    required: false
+`
+  },
+  {
+    id: "CA-002",
+    name: "Competitor Feature Matrix",
+    description: "Extracts and compares features between our product and competitors.",
+    category: "Competitor Analysis",
+    version: "v2.1.0",
+    qualityScore: 0.88,
+    tags: ["comparison", "features", "market"],
+    updatedAt: "3 hours ago",
+    status: "active",
+    isFavorite: false,
+    yamlContent: `name: "Competitor Feature Matrix"
+version: "2.1.0"
+description: "Extracts and compares features"
+model: "claude-3-opus"
+temperature: 0.2
+system_prompt: |
+  Extract feature lists from the competitor website 
+  and build a comparison matrix.
+parameters:
+  - name: "competitor_url"
+    type: "string"
+    required: true
+`
+  },
+  {
+    id: "MR-003",
+    name: "TAM/SAM/SOM Market Sizing",
+    description: "Calculates market sizes based on industry reports.",
+    category: "Market Research",
+    version: "v1.0.1",
+    qualityScore: 0.91,
+    tags: ["market-sizing", "tam", "finance"],
+    updatedAt: "1 day ago",
+    status: "draft",
+    isFavorite: false,
+    yamlContent: `name: "TAM/SAM/SOM Market Sizing"
+version: "1.0.1"
+model: "gpt-4-turbo"
+temperature: 0.1
+system_prompt: |
+  Calculate TAM, SAM, and SOM based on the provided data.
+parameters:
+  - name: "industry_report"
+    type: "string"
+    required: true
+`
+  },
+  {
+    id: "CS-002",
+    name: "Incident Triage Assistant",
+    description: "Classifies support tickets by severity and routes to appropriate team.",
+    category: "Customer Support",
+    version: "v3.0.0",
+    qualityScore: 0.98,
+    tags: ["triage", "support", "routing"],
+    updatedAt: "2 days ago",
+    status: "active",
+    isFavorite: true,
+    yamlContent: `name: "Incident Triage Assistant"
+version: "3.0.0"
+model: "gpt-4-turbo"
+temperature: 0.0
+system_prompt: |
+  Analyze the support ticket and determine severity (P1-P4).
+parameters:
+  - name: "ticket_text"
+    type: "string"
+    required: true
+`
+  },
+  {
+    id: "PR-002",
+    name: "Affiliate Product Matching",
+    description: "Matches user context to the best affiliate products.",
+    category: "Product Recommendation",
+    version: "v1.1.0",
+    qualityScore: 0.82,
+    tags: ["affiliate", "matching", "ecommerce"],
+    updatedAt: "5 days ago",
+    status: "review",
+    isFavorite: false,
+    yamlContent: `name: "Affiliate Product Matching"
+version: "1.1.0"
+model: "claude-3-sonnet"
+temperature: 0.6
+system_prompt: |
+  Match the user profile with top 3 affiliate products.
+parameters:
+  - name: "user_profile"
+    type: "string"
+    required: true
+`
+  },
+  {
+    id: "FC-001",
+    name: "Feature Comparison Matrix",
+    description: "Generates a feature comparison matrix against competitors.",
+    category: "Feature Comparison",
+    version: "v1.2.5",
+    qualityScore: 0.89,
+    tags: ["matrix", "competitors"],
+    updatedAt: "1 week ago",
+    status: "active",
+    isFavorite: false,
+    yamlContent: `name: "Feature Comparison Matrix"
+version: "1.2.5"
+model: "gpt-4o"
+temperature: 0.3
+system_prompt: |
+  Compare features across provided products.
+`
+  },
+  {
+    id: "ES-004",
+    name: "Executive Summary Generator",
+    description: "Distills 50-page reports into a 1-page executive summary.",
+    category: "Executive Summary",
+    version: "v2.0.1",
+    qualityScore: 0.95,
+    tags: ["summary", "c-suite", "pdf"],
+    updatedAt: "2 weeks ago",
+    status: "active",
+    isFavorite: true,
+    yamlContent: `name: "Executive Summary Generator"
+version: "2.0.1"
+model: "claude-3-opus"
+temperature: 0.2
+system_prompt: |
+  Summarize the document for a C-suite executive.
+`
+  },
+  {
+    id: "RG-001",
+    name: "Weekly Marketing Report",
+    description: "Consolidates weekly marketing metrics into a narrative report.",
+    category: "Report Generation",
+    version: "v1.0.0",
+    qualityScore: 0.76,
+    tags: ["marketing", "metrics", "reporting"],
+    updatedAt: "3 weeks ago",
+    status: "archived",
+    isFavorite: false,
+    yamlContent: `name: "Weekly Marketing Report"
+version: "1.0.0"
+status: "archived"
+`
+  },
+];
