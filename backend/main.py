@@ -176,8 +176,8 @@ class RecommendRequest(BaseModel):
 
 class PlaygroundRunRequest(BaseModel):
     prompt_id: str
-    version: str
-    variables: Dict[str, str]
+    version: Optional[str] = "1.0.0"
+    variables: Dict[str, Any] = {}
 
 
 class FavoriteToggleRequest(BaseModel):

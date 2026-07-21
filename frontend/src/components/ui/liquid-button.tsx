@@ -15,17 +15,15 @@ type LiquidButtonEvents = {
   [K in keyof LiquidButtonEventMap]?: (event: LiquidButtonEventMap[K]) => void;
 };
 
-export interface LiquidButtonProps extends Omit<
-  React.ButtonHTMLAttributes<HTMLButtonElement>,
-  'onClick'
-> {
+export interface LiquidButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   label: string;
   options?: LiquidButtonOptions;
   events?: LiquidButtonEvents;
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
 }
 
 export const LiquidButton = forwardRef<HTMLButtonElement, LiquidButtonProps>(
-  ({ label, options, events, ...props }, ref) => {
+  ({ label, options, events, onClick, ...props }, ref) => {
     const buttonRef = useRef<HTMLButtonElement>(null);
     const handleRef = useRef<LiquidButtonHandle | null>(null);
 
@@ -63,24 +61,42 @@ export const LiquidButton = forwardRef<HTMLButtonElement, LiquidButtonProps>(
      * Strictly typed event binding (no unsafe iteration tricks)
      */
     useEffect(() => {
-      if (!handleRef.current || !events) return;
-      (Object.keys(events) as (keyof LiquidButtonEventMap)[]).forEach((event) => {
-        const handler = events[event];
+      if (!handleRef.current) return;
+      
+      if (events) {
+        (Object.keys(events) as (keyof LiquidButtonEventMap)[]).forEach((event) => {
+          const handler = events[event];
+          if (handler) {
+            handleRef.current?.on(event, handler as (e: LiquidButtonEventMap[typeof event]) => void);
+          }
+        });
+      }
 
-        if (handler) {
-          handleRef.current?.on(event, handler as (e: LiquidButtonEventMap[typeof event]) => void);
-        }
-      });
+      if (onClick) {
+        handleRef.current?.on('click', onClick as unknown as (e: LiquidButtonEventMap['click']) => void);
+      }
 
       return () => {
-        if (!handleRef.current || !events) return;
-        (Object.keys(events) as (keyof LiquidButtonEventMap)[]).forEach((event) => {
-          handleRef.current?.off?.(event);
-        });
+        if (!handleRef.current) return;
+        if (events) {
+          (Object.keys(events) as (keyof LiquidButtonEventMap)[]).forEach((event) => {
+            handleRef.current?.off?.(event);
+          });
+        }
       };
-    }, [events]);
+    }, [events, onClick]);
 
-    return <button ref={buttonRef} {...props} />;
+    return (
+      <button 
+        ref={buttonRef} 
+        onClick={(e) => {
+          if (props.disabled) return;
+          if (onClick) onClick(e);
+          if (events?.click) events.click(e as unknown as LiquidButtonEventMap['click']);
+        }} 
+        {...props} 
+      />
+    );
   },
 );
 

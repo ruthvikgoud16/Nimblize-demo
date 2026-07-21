@@ -195,7 +195,11 @@ export default function PlaygroundPage() {
     const vars = extractVariablesFromYAML(p.yamlContent);
     const defaults: Record<string, string> = {};
     vars.forEach(v => {
-      defaults[v.name] = "";
+      if (v.name.includes("domain")) defaults[v.name] = "rankvantage.com";
+      else if (v.name.includes("audience")) defaults[v.name] = "B2B enterprise SaaS decision makers";
+      else if (v.name.includes("period")) defaults[v.name] = "Q3 2026";
+      else if (v.name.includes("text") || v.name.includes("raw")) defaults[v.name] = "RankVantage is an enterprise SEO attribution platform with 120,000 monthly organic visitors.";
+      else defaults[v.name] = "Sample " + v.name;
     });
     setVariables(defaults);
     setValidationErrors({});
@@ -768,10 +772,11 @@ export default function PlaygroundPage() {
                      refractiveIndex: 1.4,
                      profile: "convexSquircle",
                    }}
+                   onClick={handleExecute}
                    events={{ click: handleExecute }}
                    disabled={isExecuting}
                    className={cn(
-                     "flex-1 h-9 text-xs font-bold text-white shadow rounded-lg",
+                     "flex-1 h-9 text-xs font-bold text-white shadow rounded-lg cursor-pointer",
                      isExecuting ? "opacity-60 cursor-not-allowed" : ""
                    )}
                  />
