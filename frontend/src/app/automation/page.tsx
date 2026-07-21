@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { PageHeader } from "@/components/common/page-header";
 import { Button } from "@/components/ui/button";
+import { LiquidButton } from "@/components/ui/liquid-button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { fetchFromAPI } from "@/lib/api";
@@ -319,26 +320,21 @@ export default function AutomationStudioPage() {
           <Button variant="outline" size="icon" className="h-9 w-9">
             <Settings2 className="h-4 w-4" />
           </Button>
-          <Button 
+          <LiquidButton 
+            label={isExecuting ? "Executing..." : "Run Pipeline"}
+            options={{
+              glassThickness: 80,
+              bezelWidth: 8,
+              refractiveIndex: 1.4,
+              profile: "convexSquircle",
+            }}
             className={cn(
-              "gap-2 min-w-[125px]",
-              isExecuting ? "bg-muted text-muted-foreground" : "bg-primary text-primary-foreground hover:bg-primary/95"
+              "min-w-[140px] h-9 text-xs font-bold text-white shadow rounded-lg",
+              isExecuting ? "opacity-60 cursor-not-allowed" : ""
             )}
-            onClick={handleRunPipeline}
+            events={{ click: handleRunPipeline }}
             disabled={isExecuting}
-          >
-            {isExecuting ? (
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-              >
-                <RotateCcw className="h-4 w-4" />
-              </motion.div>
-            ) : (
-              <Play className="h-4 w-4" />
-            )}
-            Run Pipeline
-          </Button>
+          />
         </div>
       </PageHeader>
 

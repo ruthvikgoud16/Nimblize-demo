@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/common/page-header";
 import { type PromptTemplate, type PlaygroundHistoryItem } from "@/lib/mock-data";
 import { fetchFromAPI } from "@/lib/api";
 import { Button } from "@/components/ui/button";
+import { LiquidButton } from "@/components/ui/liquid-button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
@@ -759,14 +760,21 @@ export default function PlaygroundPage() {
                   <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
                   Reset
                 </Button>
-                <Button 
-                  onClick={handleExecute}
-                  disabled={isExecuting}
-                  className="flex-1 h-9 text-xs font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow"
-                >
-                  <Play className="h-3.5 w-3.5 mr-1.5" />
-                  Run Prompt
-                </Button>
+                 <LiquidButton 
+                   label={isExecuting ? "Executing..." : "Run Prompt"}
+                   options={{
+                     glassThickness: 80,
+                     bezelWidth: 8,
+                     refractiveIndex: 1.4,
+                     profile: "convexSquircle",
+                   }}
+                   events={{ click: handleExecute }}
+                   disabled={isExecuting}
+                   className={cn(
+                     "flex-1 h-9 text-xs font-bold text-white shadow rounded-lg",
+                     isExecuting ? "opacity-60 cursor-not-allowed" : ""
+                   )}
+                 />
               </div>
             )}
           </div>

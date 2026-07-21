@@ -8,7 +8,6 @@ import { navigation } from "@/lib/navigation";
 import {
   PanelLeftClose,
   PanelLeft,
-  Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,15 +30,13 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
       animate={{ width: collapsed ? 64 : 240 }}
       transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
-        "fixed left-0 top-0 z-40 flex h-full flex-col border-r border-border bg-sidebar",
+        "fixed left-0 top-0 z-40 flex h-full flex-col border-r border-dashed border-neutral-300 dark:border-neutral-700 bg-sidebar/85 backdrop-blur-md",
         "hidden md:flex"
       )}
     >
       {/* Logo */}
-      <div className="flex h-14 items-center gap-2 border-b border-border px-4">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary">
-          <Zap className="h-4 w-4 text-primary-foreground" />
-        </div>
+      <div className="flex h-14 items-center gap-2 border-b border-dashed border-neutral-300 dark:border-neutral-700 px-4 select-none">
+        <span className="text-xl font-bold text-neutral-900 dark:text-white -translate-y-0.5">✦</span>
         <AnimatePresence>
           {!collapsed && (
             <motion.span
@@ -47,7 +44,7 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -8 }}
               transition={{ duration: 0.15 }}
-              className="text-sm font-semibold tracking-tight"
+              className="text-sm font-semibold tracking-tight text-neutral-900 dark:text-white"
             >
               Nimblize Studio
             </motion.span>

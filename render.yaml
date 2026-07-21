@@ -1,0 +1,47 @@
+# Render.com Infrastructure Blueprint for Nimblize Backend
+# Deploy via Render Dashboard -> New -> Blueprint -> Connect Repository
+
+services:
+  # ─── FastAPI API Gateway (Web Service) ───
+  - type: web
+    name: nimblize-backend-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: starter
+    region: singapore
+    envVars:
+      - key: ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ALLOWED_ORIGINS
+        value: "https://frontend-two-weld-39.vercel.app,http://localhost:3000"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: nimblize-postgres
+          property: connectionString
+      - key: REDIS_HOST
+        fromService:
+          type: redis
+          name: nimblize-redis
+          property: host
+      - key: REDIS_PORT
+        fromService:
+          type: redis
+          name: nimblize-redis
+          property: port
+    healthCheckPath: /health
+
+  # ─── Redis (Semantic Cache & Rate Limiting) ───
+  - type: redis
+    name: nimblize-redis
+    plan: starter
+    maxmemoryPolicy: allkeys-lru
+    ipAllowList: []
+
+databases:
+  # ─── PostgreSQL + pgvector (Database) ───
+  - name: nimblize-postgres
+    databaseName: nimblize
+    user: nimblize
+    plan: starter

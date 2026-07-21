@@ -19,7 +19,6 @@ import {
   Sun,
   Monitor,
   Menu,
-  Zap,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { CommandPalette } from "@/components/layout/command-palette";
@@ -78,7 +77,7 @@ export function TopNavbar({ onMobileMenuToggle }: TopNavbarProps) {
         initial={{ y: -8, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] }}
-        className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b border-border bg-background/80 px-4 backdrop-blur-xl md:px-6"
+        className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b border-dashed border-neutral-300 dark:border-neutral-700 bg-background/80 px-4 backdrop-blur-md md:px-6"
       >
         {/* Mobile menu button */}
         <Button
@@ -91,11 +90,9 @@ export function TopNavbar({ onMobileMenuToggle }: TopNavbarProps) {
         </Button>
 
         {/* Mobile logo */}
-        <div className="flex items-center gap-2 md:hidden">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary">
-            <Zap className="h-3.5 w-3.5 text-primary-foreground" />
-          </div>
-          <span className="text-sm font-semibold">Nimblize</span>
+        <div className="flex items-center gap-2 md:hidden select-none">
+          <span className="text-lg font-bold text-neutral-900 dark:text-white">✦</span>
+          <span className="text-sm font-semibold text-neutral-900 dark:text-white">Nimblize</span>
         </div>
 
         {/* Search trigger */}
