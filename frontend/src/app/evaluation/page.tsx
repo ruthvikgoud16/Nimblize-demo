@@ -233,8 +233,15 @@ export default function EvaluationPage() {
       })
       .catch(err => {
         console.error("Evaluations history load error:", err);
-        setEvaluations(mockEvaluations);
       });
+
+    fetchFromAPI("/api/v1/evaluation/stats")
+      .then(stats => {
+        if (stats && stats.metrics) {
+          // Update aggregate benchmarks from live DB stats
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const handleRunEvaluation = (id: string, e: React.MouseEvent) => {

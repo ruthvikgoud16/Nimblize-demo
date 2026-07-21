@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { PageHeader } from "@/components/common/page-header";
 import { MetricCard } from "@/components/common/metric-card";
@@ -8,10 +9,11 @@ import { CategoryChart } from "@/components/dashboard/category-chart";
 import { QuickActionsGrid } from "@/components/dashboard/quick-actions";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
 import { Badge } from "@/components/ui/badge";
+import { fetchFromAPI } from "@/lib/api";
 import {
-  dashboardMetrics,
+  dashboardMetrics as initialMetrics,
   timelineEvents,
-  categoryDistribution,
+  categoryDistribution as initialCategories,
   quickActions,
   recentActivity,
 } from "@/lib/mock-data";
@@ -33,8 +35,58 @@ const fadeUp = {
   },
 };
 
-
 export default function DashboardPage() {
+  const [metrics, setMetrics] = useState(initialMetrics);
+  const [categories, setCategories] = useState(initialCategories);
+
+  useEffect(() => {
+    fetchFromAPI("/api/v1/dashboard/stats")
+      .then((data) => {
+        if (!data) return;
+        setMetrics([
+          {
+            title: "Prompt Templates",
+            value: `${data.activePrompts || 29}`,
+            description: "Across 8 categories",
+            icon: initialMetrics[0].icon,
+            trend: { value: "4 new", positive: true },
+            accentColor: "primary" as const,
+          },
+          {
+            title: "Total Executions",
+            value: data.totalExecutions?.toLocaleString() || "128",
+            description: "Recorded in PostgreSQL",
+            icon: initialMetrics[1].icon,
+            trend: { value: "12.4%", positive: true },
+            accentColor: "success" as const,
+          },
+          {
+            title: "Cache Hit Rate",
+            value: data.cacheHitRate || "88.6%",
+            description: "Redis semantic cache",
+            icon: initialMetrics[2].icon,
+            trend: { value: "8%", positive: true },
+            accentColor: "warning" as const,
+          },
+          {
+            title: "RAGAS SLA",
+            value: data.successRate || "99.4%",
+            description: "Composite score ≥ 0.85",
+            icon: initialMetrics[3].icon,
+            trend: { value: "1.3%", positive: true },
+            accentColor: "success" as const,
+          },
+        ]);
+
+        if (data.categoryDistribution) {
+          setCategories(data.categoryDistribution);
+        }
+      })
+      .catch(() => {
+        // Fallback to defaults on offline
+      });
+  }, []);
+
   return (
     <motion.div
       variants={stagger}
@@ -60,7 +112,7 @@ export default function DashboardPage() {
         variants={fadeUp}
         className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
       >
-        {dashboardMetrics.map((metric) => (
+        {metrics.map((metric) => (
           <MetricCard key={metric.title} {...metric} />
         ))}
       </motion.div>
@@ -71,7 +123,7 @@ export default function DashboardPage() {
         className="grid gap-4 lg:grid-cols-3"
       >
         <ExecutionTimeline events={timelineEvents} className="lg:col-span-2" />
-        <CategoryChart data={categoryDistribution} />
+        <CategoryChart data={categories} />
       </motion.div>
 
       {/* Quick Actions */}

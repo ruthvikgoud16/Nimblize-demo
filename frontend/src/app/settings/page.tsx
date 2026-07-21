@@ -1,11 +1,13 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { PageHeader } from "@/components/common/page-header";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { fetchFromAPI } from "@/lib/api";
 import { 
   Moon, 
   Sun, 
@@ -13,12 +15,48 @@ import {
   GitBranch, 
   Key, 
   Keyboard, 
-  Cpu 
+  Cpu,
+  Check
 } from "lucide-react";
 import { useTheme } from "next-themes";
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
+  const [openaiKey, setOpenaiKey] = useState("");
+  const [anthropicKey, setAnthropicKey] = useState("");
+  const [cacheTtl, setCacheTtl] = useState(86400);
+  const [isSaved, setIsSaved] = useState(false);
+
+  useEffect(() => {
+    fetchFromAPI("/api/v1/settings")
+      .then((data) => {
+        if (data && data.settings) {
+          setOpenaiKey(data.settings.openai_key || "");
+          setAnthropicKey(data.settings.anthropic_key || "");
+          setCacheTtl(data.settings.cache_ttl || 86400);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleSaveKeys = async () => {
+    try {
+      await fetchFromAPI("/api/v1/settings", {
+        method: "POST",
+        body: JSON.stringify({
+          settings: {
+            openai_key: openaiKey,
+            anthropic_key: anthropicKey,
+            cache_ttl: cacheTtl
+          }
+        })
+      });
+      setIsSaved(true);
+      setTimeout(() => setIsSaved(false), 2000);
+    } catch (err) {
+      console.error("Failed to save settings:", err);
+    }
+  };
 
   return (
     <div className="space-y-6 pb-12 max-w-4xl">
@@ -66,22 +104,37 @@ export default function SettingsPage() {
         <Card className="bg-card">
           <CardHeader>
             <CardTitle className="text-base font-semibold">LLM API Providers</CardTitle>
-            <CardDescription className="text-xs">Input your credentials securely. These are stored locally.</CardDescription>
+            <CardDescription className="text-xs">Input your credentials securely. These are stored encrypted in the backend.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="openai-key" className="text-xs font-mono">OPENAI_API_KEY</Label>
-                <Input id="openai-key" type="password" placeholder="sk-..." className="bg-background font-mono text-xs" />
+                <Input 
+                  id="openai-key" 
+                  type="password" 
+                  value={openaiKey}
+                  onChange={(e) => setOpenaiKey(e.target.value)}
+                  placeholder="sk-..." 
+                  className="bg-background font-mono text-xs" 
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="anthropic-key" className="text-xs font-mono">ANTHROPIC_API_KEY</Label>
-                <Input id="anthropic-key" type="password" placeholder="sk-ant-..." className="bg-background font-mono text-xs" />
+                <Input 
+                  id="anthropic-key" 
+                  type="password" 
+                  value={anthropicKey}
+                  onChange={(e) => setAnthropicKey(e.target.value)}
+                  placeholder="sk-ant-..." 
+                  className="bg-background font-mono text-xs" 
+                />
               </div>
             </div>
             <div className="flex justify-end pt-2">
-              <Button size="sm" className="gap-1.5">
-                <Key className="h-3.5 w-3.5" /> Save Keys
+              <Button size="sm" onClick={handleSaveKeys} className="gap-1.5">
+                {isSaved ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Key className="h-3.5 w-3.5" />}
+                {isSaved ? "Saved to DB" : "Save Keys"}
               </Button>
             </div>
           </CardContent>
@@ -99,7 +152,12 @@ export default function SettingsPage() {
                 <Label className="text-sm">Semantic Cache TTL</Label>
                 <p className="text-xs text-muted-foreground">Lifespan of vector equivalence matches in Redis cache (seconds).</p>
               </div>
-              <Input type="number" defaultValue={86400} className="w-[120px] bg-background text-right font-mono" />
+              <Input 
+                type="number" 
+                value={cacheTtl} 
+                onChange={(e) => setCacheTtl(Number(e.target.value))}
+                className="w-[120px] bg-background text-right font-mono" 
+              />
             </div>
             <Separator />
             <div className="flex items-center justify-between">
@@ -152,7 +210,7 @@ export default function SettingsPage() {
               </div>
               <div className="flex items-center gap-2">
                 <Terminal className="h-4 w-4 text-primary" />
-                <span className="font-mono text-muted-foreground">Next.js Version: <span className="font-bold text-foreground">15.1.0</span></span>
+                <span className="font-mono text-muted-foreground">Next.js Version: <span className="font-bold text-foreground">16.2.10</span></span>
               </div>
               <div className="flex items-center gap-2">
                 <Cpu className="h-4 w-4 text-primary" />
