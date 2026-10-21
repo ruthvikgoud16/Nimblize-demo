@@ -20,9 +20,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }, []);
 
   const isLandingPage = pathname === "/landing";
+  const isSeo = pathname === "/seo" || pathname.startsWith("/seo/");
 
-  if (isLandingPage) {
-    return <div className="min-h-screen bg-background">{children}</div>;
+  if (isLandingPage || isSeo) {
+    return <div className="min-h-screen bg-background text-foreground">{children}</div>;
   }
 
   const sidebarWidth = sidebarCollapsed ? 64 : 240;

@@ -38,6 +38,10 @@ Thumbs.db
 # Coverage
 htmlcov/
 .coverage
+
+# Phase 7 generated store
+seo/data/*.db
+seo/data/processed/
 .coverage.*
 
 # Logs

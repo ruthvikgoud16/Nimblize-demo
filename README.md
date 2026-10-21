@@ -1,3 +1,20 @@
+# Nimblize — SEO intelligence rebuild
+
+The current product is the Phase 7 SEO system. Page 33 of the build guide is the acceptance test. Setup, architecture, and the demo live in [seo/README.md](seo/README.md).
+
+```bash
+python3 -m pip install -r seo/requirements.txt
+python3 -m seo.pipeline
+python3 -m uvicorn seo.api.app:app --port 8000
+cd frontend && npm run dev
+```
+
+Open http://localhost:3000/seo.
+
+The sections below describe the earlier Studio and competitor-pipeline build. They are not the ranking system.
+
+---
+
 # Nimblize — Production AI Assets & Automation Engine
 
 **Internship Domain:** AI & Automation  
