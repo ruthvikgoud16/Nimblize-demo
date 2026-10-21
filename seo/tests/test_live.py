@@ -13,7 +13,7 @@ from fastapi.testclient import TestClient
 
 from seo import store
 from seo.collectors import CollectionError, refresh_google_token
-from seo.config import FEATURES, GSC_SITE_URL, LEAKY_COLUMNS
+from seo.config import FEATURES, GSC_SITE_URL, LEAKY_COLUMNS, PRIORITY_URL
 from seo.crawl import FetchError, crawl_allowlist, fetch_url, robots_allowed
 from seo.jobs import run_job
 
@@ -310,6 +310,19 @@ class LivePath(unittest.TestCase):
         connection.close()
         self.assertEqual(site["domain"], "nimblize.ai")
         self.assertEqual(site["url"], "sc-domain:nimblize.ai")
+
+    def test_priority_url_defaults_to_the_homepage(self):
+        self.assertEqual(PRIORITY_URL, "https://www.nimblize.ai/")
+        os.environ["SEO_GOOGLE_API_KEY"] = "key"
+        seen = []
+
+        def opener(request, timeout=60):
+            seen.append(__import__("json").loads(request.data.decode())["url"])
+            return _Body(b'{"record":{"metrics":{"largest_contentful_paint":{"percentiles":{"p75":1800}},"interaction_to_next_paint":{"percentiles":{"p75":120}},"cumulative_layout_shift":{"percentiles":{"p75":0.05}}}}}')
+
+        result = run_job("crux_priority", opener=opener)
+        self.assertEqual(result["status"], "succeeded")
+        self.assertEqual(seen, ["https://www.nimblize.ai/"])
 
     def test_ahrefs_import_and_consent_url(self):
         from seo.config import VENDOR

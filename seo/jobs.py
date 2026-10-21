@@ -16,7 +16,7 @@ from urllib.request import urlopen
 
 from seo import store
 from seo.collectors import CollectionError, fetch_crux, fetch_pagespeed, fetch_search_console
-from seo.config import GSC_SITE_URL
+from seo.config import GSC_SITE_URL, PRIORITY_URL
 from seo.crawl import FetchError, crawl_allowlist
 
 SCHEDULE = [
@@ -115,7 +115,7 @@ def run_job(name: str, *, opener: Callable | None = None, fetcher: Callable[...,
         return {"status": "succeeded", **result}
     if name in {"crux_priority", "pagespeed_priority"}:
         key = os.getenv("SEO_GOOGLE_API_KEY")
-        target = os.getenv("SEO_PRIORITY_URL")
+        target = os.getenv("SEO_PRIORITY_URL", PRIORITY_URL).strip()
         if not key or not target:
             _record(name, "failed", "SEO_GOOGLE_API_KEY and SEO_PRIORITY_URL are required. Previous audits were kept.")
             raise CollectionError("PageSpeed/CrUX credentials are not configured")

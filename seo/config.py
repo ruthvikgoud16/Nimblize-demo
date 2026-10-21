@@ -71,6 +71,7 @@ PRIMARY_COUNTRY = "usa"
 PRIMARY_DEVICE = "MOBILE"
 # Domain property covers www, the apex host, and every subdomain and protocol.
 GSC_SITE_URL = "sc-domain:nimblize.ai"
+PRIORITY_URL = "https://www.nimblize.ai/"
 # Keyword ideas, difficulty, and referring domains come from Ahrefs exports.
 VENDOR = "ahrefs"
 GSC_SCOPE = "https://www.googleapis.com/auth/webmasters.readonly"

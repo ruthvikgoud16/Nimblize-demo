@@ -70,8 +70,8 @@ python3 -c "from seo.jobs import run_job; run_job('search_console_refresh')"
 | `SEO_AHREFS_KEYWORDS_CSV` | Ahrefs organic-keywords export |
 | `SEO_AHREFS_REFERRING_DOMAINS_CSV` | Ahrefs referring-domains export |
 | `SEO_GSC_ACCESS_TOKEN` | Short-lived token used when no refresh token is set |
-| `SEO_GOOGLE_API_KEY` | PageSpeed Insights v5 and the Chrome UX Report API |
-| `SEO_PRIORITY_URL` | URL for the daily performance jobs |
+| `SEO_GOOGLE_API_KEY` | PageSpeed Insights v5 and the Chrome UX Report API. Stored in the gitignored `.env` |
+| `SEO_PRIORITY_URL` | Daily performance URL. Default `https://www.nimblize.ai/` |
 | `SEO_CRAWL_URLS` | Comma-separated allowlist for the weekly crawl |
 | `SEO_ROBOTS_TXT_PATH` | Optional robots.txt file. A disallow is stored and not fetched |
 | `SEO_API_TOKEN` | Required bearer token when `ENV=production` |
@@ -94,12 +94,13 @@ The Search Console property is `sc-domain:nimblize.ai`. Keyword and referring-do
 
 Add `http://127.0.0.1:8765/` as an authorized redirect URI on that OAuth client, then run `python3 -m seo.oauth` and sign in with the Google account that owns the Search Console property. Send back the refresh token from the redirect. It is stored as `SEO_GSC_REFRESH_TOKEN` and is not committed.
 
-1. A Google API key with the PageSpeed Insights API and the Chrome UX Report API enabled, plus the priority URL to measure.
-2. The Ahrefs organic-keywords CSV and referring-domains CSV for `nimblize.ai`.
-3. The primary country, if it is not the United States. Use the ISO-3 code Search Console expects, such as `usa`.
-4. The sitemap URL and the crawl host allowlist.
-5. Hosting confirmation if it should differ from Vercel for the Next.js app and Render plus Postgres for the API and worker.
-6. The human owner name for recommendations, if it should differ from `seo-team`.
+The PageSpeed Insights and Chrome UX Report key is in the gitignored `.env`. The daily measurement URL is `https://www.nimblize.ai/`.
+
+1. The Ahrefs organic-keywords CSV and referring-domains CSV for `nimblize.ai`.
+2. The primary country, if it is not the United States. Use the ISO-3 code Search Console expects, such as `usa`.
+3. The sitemap URL and the crawl host allowlist.
+4. Hosting confirmation if it should differ from Vercel for the Next.js app and Render plus Postgres for the API and worker.
+5. The human owner name for recommendations, if it should differ from `seo-team`.
 
 A live Search Console pull is stored with `source=search-console`. The sample generator refuses to overwrite those rows.
 
