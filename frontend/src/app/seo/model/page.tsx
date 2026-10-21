@@ -67,11 +67,29 @@ export default function ModelPage() {
               </tbody>
             </table>
           </div>
-          {segments && (
-            <p className="text-sm text-muted-foreground">
-              Intent segments on the serving model, test set:{" "}
-              {Object.entries(segments).map(([intent, segment]) => `${intent} ${segment.rows} rows, PR-AUC ${segment.pr_auc ?? "n/a"}`).join("; ")}.
-            </p>
+          {segments && Object.keys(segments).length > 0 && (
+            <div className="space-y-2">
+              <h3 className="text-sm font-semibold">Intent segments</h3>
+              <p className="text-sm text-muted-foreground">Test-set PR-AUC from the serving model, split by intent. A segment with too few rows, or with only one class, has no PR-AUC.</p>
+              <div className="overflow-x-auto rounded-lg border border-border">
+                <table className="w-full text-left text-sm">
+                  <thead className="border-b border-border text-xs uppercase text-muted-foreground">
+                    <tr>
+                      {["Intent", "Test rows", "PR-AUC"].map((heading) => <th key={heading} className="px-3 py-2 font-medium">{heading}</th>)}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.entries(segments).map(([intent, segment]) => (
+                      <tr key={intent} className="border-b border-border last:border-0">
+                        <td className="px-3 py-2">{intent}</td>
+                        <td className="px-3 py-2 tabular-nums">{segment?.rows ?? "n/a"}</td>
+                        <td className="px-3 py-2 tabular-nums">{typeof segment?.pr_auc === "number" ? segment.pr_auc.toFixed(3) : "n/a"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           )}
           <p className="text-sm text-muted-foreground">
             Drift flags ({flagged.length}): {flagged.map((row) => row.feature).join(", ") || "none"}. A flag is a 50% move in the median versus the training window. It does not retrain by itself.

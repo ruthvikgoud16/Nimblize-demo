@@ -51,10 +51,10 @@ type Boards = {
     keyword: string;
     url: string;
     priority: string;
+    bottleneck: string;
     action: string;
     status: string;
     effort: number;
-    owner: string;
   }>;
 };
 
@@ -81,7 +81,7 @@ const copy = {
   },
   recommendations: {
     title: "Recommendations",
-    lede: "Each action has an owner and a status. The default owner is seo-team until a name is configured.",
+    lede: "Status and action come from the stored queue. The human owner stays seo-team until you supply a name. Marking a row Implemented records that change.",
   },
 } as const;
 
@@ -181,11 +181,11 @@ export function BoardScreen({ screen }: { screen: keyof typeof copy }) {
   }
   if (boards && screen === "recommendations") {
     table = {
-      headers: ["Priority", "Keyword", "Owner", "Status", "Effort", "Action"],
+      headers: ["Priority", "Keyword", "Bottleneck", "Status", "Effort", "Action"],
       rows: boards.recommendations.map((row) => [
         row.priority,
         row.keyword,
-        row.owner,
+        row.bottleneck,
         row.status,
         String(row.effort),
         row.action,

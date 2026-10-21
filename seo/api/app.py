@@ -246,13 +246,15 @@ def boards(authorization: str | None = Header(default=None)) -> dict[str, Any]:
             })
             recommendations.append({
                 "id": item["id"],
+                "keyword_id": item["keyword_id"],
+                "page_id": item["page_id"],
                 "keyword": item["keyword"],
                 "url": item["url"],
                 "priority": item["priority"],
+                "bottleneck": item["bottleneck"],
                 "action": item["action"],
                 "status": item["status"],
                 "effort": item["effort"],
-                "owner": "seo-team",
             })
         p0 = sum(1 for item in items if item["priority"] == "P0")
         return {

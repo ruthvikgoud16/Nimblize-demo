@@ -1,10 +1,22 @@
 # Nimblize SEO intelligence
 
-This package implements the whole Phase 7 build guide: all 33 numbered sections in the PDF. Section 33 is the final checklist and the official resource list. It is the standard the build is checked against. It is not a separate guide.
+This package is the Phase 7 SEO bounded context. The page 33 sample demo runs today: clone, run the pipeline, inspect the dataset, reproduce the model, open `/seo`, read why a recommendation exists, and see the before/after experiment. Live Search Console upsert, robots-aware crawl, and CrUX/PageSpeed persistence are in this increment. The production checklist stays open until the account inputs below are supplied.
 
-The official resources named in section 33 are Google Search Central and Search Essentials, the Google SEO Starter Guide, Search Console documentation, structured data documentation, the PageSpeed Insights API, and one vendor guide. Ahrefs is the default vendor. Semrush uses the same import shape when that is the subscription you already have.
+Section 33 of the build guide is the checklist and the official resource list: Google Search Central and Search Essentials, the Google SEO Starter Guide, Search Console documentation, structured data documentation, the PageSpeed Insights API, and one vendor guide. Ahrefs is the default vendor. Semrush uses the same import shape when that is the subscription you already pay for.
 
-Section 32 is the demo flow inside that guide: clone, configure credentials, run the pipeline, inspect the dataset, reproduce the model, open the dashboard, see why a recommendation exists, and measure what happened after it. The sample property proves that flow before live credentials exist.
+## Decisions already made
+
+These are not open questions.
+
+- The ranker lives in `seo/`. The old Studio app stays in the repo and is not this ranker. The API prefix is `/api/seo`. The UI is Next.js at `/seo` and bypasses `AuthProvider`. There is no Streamlit app.
+- `y_top10` is 1 when the Search Console average position on day D+28 is at most 10, for `type=web`, `device=MOBILE`, and the primary country (default `usa`). Same-day position, clicks, impressions, and CTR are leaky and are not features.
+- Before a model exists, the score is `0.35 demand + 0.25 business relevance + 0.25 headroom + 0.15 expected value`. It contains no ranking probability. After a model exists, the guide weights are `0.25 / 0.20 / 0.30 / 0.15 / 0.10`. A noindex, robots block, or status of 500 or higher is P0 and sorts above both scores.
+- Logistic regression serves until the histogram gradient booster's test PR-AUC is at least the logistic PR-AUC plus 0.03 and precision at 10 does not fall. Embeddings are LSA. `bge-m3` loads only when `SEO_EMBEDDING_MODEL` is set. Field vitals come from CrUX. Lab scores come from PageSpeed Insights. A failed API call is not stored as zeros.
+- The later vendor for referring domains is Ahrefs. There is no link-scheme automation, no neural net, and no learning-to-rank in this build.
+- Production requests need `Authorization: Bearer <SEO_API_TOKEN>`. If `ENV=production` and the token is unset, the API returns 500. A local demo with the token unset stays open.
+- Search Console uses the refresh token when `SEO_GSC_REFRESH_TOKEN`, `SEO_GSC_CLIENT_ID`, and `SEO_GSC_CLIENT_SECRET` are set. Otherwise it uses `SEO_GSC_ACCESS_TOKEN`.
+- The hosting target is Vercel for the Next.js app and Render plus Postgres for the API. That deploy is not wired in this increment. The running store is SQLite. `seo/schema.sql` is the Postgres DDL.
+- The default recommendation owner is `seo-team`.
 
 The previous Studio app under `frontend/src/app` (prompt library, playground, CIMS) is the earlier internship build. It is not this system. The new API does not call it.
 
@@ -23,7 +35,7 @@ Logistic regression is the baseline. A histogram gradient booster replaces it on
 ```bash
 python3 -m pip install -r seo/requirements.txt
 python3 -m seo.pipeline
-python3 -m unittest discover -s seo/tests -t .
+python3 -m unittest discover -s seo/tests -t /workspace
 python3 -m uvicorn seo.api.app:app --port 8000
 ```
 
@@ -78,7 +90,7 @@ The architecture decisions are already made. These are the only inputs that have
 1. The exact Search Console property URL (`sc-domain:` or the `https` property string).
 2. A Google OAuth client id, client secret, and refresh token with Search Console read access for that property.
 3. A Google API key with the PageSpeed Insights API and the Chrome UX Report API enabled, plus the priority URL to measure.
-4. Confirmation if you already pay for Semrush. Ahrefs is the default vendor for referring domains and keyword exports.
+4. Confirm Ahrefs versus Semrush if you already pay for one. The default vendor is Ahrefs.
 5. The primary country, if it is not the United States. Use the ISO-3 code Search Console expects, such as `usa`.
 6. The sitemap URL and the crawl host allowlist.
 7. Hosting confirmation if it should differ from Vercel for the Next.js app and Render plus Postgres for the API and worker.

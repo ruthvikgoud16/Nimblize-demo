@@ -40,7 +40,7 @@ def _record(job_name: str, status: str, message: str, rows_out: int = 0) -> None
     connection.close()
 
 
-def _token() -> str:
+def _token(opener: Callable | None = None) -> str:
     refresh = os.getenv("SEO_GSC_REFRESH_TOKEN")
     if refresh:
         client_id = os.getenv("SEO_GSC_CLIENT_ID")
@@ -48,7 +48,9 @@ def _token() -> str:
         if not client_id or not client_secret:
             raise CollectionError("SEO_GSC_CLIENT_ID and SEO_GSC_CLIENT_SECRET are required with a refresh token")
         from seo.collectors import refresh_google_token
-        return refresh_google_token(client_id, client_secret, refresh)
+        if opener is None:
+            return refresh_google_token(client_id, client_secret, refresh)
+        return refresh_google_token(client_id, client_secret, refresh, opener)
     token = os.getenv("SEO_GSC_ACCESS_TOKEN")
     if not token:
         raise CollectionError("Search Console credentials are not configured")
@@ -82,7 +84,7 @@ def run_job(name: str, *, opener: Callable | None = None, fetcher: Callable[...,
             _record(name, "failed", "SEO_GSC_SITE_URL is required. Previous observations were kept.")
             raise CollectionError("Search Console site URL is not configured")
         try:
-            token = _token()
+            token = _token(opener)
         except CollectionError as exc:
             _record(name, "failed", str(exc) + " Previous observations were kept.")
             raise

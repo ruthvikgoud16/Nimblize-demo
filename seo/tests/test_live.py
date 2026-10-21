@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 import tempfile
 import unittest
@@ -129,10 +130,59 @@ class LivePath(unittest.TestCase):
             run_job("search_console_refresh", opener=broken)
         self.assertEqual(self._live(), 1)
 
+    def test_refresh_upsert_sets_collected_at(self):
+        os.environ["SEO_GSC_SITE_URL"] = "https://www.nimblize.ai/"
+        os.environ["SEO_GSC_ACCESS_TOKEN"] = "token"
+        body = json.dumps({
+            "rows": [{
+                "keys": ["2026-09-01", "ai automation platform", "https://www.nimblize.ai/platform", "MOBILE", "usa"],
+                "clicks": 2,
+                "impressions": 40,
+                "ctr": 0.05,
+                "position": 9.0,
+            }]
+        }).encode()
+        first = run_job("search_console_refresh", opener=_opener(body))
+        self.assertEqual(first["kept"], 1)
+        updated = json.dumps({
+            "rows": [{
+                "keys": ["2026-09-01", "ai automation platform", "https://www.nimblize.ai/platform", "MOBILE", "usa"],
+                "clicks": 7,
+                "impressions": 50,
+                "ctr": 0.14,
+                "position": 4.0,
+            }]
+        }).encode()
+        second = run_job("search_console_refresh", opener=_opener(updated))
+        self.assertEqual(second["kept"], 1)
+        connection = store.connect()
+        row = connection.execute("SELECT position, clicks, collected_at, source FROM observations").fetchone()
+        count = connection.execute("SELECT COUNT(*) AS n FROM observations").fetchone()["n"]
+        connection.close()
+        self.assertEqual(count, 1)
+        self.assertEqual(row["source"], "search-console")
+        self.assertEqual(row["position"], 4.0)
+        self.assertEqual(row["clicks"], 7)
+        self.assertTrue(row["collected_at"])
+
     def test_opportunity_report_and_snapshot_refuse_live_rows(self):
         self._ingest()
-        with self.assertRaises(CollectionError):
-            run_job("opportunity_report")
+        import seo.pipeline as pipeline
+
+        called = {"run": False}
+        original = pipeline.run
+
+        def boom(*_args, **_kwargs):
+            called["run"] = True
+            raise AssertionError("sample pipeline was called")
+
+        pipeline.run = boom
+        try:
+            with self.assertRaises(CollectionError):
+                run_job("opportunity_report")
+        finally:
+            pipeline.run = original
+        self.assertFalse(called["run"])
         connection = store.connect()
         with self.assertRaises(RuntimeError):
             store.replace_snapshot(connection, {})
@@ -153,8 +203,15 @@ class LivePath(unittest.TestCase):
         robots = "User-agent: *\nDisallow: /admin\n"
         self.assertFalse(robots_allowed("https://www.nimblize.ai/admin", robots))
         self.assertTrue(robots_allowed("https://www.nimblize.ai/platform", robots))
+        class Exploding:
+            def get(self, *_args, **_kwargs):
+                raise AssertionError("disallowed URL was fetched")
+
+            def close(self):
+                return None
+
         with self.assertRaises(FetchError):
-            fetch_url("https://www.nimblize.ai/admin", robots_txt=robots)
+            fetch_url("https://www.nimblize.ai/admin", client=Exploding(), robots_txt=robots)
         called = []
 
         def fetcher(url):
@@ -178,6 +235,23 @@ class LivePath(unittest.TestCase):
         raw = b'{"record":{"metrics":{"largest_contentful_paint":{"percentiles":{"p75":1800}},"interaction_to_next_paint":{"percentiles":{"p75":120}},"cumulative_layout_shift":{"percentiles":{"p75":0.05}}}}}'
         result = run_job("crux_priority", opener=_opener(raw))
         self.assertEqual(result["status"], "succeeded")
+        psi = json.dumps({
+            "lighthouseResult": {
+                "categories": {
+                    "performance": {"score": 0.72},
+                    "seo": {"score": 0.91},
+                    "accessibility": {"score": 0.88},
+                }
+            }
+        }).encode()
+        pagespeed = run_job("pagespeed_priority", opener=_opener(psi))
+        self.assertEqual(pagespeed["status"], "succeeded")
+
+        def broken(request, timeout=60):
+            raise URLError("down")
+
+        with self.assertRaises(CollectionError):
+            run_job("pagespeed_priority", opener=broken)
         robots = Path(self.tmp.name) / "robots.txt"
         robots.write_text("User-agent: *\nDisallow: /admin\n", encoding="utf-8")
         os.environ["SEO_ROBOTS_TXT_PATH"] = str(robots)
@@ -205,14 +279,17 @@ class LivePath(unittest.TestCase):
         rows = store.rows(
             connection,
             """SELECT pages.url AS url, technical_audits.indexable AS indexable,
-            technical_audits.lcp_ms AS lcp_ms, technical_audits.title AS title
+            technical_audits.lcp_ms AS lcp_ms, technical_audits.title AS title,
+            technical_audits.robots AS robots, technical_audits.performance_score AS performance_score
             FROM pages JOIN technical_audits ON pages.id = technical_audits.page_id""",
         )
         connection.close()
         by_url = {row["url"]: row for row in rows}
         self.assertEqual(by_url["https://www.nimblize.ai/platform"]["lcp_ms"], 1800)
         self.assertEqual(by_url["https://www.nimblize.ai/platform"]["title"], "Platform")
+        self.assertEqual(by_url["https://www.nimblize.ai/platform"]["performance_score"], 0.72)
         self.assertEqual(by_url["https://www.nimblize.ai/admin"]["indexable"], 0)
+        self.assertEqual(by_url["https://www.nimblize.ai/admin"]["robots"], "disallow")
 
     def test_feature_registry_matches_config(self):
         import yaml
