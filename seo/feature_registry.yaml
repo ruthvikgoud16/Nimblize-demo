@@ -1,0 +1,34 @@
+version: registry-v1
+label:
+  name: y_top10
+  horizon_days: 28
+  device: MOBILE
+  country: usa
+  search_type: web
+  definition: "1 when average position on day D+28 is at most 10"
+features:
+  - title_relevance
+  - heading_relevance
+  - semantic_similarity
+  - topic_coverage
+  - word_count
+  - internal_links
+  - ref_domains
+  - speed_score
+  - indexed
+  - log_impressions_lag_28
+  - ctr_lag_28
+  - position_lag_28
+  - position_delta_28
+  - difficulty
+  - business_relevance
+  - intent_commercial
+  - intent_informational
+  - intent_transactional
+forbidden:
+  - position
+  - clicks
+  - impressions
+  - ctr
+  - position_future_28
+  - y_top10

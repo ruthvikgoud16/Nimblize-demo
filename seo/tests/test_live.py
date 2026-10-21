@@ -1,0 +1,364 @@
+"""Live collection must not wipe Search Console rows or invent audits."""
+
+from __future__ import annotations
+
+import json
+import os
+import tempfile
+import unittest
+from pathlib import Path
+from urllib.error import URLError
+
+from fastapi.testclient import TestClient
+
+from seo import store
+from seo.collectors import CollectionError, refresh_google_token
+from seo.config import FEATURES, GSC_SITE_URL, LEAKY_COLUMNS, PRIORITY_URL
+from seo.crawl import FetchError, crawl_allowlist, fetch_url, robots_allowed
+from seo.jobs import run_job
+
+
+class _Body:
+    def __init__(self, raw: bytes, status: int = 200):
+        self._raw = raw
+        self.status = status
+
+    def read(self) -> bytes:
+        return self._raw
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_args):
+        return False
+
+
+def _opener(raw: bytes):
+    def opener(request, timeout=60):
+        return _Body(raw)
+
+    return opener
+
+
+class LivePath(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self._env = {
+            key: os.environ.get(key)
+            for key in (
+                "SEO_DB_PATH",
+                "SEO_GSC_SITE_URL",
+                "SEO_GSC_ACCESS_TOKEN",
+                "SEO_GSC_REFRESH_TOKEN",
+                "SEO_GSC_CLIENT_ID",
+                "SEO_GSC_CLIENT_SECRET",
+                "SEO_AHREFS_KEYWORDS_CSV",
+                "SEO_AHREFS_REFERRING_DOMAINS_CSV",
+                "SEO_GOOGLE_API_KEY",
+                "SEO_PRIORITY_URL",
+                "SEO_CRAWL_URLS",
+                "SEO_ROBOTS_TXT_PATH",
+                "SEO_API_TOKEN",
+                "ENV",
+            )
+        }
+        os.environ["SEO_DB_PATH"] = str(Path(self.tmp.name) / "seo.db")
+        for key in self._env:
+            if key != "SEO_DB_PATH":
+                os.environ.pop(key, None)
+
+    def tearDown(self):
+        for key, value in self._env.items():
+            if value is None:
+                os.environ.pop(key, None)
+            else:
+                os.environ[key] = value
+        self.tmp.cleanup()
+
+    def _row(self, position: float = 8.0):
+        return {
+            "keyword": "ai automation platform",
+            "url": "https://www.nimblize.ai/platform",
+            "obs_date": "2026-10-01",
+            "device": "MOBILE",
+            "country": "usa",
+            "search_type": "web",
+            "position": position,
+            "clicks": 4,
+            "impressions": 100,
+            "ctr": 0.04,
+        }
+
+    def _ingest(self, position: float = 8.0) -> dict:
+        connection = store.connect()
+        result = store.ingest_search_console(connection, [self._row(position)], "run-test", "https://www.nimblize.ai/")
+        connection.close()
+        return result
+
+    def _live(self) -> int:
+        connection = store.connect()
+        count = store.live_observation_count(connection)
+        connection.close()
+        return count
+
+    def test_ingest_upserts_and_quarantines(self):
+        first = self._ingest(8.0)
+        self.assertEqual(first["kept"], 1)
+        second = self._ingest(6.5)
+        self.assertEqual(second["kept"], 1)
+        self.assertEqual(self._live(), 1)
+        connection = store.connect()
+        position = connection.execute("SELECT position FROM observations").fetchone()["position"]
+        connection.close()
+        self.assertEqual(position, 6.5)
+        bad = dict(self._row())
+        bad["obs_date"] = "2026-10-02"
+        bad["position"] = 140
+        connection = store.connect()
+        result = store.ingest_search_console(connection, [bad], "run-bad", "https://www.nimblize.ai/")
+        connection.close()
+        self.assertEqual(result["quarantined"], 1)
+        self.assertEqual(self._live(), 1)
+
+    def test_failed_refresh_keeps_rows(self):
+        self._ingest()
+        os.environ["SEO_GSC_SITE_URL"] = "https://www.nimblize.ai/"
+        os.environ["SEO_GSC_ACCESS_TOKEN"] = "token"
+
+        def broken(request, timeout=60):
+            raise URLError("down")
+
+        with self.assertRaises(CollectionError):
+            run_job("search_console_refresh", opener=broken)
+        self.assertEqual(self._live(), 1)
+
+    def test_refresh_upsert_sets_collected_at(self):
+        os.environ["SEO_GSC_SITE_URL"] = "https://www.nimblize.ai/"
+        os.environ["SEO_GSC_ACCESS_TOKEN"] = "token"
+        body = json.dumps({
+            "rows": [{
+                "keys": ["2026-09-01", "ai automation platform", "https://www.nimblize.ai/platform", "MOBILE", "usa"],
+                "clicks": 2,
+                "impressions": 40,
+                "ctr": 0.05,
+                "position": 9.0,
+            }]
+        }).encode()
+        first = run_job("search_console_refresh", opener=_opener(body))
+        self.assertEqual(first["kept"], 1)
+        updated = json.dumps({
+            "rows": [{
+                "keys": ["2026-09-01", "ai automation platform", "https://www.nimblize.ai/platform", "MOBILE", "usa"],
+                "clicks": 7,
+                "impressions": 50,
+                "ctr": 0.14,
+                "position": 4.0,
+            }]
+        }).encode()
+        second = run_job("search_console_refresh", opener=_opener(updated))
+        self.assertEqual(second["kept"], 1)
+        connection = store.connect()
+        row = connection.execute("SELECT position, clicks, collected_at, source FROM observations").fetchone()
+        count = connection.execute("SELECT COUNT(*) AS n FROM observations").fetchone()["n"]
+        connection.close()
+        self.assertEqual(count, 1)
+        self.assertEqual(row["source"], "search-console")
+        self.assertEqual(row["position"], 4.0)
+        self.assertEqual(row["clicks"], 7)
+        self.assertTrue(row["collected_at"])
+
+    def test_opportunity_report_and_snapshot_refuse_live_rows(self):
+        self._ingest()
+        import seo.pipeline as pipeline
+
+        called = {"run": False}
+        original = pipeline.run
+
+        def boom(*_args, **_kwargs):
+            called["run"] = True
+            raise AssertionError("sample pipeline was called")
+
+        pipeline.run = boom
+        try:
+            with self.assertRaises(CollectionError):
+                run_job("opportunity_report")
+        finally:
+            pipeline.run = original
+        self.assertFalse(called["run"])
+        connection = store.connect()
+        with self.assertRaises(RuntimeError):
+            store.replace_snapshot(connection, {})
+        connection.close()
+        self.assertEqual(self._live(), 1)
+
+    def test_api_does_not_seed_over_live_rows(self):
+        self._ingest()
+        from seo.api.app import app
+
+        client = TestClient(app)
+        response = client.get("/api/seo/keywords/opportunities")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["opportunities"], [])
+        self.assertEqual(self._live(), 1)
+
+    def test_robots_skip_and_token_refresh(self):
+        robots = "User-agent: *\nDisallow: /admin\n"
+        self.assertFalse(robots_allowed("https://www.nimblize.ai/admin", robots))
+        self.assertTrue(robots_allowed("https://www.nimblize.ai/platform", robots))
+        class Exploding:
+            def get(self, *_args, **_kwargs):
+                raise AssertionError("disallowed URL was fetched")
+
+            def close(self):
+                return None
+
+        with self.assertRaises(FetchError):
+            fetch_url("https://www.nimblize.ai/admin", client=Exploding(), robots_txt=robots)
+        called = []
+
+        def fetcher(url):
+            called.append(url)
+            return {"url": url, "status": 200, "indexable": True, "links": [], "word_count": 10, "jsonld_count": 0, "title": "Platform", "h1": "Platform", "canonical": url, "robots": ""}
+
+        crawled = crawl_allowlist(
+            ["https://www.nimblize.ai/admin", "https://www.nimblize.ai/platform"],
+            robots,
+            fetcher,
+        )
+        self.assertEqual(called, ["https://www.nimblize.ai/platform"])
+        self.assertEqual(crawled[0]["skipped"], "robots")
+        self.assertEqual(refresh_google_token("id", "secret", "refresh", _opener(b'{"access_token":"ya29.test"}')), "ya29.test")
+        with self.assertRaises(CollectionError):
+            refresh_google_token("id", "secret", "refresh", _opener(b"{}"))
+
+    def test_crux_and_crawl_persist(self):
+        os.environ["SEO_GOOGLE_API_KEY"] = "key"
+        os.environ["SEO_PRIORITY_URL"] = "https://www.nimblize.ai/platform"
+        raw = b'{"record":{"metrics":{"largest_contentful_paint":{"percentiles":{"p75":1800}},"interaction_to_next_paint":{"percentiles":{"p75":120}},"cumulative_layout_shift":{"percentiles":{"p75":0.05}}}}}'
+        result = run_job("crux_priority", opener=_opener(raw))
+        self.assertEqual(result["status"], "succeeded")
+        psi = json.dumps({
+            "lighthouseResult": {
+                "categories": {
+                    "performance": {"score": 0.72},
+                    "seo": {"score": 0.91},
+                    "accessibility": {"score": 0.88},
+                }
+            }
+        }).encode()
+        pagespeed = run_job("pagespeed_priority", opener=_opener(psi))
+        self.assertEqual(pagespeed["status"], "succeeded")
+
+        def broken(request, timeout=60):
+            raise URLError("down")
+
+        with self.assertRaises(CollectionError):
+            run_job("pagespeed_priority", opener=broken)
+        robots = Path(self.tmp.name) / "robots.txt"
+        robots.write_text("User-agent: *\nDisallow: /admin\n", encoding="utf-8")
+        os.environ["SEO_ROBOTS_TXT_PATH"] = str(robots)
+        os.environ["SEO_CRAWL_URLS"] = "https://www.nimblize.ai/admin,https://www.nimblize.ai/platform"
+
+        def fetcher(url):
+            if "/admin" in url:
+                raise AssertionError("disallowed URL was fetched")
+            return {
+                "url": url,
+                "status": 200,
+                "indexable": True,
+                "title": "Platform",
+                "h1": "Platform",
+                "canonical": url,
+                "robots": "index,follow",
+                "links": ["/customers"],
+                "word_count": 120,
+                "jsonld_count": 1,
+            }
+
+        crawl = run_job("technical_crawl", fetcher=fetcher)
+        self.assertEqual(crawl["rows"], 1)
+        connection = store.connect()
+        rows = store.rows(
+            connection,
+            """SELECT pages.url AS url, technical_audits.indexable AS indexable,
+            technical_audits.lcp_ms AS lcp_ms, technical_audits.title AS title,
+            technical_audits.robots AS robots, technical_audits.performance_score AS performance_score
+            FROM pages JOIN technical_audits ON pages.id = technical_audits.page_id""",
+        )
+        connection.close()
+        by_url = {row["url"]: row for row in rows}
+        self.assertEqual(by_url["https://www.nimblize.ai/platform"]["lcp_ms"], 1800)
+        self.assertEqual(by_url["https://www.nimblize.ai/platform"]["title"], "Platform")
+        self.assertEqual(by_url["https://www.nimblize.ai/platform"]["performance_score"], 0.72)
+        self.assertEqual(by_url["https://www.nimblize.ai/admin"]["indexable"], 0)
+        self.assertEqual(by_url["https://www.nimblize.ai/admin"]["robots"], "disallow")
+
+    def test_default_property_is_the_domain_property(self):
+        self.assertEqual(GSC_SITE_URL, "sc-domain:nimblize.ai")
+        os.environ["SEO_GSC_ACCESS_TOKEN"] = "token"
+        seen = []
+
+        def opener(request, timeout=60):
+            seen.append(request.full_url)
+            return _Body(b'{"rows":[{"keys":["2026-09-01","ai automation platform","https://www.nimblize.ai/platform","MOBILE","usa"],"clicks":1,"impressions":10,"ctr":0.1,"position":8}]}')
+
+        result = run_job("search_console_refresh", opener=opener)
+        self.assertEqual(result["kept"], 1)
+        self.assertIn("sc-domain%3Animblize.ai", seen[0])
+        connection = store.connect()
+        site = connection.execute("SELECT domain, url FROM sites WHERE id = 'site-live'").fetchone()
+        connection.close()
+        self.assertEqual(site["domain"], "nimblize.ai")
+        self.assertEqual(site["url"], "sc-domain:nimblize.ai")
+
+    def test_priority_url_defaults_to_the_homepage(self):
+        self.assertEqual(PRIORITY_URL, "https://www.nimblize.ai/")
+        os.environ["SEO_GOOGLE_API_KEY"] = "key"
+        seen = []
+
+        def opener(request, timeout=60):
+            seen.append(__import__("json").loads(request.data.decode())["url"])
+            return _Body(b'{"record":{"metrics":{"largest_contentful_paint":{"percentiles":{"p75":1800}},"interaction_to_next_paint":{"percentiles":{"p75":120}},"cumulative_layout_shift":{"percentiles":{"p75":0.05}}}}}')
+
+        result = run_job("crux_priority", opener=opener)
+        self.assertEqual(result["status"], "succeeded")
+        self.assertEqual(seen, ["https://www.nimblize.ai/"])
+
+    def test_ahrefs_import_and_consent_url(self):
+        from seo.config import VENDOR
+        from seo.oauth import authorization_url
+
+        self.assertEqual(VENDOR, "ahrefs")
+        keywords = Path(self.tmp.name) / "keywords.csv"
+        refs = Path(self.tmp.name) / "refs.csv"
+        keywords.write_text("Keyword,Volume,KD,URL\nai automation platform,2400,46,https://www.nimblize.ai/platform\n", encoding="utf-8")
+        refs.write_text("Referring domain,DR\nexample.com,70\nnews.example.com,40\n", encoding="utf-8")
+        os.environ["SEO_AHREFS_KEYWORDS_CSV"] = str(keywords)
+        os.environ["SEO_AHREFS_REFERRING_DOMAINS_CSV"] = str(refs)
+        os.environ["SEO_PRIORITY_URL"] = "https://www.nimblize.ai/"
+        result = run_job("ahrefs_import")
+        self.assertEqual(result["rows"], 3)
+        connection = store.connect()
+        keyword = connection.execute("SELECT difficulty, volume FROM keywords WHERE text = ?", ("ai automation platform",)).fetchone()
+        authority = connection.execute("SELECT source, ref_domains FROM authority_snapshots").fetchone()
+        connection.close()
+        self.assertEqual(keyword["difficulty"], 46)
+        self.assertEqual(keyword["volume"], 2400)
+        self.assertEqual(authority["source"], "ahrefs")
+        self.assertEqual(authority["ref_domains"], 2)
+        url = authorization_url(client_id="client-id.apps.googleusercontent.com")
+        self.assertIn("client-id.apps.googleusercontent.com", url)
+        self.assertIn("webmasters.readonly", url)
+        self.assertNotIn("client_secret", url)
+
+    def test_feature_registry_matches_config(self):
+        import yaml
+
+        registry = yaml.safe_load((Path(__file__).resolve().parents[1] / "feature_registry.yaml").read_text(encoding="utf-8"))
+        self.assertEqual(registry["features"], FEATURES)
+        self.assertEqual(registry["forbidden"], LEAKY_COLUMNS)
+        self.assertEqual(registry["version"], "registry-v1")
+
+
+if __name__ == "__main__":
+    unittest.main()
