@@ -24,6 +24,7 @@ SCHEDULE = [
     {"name": "crux_priority", "cadence": "daily"},
     {"name": "pagespeed_priority", "cadence": "daily"},
     {"name": "technical_crawl", "cadence": "weekly"},
+    {"name": "ahrefs_import", "cadence": "weekly"},
     {"name": "opportunity_report", "cadence": "weekly"},
     {"name": "drift_review", "cadence": "monthly"},
 ]
@@ -178,6 +179,33 @@ def run_job(name: str, *, opener: Callable | None = None, fetcher: Callable[...,
             kept += 1
         connection.close()
         _record(name, "succeeded", "allowlisted crawl stored", kept)
+        return {"status": "succeeded", "rows": kept}
+    if name == "ahrefs_import":
+        from seo.ahrefs import apply_keywords, apply_referring_domains, parse_keywords, parse_referring_domains
+
+        keywords_path = os.getenv("SEO_AHREFS_KEYWORDS_CSV")
+        referring_path = os.getenv("SEO_AHREFS_REFERRING_DOMAINS_CSV")
+        if not keywords_path and not referring_path:
+            _record(name, "failed", "Set an Ahrefs CSV path. Previous keyword and authority rows were kept.")
+            raise CollectionError("Ahrefs export is not configured")
+        connection = store.connect()
+        kept = 0
+        try:
+            if keywords_path:
+                kept += apply_keywords(connection, parse_keywords(Path(keywords_path).read_text(encoding="utf-8")))
+            if referring_path:
+                target = os.getenv("SEO_PRIORITY_URL", "https://www.nimblize.ai/")
+                kept += apply_referring_domains(
+                    connection,
+                    parse_referring_domains(Path(referring_path).read_text(encoding="utf-8")),
+                    target,
+                )
+        except OSError as exc:
+            connection.close()
+            _record(name, "failed", str(exc) + " Previous Ahrefs rows were kept.")
+            raise CollectionError(str(exc)) from exc
+        connection.close()
+        _record(name, "succeeded", "ahrefs rows stored", kept)
         return {"status": "succeeded", "rows": kept}
     raise CollectionError(f"unknown job {name}")
 

@@ -23,8 +23,9 @@ def refresh_google_token(client_id: str, client_secret: str, refresh_token: str,
             "refresh_token": refresh_token,
             "grant_type": "refresh_token",
         },
-        {"Content-Type": "application/json"},
+        {},
         opener,
+        form=True,
     )
     token = payload.get("access_token")
     if not token:
@@ -32,8 +33,14 @@ def refresh_google_token(client_id: str, client_secret: str, refresh_token: str,
     return str(token)
 
 
-def _request(url: str, payload: dict | None, headers: dict[str, str], opener: Callable = urlopen) -> dict:
-    data = None if payload is None else json.dumps(payload).encode()
+def _request(url: str, payload: dict | None, headers: dict[str, str], opener: Callable = urlopen, form: bool = False) -> dict:
+    if payload is None:
+        data = None
+    elif form:
+        data = urlencode(payload).encode()
+        headers = {**headers, "Content-Type": "application/x-www-form-urlencoded"}
+    else:
+        data = json.dumps(payload).encode()
     request = Request(url, data=data, headers=headers)
     try:
         with opener(request, timeout=60) as response:

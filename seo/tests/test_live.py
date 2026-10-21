@@ -52,6 +52,8 @@ class LivePath(unittest.TestCase):
                 "SEO_GSC_REFRESH_TOKEN",
                 "SEO_GSC_CLIENT_ID",
                 "SEO_GSC_CLIENT_SECRET",
+                "SEO_AHREFS_KEYWORDS_CSV",
+                "SEO_AHREFS_REFERRING_DOMAINS_CSV",
                 "SEO_GOOGLE_API_KEY",
                 "SEO_PRIORITY_URL",
                 "SEO_CRAWL_URLS",
@@ -308,6 +310,33 @@ class LivePath(unittest.TestCase):
         connection.close()
         self.assertEqual(site["domain"], "nimblize.ai")
         self.assertEqual(site["url"], "sc-domain:nimblize.ai")
+
+    def test_ahrefs_import_and_consent_url(self):
+        from seo.config import VENDOR
+        from seo.oauth import authorization_url
+
+        self.assertEqual(VENDOR, "ahrefs")
+        keywords = Path(self.tmp.name) / "keywords.csv"
+        refs = Path(self.tmp.name) / "refs.csv"
+        keywords.write_text("Keyword,Volume,KD,URL\nai automation platform,2400,46,https://www.nimblize.ai/platform\n", encoding="utf-8")
+        refs.write_text("Referring domain,DR\nexample.com,70\nnews.example.com,40\n", encoding="utf-8")
+        os.environ["SEO_AHREFS_KEYWORDS_CSV"] = str(keywords)
+        os.environ["SEO_AHREFS_REFERRING_DOMAINS_CSV"] = str(refs)
+        os.environ["SEO_PRIORITY_URL"] = "https://www.nimblize.ai/"
+        result = run_job("ahrefs_import")
+        self.assertEqual(result["rows"], 3)
+        connection = store.connect()
+        keyword = connection.execute("SELECT difficulty, volume FROM keywords WHERE text = ?", ("ai automation platform",)).fetchone()
+        authority = connection.execute("SELECT source, ref_domains FROM authority_snapshots").fetchone()
+        connection.close()
+        self.assertEqual(keyword["difficulty"], 46)
+        self.assertEqual(keyword["volume"], 2400)
+        self.assertEqual(authority["source"], "ahrefs")
+        self.assertEqual(authority["ref_domains"], 2)
+        url = authorization_url(client_id="client-id.apps.googleusercontent.com")
+        self.assertIn("client-id.apps.googleusercontent.com", url)
+        self.assertIn("webmasters.readonly", url)
+        self.assertNotIn("client_secret", url)
 
     def test_feature_registry_matches_config(self):
         import yaml

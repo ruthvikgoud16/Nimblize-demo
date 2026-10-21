@@ -148,6 +148,13 @@ CREATE TABLE IF NOT EXISTS recommendation_events (
     to_status TEXT NOT NULL,
     recorded_at TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS authority_snapshots (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    source TEXT NOT NULL,
+    url TEXT NOT NULL,
+    ref_domains INTEGER NOT NULL,
+    imported_at TEXT NOT NULL
+);
 """
 
 

@@ -141,3 +141,11 @@ CREATE TABLE IF NOT EXISTS recommendation_events (
     to_status TEXT NOT NULL,
     recorded_at TIMESTAMPTZ NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS authority_snapshots (
+    id BIGSERIAL PRIMARY KEY,
+    source TEXT NOT NULL,
+    url TEXT NOT NULL,
+    ref_domains INTEGER NOT NULL,
+    imported_at TIMESTAMPTZ NOT NULL
+);

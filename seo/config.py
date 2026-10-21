@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import os
+from pathlib import Path
+
 FEATURES = [
     "title_relevance",
     "heading_relevance",
@@ -68,3 +71,27 @@ PRIMARY_COUNTRY = "usa"
 PRIMARY_DEVICE = "MOBILE"
 # Domain property covers www, the apex host, and every subdomain and protocol.
 GSC_SITE_URL = "sc-domain:nimblize.ai"
+# Keyword ideas, difficulty, and referring domains come from Ahrefs exports.
+VENDOR = "ahrefs"
+GSC_SCOPE = "https://www.googleapis.com/auth/webmasters.readonly"
+GSC_REDIRECT_URI = "http://127.0.0.1:8765/"
+
+
+def load_local_env() -> None:
+    """Load gitignored .env values without overriding the process environment."""
+    roots = [Path(__file__).resolve().parents[1], Path.cwd()]
+    seen: set[Path] = set()
+    for root in roots:
+        path = (root / ".env").resolve()
+        if path in seen or not path.is_file():
+            continue
+        seen.add(path)
+        for raw in path.read_text(encoding="utf-8").splitlines():
+            line = raw.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
+
+
+load_local_env()
