@@ -34,10 +34,10 @@ def _guard(authorization: str | None) -> None:
 
 
 def _db():
-    if not store.DB_PATH.exists():
-        run()
     connection = store.connect()
     store.init_db(connection)
+    if store.live_observation_count(connection):
+        return connection
     if connection.execute("SELECT COUNT(*) AS n FROM opportunities").fetchone()["n"] == 0:
         connection.close()
         run()
@@ -149,6 +149,7 @@ def complete(recommendation_id: str, authorization: str | None = Header(default=
         if found is None:
             raise HTTPException(status_code=404, detail="Unknown recommendation.")
         connection.execute("UPDATE opportunities SET status = ? WHERE id = ?", ("Implemented", recommendation_id))
+        store.record_recommendation_event(connection, recommendation_id, found["status"], "Implemented")
         connection.commit()
         return {"id": recommendation_id, "status": "Implemented", "previous": found["status"]}
     finally:
@@ -178,5 +179,96 @@ def current_model(authorization: str | None = Header(default=None)) -> dict[str,
         payload["drift"] = drift
         payload["runs"] = runs
         return payload
+    finally:
+        connection.close()
+
+
+def _evidence(raw: str | None) -> dict[str, Any]:
+    if not raw:
+        return {}
+    loaded = json.loads(raw)
+    return loaded if isinstance(loaded, dict) else {}
+
+
+@app.get("/api/seo/boards")
+def boards(authorization: str | None = Header(default=None)) -> dict[str, Any]:
+    """Section 25 screens, read from the stored queue. This route does not crawl or train."""
+    _guard(authorization)
+    connection = _db()
+    try:
+        items = store.rows(connection, "SELECT * FROM opportunities")
+        model = connection.execute("SELECT serving_name, version, trained_through FROM models").fetchone()
+        observation_count = connection.execute("SELECT COUNT(*) AS n FROM observations").fetchone()["n"]
+        technical = []
+        content = []
+        competitors = []
+        rankings = []
+        recommendations = []
+        for item in items:
+            evidence = _evidence(item.get("evidence_json"))
+            health = evidence.get("technical") or {}
+            semantic = evidence.get("semantic") or {}
+            rival = evidence.get("competitor") or {}
+            technical.append({
+                "url": item["url"],
+                "keyword": item["keyword"],
+                "indexable": health.get("indexable"),
+                "status": health.get("status"),
+                "lcp_ms": health.get("lcp_ms"),
+                "inp_ms": health.get("inp_ms"),
+                "cls": health.get("cls"),
+                "canonical": health.get("canonical"),
+                "jsonld_count": health.get("jsonld_count"),
+            })
+            content.append({
+                "keyword": item["keyword"],
+                "url": item["url"],
+                "topic_coverage": semantic.get("topic_coverage"),
+                "semantic_similarity": semantic.get("semantic_similarity"),
+                "missing_topics": semantic.get("missing_topics") or [],
+                "bottleneck": item["bottleneck"],
+                "action": item["action"],
+            })
+            competitors.append({
+                "keyword": item["keyword"],
+                "url": item["url"],
+                "competitor_url": rival.get("url"),
+                "authority_gap": rival.get("authority_gap"),
+                "competitor_position": rival.get("position"),
+            })
+            rankings.append({
+                "keyword": item["keyword"],
+                "url": item["url"],
+                "position": item["position"],
+                "probability": item["probability"],
+                "impressions": item["impressions"],
+                "priority": item["priority"],
+            })
+            recommendations.append({
+                "id": item["id"],
+                "keyword": item["keyword"],
+                "url": item["url"],
+                "priority": item["priority"],
+                "action": item["action"],
+                "status": item["status"],
+                "effort": item["effort"],
+                "owner": "seo-team",
+            })
+        p0 = sum(1 for item in items if item["priority"] == "P0")
+        return {
+            "overview": {
+                "observations": observation_count,
+                "opportunities": len(items),
+                "p0": p0,
+                "serving_name": model["serving_name"] if model else None,
+                "model_version": model["version"] if model else None,
+                "trained_through": model["trained_through"] if model else None,
+            },
+            "technical": technical,
+            "content": content,
+            "competitors": competitors,
+            "rankings": rankings,
+            "recommendations": recommendations,
+        }
     finally:
         connection.close()

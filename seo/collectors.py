@@ -13,6 +13,25 @@ class CollectionError(RuntimeError):
     pass
 
 
+def refresh_google_token(client_id: str, client_secret: str, refresh_token: str, opener: Callable = urlopen) -> str:
+    """Exchange a long-lived refresh token. A failed exchange raises and writes nothing."""
+    payload = _request(
+        "https://oauth2.googleapis.com/token",
+        {
+            "client_id": client_id,
+            "client_secret": client_secret,
+            "refresh_token": refresh_token,
+            "grant_type": "refresh_token",
+        },
+        {"Content-Type": "application/json"},
+        opener,
+    )
+    token = payload.get("access_token")
+    if not token:
+        raise CollectionError("Google token response did not include an access token")
+    return str(token)
+
+
 def _request(url: str, payload: dict | None, headers: dict[str, str], opener: Callable = urlopen) -> dict:
     data = None if payload is None else json.dumps(payload).encode()
     request = Request(url, data=data, headers=headers)

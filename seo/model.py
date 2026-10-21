@@ -86,6 +86,21 @@ def train_models(frame: pd.DataFrame, matrix: pd.DataFrame, names: list[str]) ->
     )
     serving_name = "boosting" if promote else "logistic"
     serving = booster if promote else logistic
+    serving_probabilities = probabilities[serving_name]
+    intent_values = frame.loc[labeled, "intent"].to_numpy()[test_mask]
+    y_test = y[test_mask]
+    segments: dict[str, dict[str, float | int | None]] = {}
+    for intent in sorted(set(intent_values)):
+        selected = intent_values == intent
+        count = int(selected.sum())
+        if count < 3 or y_test[selected].sum() == 0 or y_test[selected].sum() == count:
+            segments[str(intent)] = {"rows": count, "pr_auc": None}
+        else:
+            segments[str(intent)] = {
+                "rows": count,
+                "pr_auc": round(float(average_precision_score(y_test[selected], serving_probabilities[selected])), 4),
+            }
+    report["segments"] = segments
     return {
         "model": serving,
         "logistic": logistic,

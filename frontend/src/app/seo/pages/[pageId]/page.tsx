@@ -90,8 +90,8 @@ function Evidence() {
           <h3 className="font-semibold">Internal links</h3>
           <p className="mt-2 text-muted-foreground">Inbound links: {audit.evidence.internal_links.inbound}.</p>
           <ul className="mt-2 space-y-1 text-muted-foreground">
-            {audit.evidence.internal_links.suggestions.map((item) => (
-              <li key={item.from}>{item.from}. {item.reason}</li>
+            {audit.evidence.internal_links.suggestions.map((item, index) => (
+              <li key={`${item.from}-${index}`}>{item.from}. {item.reason}</li>
             ))}
           </ul>
         </div>

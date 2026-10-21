@@ -1,6 +1,6 @@
 # Nimblize — SEO intelligence rebuild
 
-The current product is the Phase 7 SEO system. Page 33 of the build guide is the acceptance test. Setup, architecture, and the demo live in [seo/README.md](seo/README.md).
+The current product is the Phase 7 SEO system. The build guide is the full 33-section PDF. Section 33 is the checklist and the official resource list. Setup and architecture live in [seo/README.md](seo/README.md).
 
 ```bash
 python3 -m pip install -r seo/requirements.txt

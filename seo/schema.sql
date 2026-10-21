@@ -58,6 +58,10 @@ CREATE TABLE IF NOT EXISTS technical_audits (
     internal_links INTEGER,
     word_count INTEGER,
     jsonld_count INTEGER,
+    performance_score DOUBLE PRECISION,
+    seo_score DOUBLE PRECISION,
+    accessibility_score DOUBLE PRECISION,
+    vitals_source TEXT,
     PRIMARY KEY (page_id, audited_at)
 );
 
@@ -128,4 +132,12 @@ CREATE TABLE IF NOT EXISTS drift (
     recent_median DOUBLE PRECISION,
     relative_change DOUBLE PRECISION,
     flagged BOOLEAN
+);
+
+CREATE TABLE IF NOT EXISTS recommendation_events (
+    id BIGSERIAL PRIMARY KEY,
+    recommendation_id TEXT NOT NULL,
+    from_status TEXT,
+    to_status TEXT NOT NULL,
+    recorded_at TIMESTAMPTZ NOT NULL
 );

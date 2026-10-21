@@ -3,13 +3,16 @@
 import { useEffect, useState } from "react";
 import { seoGet } from "@/lib/seo";
 
+type MetricRow = { precision: number; recall: number; f1: number; pr_auc: number; brier: number; precision_at_k: number };
+type SegmentRow = { rows: number; pr_auc: number | null };
+
 type ModelCard = {
   version: string;
   feature_version: string;
   serving_name: string;
   promoted_boosting: number;
   trained_through: string;
-  metrics: Record<string, { precision: number; recall: number; f1: number; pr_auc: number; brier: number; precision_at_k: number }>;
+  metrics: Record<string, MetricRow | { segments?: never } | Record<string, SegmentRow>>;
   drift: Array<{ feature: string; train_median: number; recent_median: number; relative_change: number; flagged: number }>;
 };
 
@@ -24,6 +27,11 @@ export default function ModelPage() {
   }, []);
 
   const flagged = model?.drift.filter((row) => row.flagged) ?? [];
+  const metricRows = Object.entries(model?.metrics ?? {}).filter((entry): entry is [string, MetricRow] => {
+    const value = entry[1] as Partial<MetricRow>;
+    return typeof value?.pr_auc === "number" && typeof value?.precision === "number";
+  });
+  const segments = (model?.metrics?.segments ?? null) as Record<string, SegmentRow> | null;
 
   return (
     <div className="space-y-4">
@@ -45,7 +53,7 @@ export default function ModelPage() {
                 <tr>{["Model", "Precision", "Recall", "F1", "PR-AUC", "Brier", "P@10"].map((heading) => <th key={heading} className="px-3 py-2 font-medium">{heading}</th>)}</tr>
               </thead>
               <tbody>
-                {Object.entries(model.metrics).map(([name, metrics]) => (
+                {metricRows.map(([name, metrics]) => (
                   <tr key={name} className="border-b border-border last:border-0">
                     <td className="px-3 py-2">{name}</td>
                     <td className="px-3 py-2 tabular-nums">{metrics.precision.toFixed(3)}</td>
@@ -59,6 +67,12 @@ export default function ModelPage() {
               </tbody>
             </table>
           </div>
+          {segments && (
+            <p className="text-sm text-muted-foreground">
+              Intent segments on the serving model, test set:{" "}
+              {Object.entries(segments).map(([intent, segment]) => `${intent} ${segment.rows} rows, PR-AUC ${segment.pr_auc ?? "n/a"}`).join("; ")}.
+            </p>
+          )}
           <p className="text-sm text-muted-foreground">
             Drift flags ({flagged.length}): {flagged.map((row) => row.feature).join(", ") || "none"}. A flag is a 50% move in the median versus the training window. It does not retrain by itself.
           </p>

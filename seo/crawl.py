@@ -17,6 +17,15 @@ class FetchError(RuntimeError):
     pass
 
 
+def robots_allowed(url: str, robots_txt: str, user_agent: str = "NimblizeSEOResearch/1.0") -> bool:
+    """Guide section 6. A disallow is an audit finding, not a page to fetch."""
+    from urllib.robotparser import RobotFileParser
+
+    parser = RobotFileParser()
+    parser.parse((robots_txt or "").splitlines())
+    return parser.can_fetch(user_agent, url)
+
+
 def parse_html(url: str, body: str, status: int = 200) -> dict[str, Any]:
     document = lhtml.fromstring(body or "<html></html>")
     title_nodes = document.xpath("//title/text()")
@@ -45,8 +54,15 @@ def parse_html(url: str, body: str, status: int = 200) -> dict[str, Any]:
     }
 
 
-def fetch_url(url: str, client: httpx.Client | None = None, attempts: int = 3) -> dict[str, Any]:
-    """Fetch one allowlisted URL. Failures raise. They do not become empty 200s."""
+def fetch_url(
+    url: str,
+    client: httpx.Client | None = None,
+    attempts: int = 3,
+    robots_txt: str | None = None,
+) -> dict[str, Any]:
+    """Fetch one allowlisted URL. A robots disallow raises before any request."""
+    if robots_txt is not None and not robots_allowed(url, robots_txt):
+        raise FetchError(f"robots.txt disallows {url}")
     owns = client is None
     client = client or httpx.Client(timeout=20.0, headers={"User-Agent": "NimblizeSEOResearch/1.0"})
     try:
@@ -69,3 +85,27 @@ def fetch_url(url: str, client: httpx.Client | None = None, attempts: int = 3) -
 def allowlisted(url: str, hosts: set[str]) -> bool:
     from urllib.parse import urlparse
     return urlparse(url).netloc in hosts
+
+
+def crawl_allowlist(
+    urls: list[str],
+    robots_txt: str | None = None,
+    fetcher: Callable[..., dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
+    """Crawl an explicit URL list. A disallowed URL is recorded and not fetched."""
+    from urllib.parse import urlparse
+
+    fetcher = fetcher or fetch_url
+    hosts = {urlparse(url).netloc for url in urls}
+    results: list[dict[str, Any]] = []
+    for url in urls:
+        if not allowlisted(url, hosts):
+            results.append({"url": url, "skipped": "host"})
+            continue
+        if robots_txt is not None and not robots_allowed(url, robots_txt):
+            results.append({"url": url, "skipped": "robots", "indexable": False, "robots": "disallow"})
+            continue
+        parsed = fetcher(url)
+        parsed["skipped"] = None
+        results.append(parsed)
+    return results

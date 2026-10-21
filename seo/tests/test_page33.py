@@ -139,6 +139,15 @@ class Page33Pipeline(unittest.TestCase):
         self.assertIn("pr_auc", json.dumps(model.json()["metrics"]))
         done = client.post(f"/api/seo/recommendations/{first['id']}/complete")
         self.assertEqual(done.json()["status"], "Implemented")
+        from seo import store
+        connection = store.connect()
+        events = store.rows(connection, "SELECT to_status FROM recommendation_events WHERE recommendation_id = ?", (first["id"],))
+        connection.close()
+        self.assertEqual(events[-1]["to_status"], "Implemented")
+        boards = client.get("/api/seo/boards")
+        self.assertEqual(boards.status_code, 200)
+        self.assertIn("technical", boards.json())
+        self.assertGreater(boards.json()["overview"]["p0"], 0)
         blocked = client.get("/api/seo/keywords/opportunities", headers={"Authorization": "Bearer wrong"})
         # Token is not configured in test, so the demo route stays open.
         self.assertEqual(blocked.status_code, 200)

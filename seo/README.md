@@ -1,6 +1,10 @@
 # Nimblize SEO intelligence
 
-This is the Phase 7 rebuild. Page 33 of the build guide is the acceptance test: another developer can clone the repository, run the pipeline, inspect the dataset, reproduce the model, open the dashboard, see why a recommendation was produced, and read what happened after an earlier change.
+This package implements the whole Phase 7 build guide: all 33 numbered sections in the PDF. Section 33 is the final checklist and the official resource list. It is the standard the build is checked against. It is not a separate guide.
+
+The official resources named in section 33 are Google Search Central and Search Essentials, the Google SEO Starter Guide, Search Console documentation, structured data documentation, the PageSpeed Insights API, and one vendor guide. Ahrefs is the default vendor. Semrush uses the same import shape when that is the subscription you already have.
+
+Section 32 is the demo flow inside that guide: clone, configure credentials, run the pipeline, inspect the dataset, reproduce the model, open the dashboard, see why a recommendation exists, and measure what happened after it. The sample property proves that flow before live credentials exist.
 
 The previous Studio app under `frontend/src/app` (prompt library, playground, CIMS) is the earlier internship build. It is not this system. The new API does not call it.
 
@@ -19,7 +23,7 @@ Logistic regression is the baseline. A histogram gradient booster replaces it on
 ```bash
 python3 -m pip install -r seo/requirements.txt
 python3 -m seo.pipeline
-python3 -m unittest seo.tests.test_page33
+python3 -m unittest discover -s seo/tests -t .
 python3 -m uvicorn seo.api.app:app --port 8000
 ```
 
@@ -29,7 +33,7 @@ Then, in `frontend`:
 npm run dev
 ```
 
-Open [http://localhost:3000/seo](http://localhost:3000/seo). The queue, the page evidence view, the experiment history, and the model card are the page 33 demo.
+Open [http://localhost:3000/seo](http://localhost:3000/seo). The section 25 screens are Overview, Queue, Technical, Content, Competitors, Rankings, Recommendations, Experiments, and Model. The queue links to the evidence for one keyword and page.
 
 `seo/data/processed/features.csv` is the inspectable dataset. `seo/data/processed/model_card.json` is the evaluation record. Running the pipeline again reproduces both.
 
@@ -46,12 +50,18 @@ python3 -c "from seo.jobs import run_job; run_job('search_console_refresh')"
 
 | Variable | Used by |
 | --- | --- |
-| `SEO_GSC_ACCESS_TOKEN` | Search Console `searchAnalytics.query` |
-| `SEO_GSC_SITE_URL` | Property URL, exact string from Search Console |
-| `SEO_GOOGLE_API_KEY` | PageSpeed Insights v5 and the CrUX API |
+| `SEO_GSC_SITE_URL` | Exact Search Console property URL |
+| `SEO_GSC_REFRESH_TOKEN` | Long-lived Google OAuth refresh token |
+| `SEO_GSC_CLIENT_ID` | OAuth client id, required with the refresh token |
+| `SEO_GSC_CLIENT_SECRET` | OAuth client secret, required with the refresh token |
+| `SEO_GSC_ACCESS_TOKEN` | Short-lived token used when no refresh token is set |
+| `SEO_GOOGLE_API_KEY` | PageSpeed Insights v5 and the Chrome UX Report API |
 | `SEO_PRIORITY_URL` | URL for the daily performance jobs |
+| `SEO_CRAWL_URLS` | Comma-separated allowlist for the weekly crawl |
+| `SEO_ROBOTS_TXT_PATH` | Optional robots.txt file. A disallow is stored and not fetched |
 | `SEO_API_TOKEN` | Required bearer token when `ENV=production` |
-| `SEO_DB_PATH` | Override the SQLite file used by a local run. |
+| `SEO_DB_PATH` | Override the SQLite file used by a local run |
+| `SEO_PRIMARY_COUNTRY` | ISO-3 country. Default `usa` |
 
 Search Console dates are requested through three days ago. Dimensions are date, query, page, device, and country, filtered to mobile and the primary country (`usa` in the sample). Field Core Web Vitals (LCP, INP, CLS) come from CrUX. PageSpeed supplies the lab diagnostics.
 
@@ -60,6 +70,21 @@ Set `ENV=production` and `SEO_API_TOKEN` before exposing the API. Without the to
 ## Schedule
 
 `python3 -m seo.jobs` prints the cadence from the guide: daily Search Console and performance, weekly crawl and opportunity report, monthly drift review.
+
+## What we need from you
+
+The architecture decisions are already made. These are the only inputs that have to come from the Nimblize account:
+
+1. The exact Search Console property URL (`sc-domain:` or the `https` property string).
+2. A Google OAuth client id, client secret, and refresh token with Search Console read access for that property.
+3. A Google API key with the PageSpeed Insights API and the Chrome UX Report API enabled, plus the priority URL to measure.
+4. Confirmation if you already pay for Semrush. Ahrefs is the default vendor for referring domains and keyword exports.
+5. The primary country, if it is not the United States. Use the ISO-3 code Search Console expects, such as `usa`.
+6. The sitemap URL and the crawl host allowlist.
+7. Hosting confirmation if it should differ from Vercel for the Next.js app and Render plus Postgres for the API and worker.
+8. The human owner name for recommendations, if it should differ from `seo-team`.
+
+A live Search Console pull is stored with `source=search-console`. The sample generator refuses to overwrite those rows.
 
 ## Reading a recommendation
 
