@@ -16,6 +16,7 @@ from urllib.request import urlopen
 
 from seo import store
 from seo.collectors import CollectionError, fetch_crux, fetch_pagespeed, fetch_search_console
+from seo.config import GSC_SITE_URL
 from seo.crawl import FetchError, crawl_allowlist
 
 SCHEDULE = [
@@ -79,7 +80,7 @@ def run_job(name: str, *, opener: Callable | None = None, fetcher: Callable[...,
         snapshot = run()
         return {"status": "succeeded", "rows": len(snapshot["opportunities"])}
     if name == "search_console_refresh":
-        site = os.getenv("SEO_GSC_SITE_URL")
+        site = os.getenv("SEO_GSC_SITE_URL", GSC_SITE_URL).strip()
         if not site:
             _record(name, "failed", "SEO_GSC_SITE_URL is required. Previous observations were kept.")
             raise CollectionError("Search Console site URL is not configured")

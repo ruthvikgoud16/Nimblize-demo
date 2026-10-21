@@ -271,7 +271,7 @@ def ingest_search_console(connection: sqlite3.Connection, collected: list[dict[s
     from seo.validate import normalize_url, validate_observations
 
     init_db(connection)
-    host = urlparse(site_url).netloc or site_url
+    host = site_url.split(":", 1)[1].strip().lower() if site_url.startswith("sc-domain:") else (urlparse(site_url).netloc or site_url)
     connection.execute(
         "INSERT OR IGNORE INTO sites (id, domain, url, primary_country) VALUES (?, ?, ?, ?)",
         ("site-live", host, site_url, os.getenv("SEO_PRIMARY_COUNTRY", "usa")),

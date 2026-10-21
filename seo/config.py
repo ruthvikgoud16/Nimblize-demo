@@ -66,3 +66,5 @@ PROMOTION_AP_GAIN = 0.03
 LABEL_HORIZON_DAYS = 28
 PRIMARY_COUNTRY = "usa"
 PRIMARY_DEVICE = "MOBILE"
+# Domain property covers www, the apex host, and every subdomain and protocol.
+GSC_SITE_URL = "sc-domain:nimblize.ai"

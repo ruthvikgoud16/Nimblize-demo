@@ -56,13 +56,13 @@ The sample property is `www.nimblize.ai` with weekly mobile observations through
 These commands do not fill missing data with zeros. If a credential is absent the job is recorded as failed and the last good rows stay.
 
 ```bash
-SEO_GSC_ACCESS_TOKEN=... SEO_GSC_SITE_URL=https://www.nimblize.ai/ python3 -m seo.jobs
+SEO_GSC_ACCESS_TOKEN=... python3 -m seo.jobs
 python3 -c "from seo.jobs import run_job; run_job('search_console_refresh')"
 ```
 
 | Variable | Used by |
 | --- | --- |
-| `SEO_GSC_SITE_URL` | Exact Search Console property URL |
+| `SEO_GSC_SITE_URL` | Search Console property. Default `sc-domain:nimblize.ai` |
 | `SEO_GSC_REFRESH_TOKEN` | Long-lived Google OAuth refresh token |
 | `SEO_GSC_CLIENT_ID` | OAuth client id, required with the refresh token |
 | `SEO_GSC_CLIENT_SECRET` | OAuth client secret, required with the refresh token |
@@ -87,14 +87,15 @@ Set `ENV=production` and `SEO_API_TOKEN` before exposing the API. Without the to
 
 The architecture decisions are already made. These are the only inputs that have to come from the Nimblize account:
 
-1. The exact Search Console property URL (`sc-domain:` or the `https` property string).
-2. A Google OAuth client id, client secret, and refresh token with Search Console read access for that property.
-3. A Google API key with the PageSpeed Insights API and the Chrome UX Report API enabled, plus the priority URL to measure.
-4. Confirm Ahrefs versus Semrush if you already pay for one. The default vendor is Ahrefs.
-5. The primary country, if it is not the United States. Use the ISO-3 code Search Console expects, such as `usa`.
-6. The sitemap URL and the crawl host allowlist.
-7. Hosting confirmation if it should differ from Vercel for the Next.js app and Render plus Postgres for the API and worker.
-8. The human owner name for recommendations, if it should differ from `seo-team`.
+The Search Console property is `sc-domain:nimblize.ai`. That domain property includes `www`, the apex host, and the other Nimblize subdomains. Set `SEO_GSC_SITE_URL` only when the verified property string in Search Console is different.
+
+1. A Google OAuth client id, client secret, and refresh token with Search Console read access for `sc-domain:nimblize.ai`.
+2. A Google API key with the PageSpeed Insights API and the Chrome UX Report API enabled, plus the priority URL to measure.
+3. Confirm Ahrefs versus Semrush if you already pay for one. The default vendor is Ahrefs.
+4. The primary country, if it is not the United States. Use the ISO-3 code Search Console expects, such as `usa`.
+5. The sitemap URL and the crawl host allowlist.
+6. Hosting confirmation if it should differ from Vercel for the Next.js app and Render plus Postgres for the API and worker.
+7. The human owner name for recommendations, if it should differ from `seo-team`.
 
 A live Search Console pull is stored with `source=search-console`. The sample generator refuses to overwrite those rows.
 

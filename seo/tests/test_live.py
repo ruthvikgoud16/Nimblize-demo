@@ -13,7 +13,7 @@ from fastapi.testclient import TestClient
 
 from seo import store
 from seo.collectors import CollectionError, refresh_google_token
-from seo.config import FEATURES, LEAKY_COLUMNS
+from seo.config import FEATURES, GSC_SITE_URL, LEAKY_COLUMNS
 from seo.crawl import FetchError, crawl_allowlist, fetch_url, robots_allowed
 from seo.jobs import run_job
 
@@ -290,6 +290,24 @@ class LivePath(unittest.TestCase):
         self.assertEqual(by_url["https://www.nimblize.ai/platform"]["performance_score"], 0.72)
         self.assertEqual(by_url["https://www.nimblize.ai/admin"]["indexable"], 0)
         self.assertEqual(by_url["https://www.nimblize.ai/admin"]["robots"], "disallow")
+
+    def test_default_property_is_the_domain_property(self):
+        self.assertEqual(GSC_SITE_URL, "sc-domain:nimblize.ai")
+        os.environ["SEO_GSC_ACCESS_TOKEN"] = "token"
+        seen = []
+
+        def opener(request, timeout=60):
+            seen.append(request.full_url)
+            return _Body(b'{"rows":[{"keys":["2026-09-01","ai automation platform","https://www.nimblize.ai/platform","MOBILE","usa"],"clicks":1,"impressions":10,"ctr":0.1,"position":8}]}')
+
+        result = run_job("search_console_refresh", opener=opener)
+        self.assertEqual(result["kept"], 1)
+        self.assertIn("sc-domain%3Animblize.ai", seen[0])
+        connection = store.connect()
+        site = connection.execute("SELECT domain, url FROM sites WHERE id = 'site-live'").fetchone()
+        connection.close()
+        self.assertEqual(site["domain"], "nimblize.ai")
+        self.assertEqual(site["url"], "sc-domain:nimblize.ai")
 
     def test_feature_registry_matches_config(self):
         import yaml
